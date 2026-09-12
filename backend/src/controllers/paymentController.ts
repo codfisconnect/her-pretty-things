@@ -1,5 +1,9 @@
 import type { Request, Response } from 'express'
-import { createPayment as createRazorpayPayment, verifyPayment as verifyRazorpayPayment } from '../services/paymentService.js'
+import {
+  createPayment as createRazorpayPayment,
+  verifyPayment as verifyRazorpayPayment,
+  handleWebhook as handleRazorpayWebhook,
+} from '../services/paymentService.js'
 import { HttpError } from '../middleware/errorHandler.js'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -47,5 +51,17 @@ export async function verifyPayment(request: Request, response: Response) {
   response.json({
     success: true,
     data: result,
+  })
+}
+
+export async function handleWebhook(request: Request, response: Response) {
+  if (!Buffer.isBuffer(request.body)) {
+    throw new HttpError(400, 'Webhook body must be provided as raw JSON.')
+  }
+
+  await handleRazorpayWebhook(request.body, request.headers['x-razorpay-signature'])
+
+  response.json({
+    success: true,
   })
 }

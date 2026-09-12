@@ -103,3 +103,102 @@ export async function verifyPayment(orderId: string, razorpayOrderId: string, ra
   const updatedOrder = await database.order.findUniqueOrThrow({ where: { id: order.id } })
   return { orderId: updatedOrder.id, paymentStatus: updatedOrder.paymentStatus, orderStatus: updatedOrder.orderStatus, razorpayOrderId: serverRazorpayOrderId, razorpayPaymentId }
 }
+
+export async function handleWebhook(rawBody: Buffer, signature: string | string[] | undefined) {
+  if (!signature || Array.isArray(signature)) {
+    throw new HttpError(400, 'Webhook signature is missing.')
+  }
+
+  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET
+  if (!webhookSecret) {
+    throw new HttpError(500, 'Razorpay webhook secret is not configured.')
+  }
+
+  const expectedSignature = crypto
+    .createHmac('sha256', webhookSecret)
+    .update(rawBody)
+    .digest('hex')
+
+  const expectedBuffer = Buffer.from(expectedSignature, 'hex')
+  const receivedBuffer = Buffer.from(signature, 'hex')
+
+  if (
+    expectedBuffer.length !== receivedBuffer.length ||
+    !crypto.timingSafeEqual(expectedBuffer, receivedBuffer)
+  ) {
+    throw new HttpError(400, 'Webhook signature verification failed.')
+  }
+
+  let payload: any
+
+  try {
+    payload = JSON.parse(rawBody.toString('utf8'))
+  } catch {
+    throw new HttpError(400, 'Webhook body is invalid JSON.')
+  }
+
+  const event = payload?.event
+  const paymentEntity = payload?.payload?.payment?.entity
+
+  if (event === 'payment.captured' && paymentEntity) {
+    const razorpayOrderId = paymentEntity.order_id
+    const razorpayPaymentId = paymentEntity.id
+    const amount = paymentEntity.amount
+    const currency = paymentEntity.currency
+
+    if (!razorpayOrderId || !razorpayPaymentId) {
+      throw new HttpError(400, 'Webhook payment data is incomplete.')
+    }
+
+    const database = getDatabase()
+
+    const order = await database.order.findFirst({
+      where: { razorpayOrderId },
+    })
+
+    if (!order) {
+      throw new HttpError(404, 'Order for Razorpay payment was not found.')
+    }
+
+    if (amount !== order.totalAmount * 100 || currency !== 'INR') {
+      throw new HttpError(400, 'Webhook payment amount or currency does not match the order.')
+    }
+
+    if (order.paymentStatus === 'PAID') {
+      return
+    }
+
+    await database.order.updateMany({
+      where: {
+        id: order.id,
+        paymentStatus: 'PENDING',
+        razorpayPaymentId: null,
+      },
+      data: {
+        paymentStatus: 'PAID',
+        orderStatus: 'PROCESSING',
+        razorpayPaymentId,
+      },
+    })
+  }
+
+  if (event === 'payment.failed' && paymentEntity) {
+    const razorpayOrderId = paymentEntity.order_id
+
+    if (!razorpayOrderId) {
+      throw new HttpError(400, 'Webhook payment data is incomplete.')
+    }
+
+    const database = getDatabase()
+
+    await database.order.updateMany({
+      where: {
+        razorpayOrderId,
+        paymentStatus: 'PENDING',
+      },
+      data: {
+        paymentStatus: 'FAILED',
+      },
+    })
+  }
+}

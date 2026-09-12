@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Footer from './components/Footer/Footer'
 import Navbar from './components/Navbar/Navbar'
 import About from './pages/About/About'
@@ -13,10 +13,22 @@ import Shipping from './pages/Shipping/Shipping'
 import Scoops from './pages/Scoops/Scoops'
 import './App.css'
 import AdminRoutes from './admin/routes/AdminRoutes'
+import { useEffect } from 'react'
+
+function ScrollToTop() {
+  const location = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
+
+  return null
+}
 
 function App() {
   return (
     <BrowserRouter>
+    <ScrollToTop />
       <Navbar />
       <Routes>
         <Route path="/admin/*" element={<AdminRoutes />} />
