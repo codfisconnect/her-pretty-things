@@ -148,10 +148,35 @@ function validateQuantity(quantity: number | undefined): number {
   return quantity;
 }
 
-function cartTotals(items: CartWithItems["items"]) {
-  const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
-  const shipping = items.some((item) => item.isCustomizedScoop) ? 150 : 0;
-  return { subtotal, shipping, total: subtotal + shipping };
+function calculateCartShipping(items: CartWithItems['items']) {
+  const totalScoops = items.reduce((sum, item) => {
+    if (!item.isCustomizedScoop) return sum
+
+    return sum + (item.numberOfScoops ?? 0) * item.quantity
+  }, 0)
+
+  if (totalScoops === 0) return 0
+  if (totalScoops === 1) return 149
+  if (totalScoops === 2) return 249
+  if (totalScoops === 3) return 339
+  if (totalScoops === 4) return 419
+  if (totalScoops === 5) return 489
+  if (totalScoops === 6) return 549
+  if (totalScoops === 7) return 599
+  if (totalScoops === 8) return 639
+
+  return 669 + (totalScoops - 9) * 30
+}
+
+function cartTotals(items: CartWithItems['items']) {
+  const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0)
+  const shipping = calculateCartShipping(items)
+
+  return {
+    subtotal,
+    shipping,
+    total: subtotal + shipping,
+  }
 }
 
 function serializeCart(cart: CartWithItems) {
@@ -197,7 +222,7 @@ export async function addCartItem(input: AddCartItemInput) {
       unitPrice: price.subtotal,
       subtotal: price.subtotal * quantity,
       shipping: price.shipping,
-      total: price.total * quantity,
+      total: price.subtotal * quantity,
       isCustomizedScoop: true,
       numberOfScoops: input.scoopConfiguration.numberOfScoops,
       colourTheme: input.scoopConfiguration.colourTheme,
@@ -284,6 +309,34 @@ export async function addCartItem(input: AddCartItemInput) {
     }
   }
 
+  if (input.scoopConfiguration) {
+    const existingScoop = await database.cartItem.findFirst({
+      where: {
+        cartId: cart.id,
+        isCustomizedScoop: true,
+        numberOfScoops: input.scoopConfiguration.numberOfScoops,
+        colourTheme: input.scoopConfiguration.colourTheme ?? null,
+        preferredCharacter: input.scoopConfiguration.preferredCharacter ?? null,
+        additionalMessage: input.scoopConfiguration.additionalMessage ?? null,
+      },
+    });
+
+    if (existingScoop) {
+      const newQuantity = existingScoop.quantity + quantity;
+
+      await database.cartItem.update({
+        where: { id: existingScoop.id },
+        data: {
+          quantity: newQuantity,
+          subtotal: existingScoop.unitPrice * newQuantity,
+          total: existingScoop.unitPrice * newQuantity,
+        },
+      });
+
+      return getCart(cart.id);
+    }
+  }
+
   if (!input.scoopConfiguration && input.productId) {
     const existingItem = await database.cartItem.findFirst({
       where: {
@@ -337,7 +390,7 @@ export async function updateCartItem(
     data.unitPrice = price.subtotal;
     data.subtotal = price.subtotal * quantity;
     data.shipping = price.shipping;
-    data.total = price.total * quantity;
+    data.total = price.subtotal * quantity;
     data.numberOfScoops = configuration.numberOfScoops;
     data.colourTheme = configuration.colourTheme;
     data.preferredCharacter = configuration.preferredCharacter;
