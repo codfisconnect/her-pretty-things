@@ -6,6 +6,7 @@ import cartRoutes from './routes/cartRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
 import paymentRoutes from './routes/paymentRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
+import productRoutes from './routes/productRoutes.js'
 
 const app = express()
 const port = Number(process.env.PORT ?? 4000)
@@ -18,6 +19,7 @@ app.get('/api/health', (_request, response) => {
 	response.json({ success: true, message: 'Her Pretty Things API is running' })
 })
 
+app.use('/api/products', productRoutes)
 app.use('/api/cart', cartRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/payments', paymentRoutes)

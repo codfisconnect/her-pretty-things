@@ -32,7 +32,7 @@ const cart = await addCartItem({
     ? {
         name: "Glossy Red Cherry Drop Earrings",
         image: "/images/glossy-red-cherry-drop-earrings.png",
-        price: "₹999",
+        price: "₹2",
         description:
           "A bold little pop of cherry red for your everyday pretty moments. ♡ These glossy drop earrings are designed to add a playful statement to any outfit.",
         highlights: ["Lightweight", "Statement Wear", "Glossy Finish"],

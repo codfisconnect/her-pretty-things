@@ -2,7 +2,7 @@
 export type ProductCategory = "scoops" | "jewellery" | "kawaii";
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   category: ProductCategory;
   price: number;

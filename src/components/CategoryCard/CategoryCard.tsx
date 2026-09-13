@@ -13,6 +13,12 @@ interface CategoryCardProps {
   category: Category
 }
 
+const categoryImages: Record<string, string> = {
+  scoops: '/images/category/scoops-collection.png',
+  jewellery: '/images/category/jewellery-collection.png',
+  kawaii: '/images/category/kawaii-collection.png',
+}
+
 function CategoryCard({ category }: CategoryCardProps) {
   return (
     <Link
@@ -20,7 +26,10 @@ function CategoryCard({ category }: CategoryCardProps) {
       to={`/${category.slug}`}
     >
       <div className="category-art">
-        <span>{category.icon}</span>
+        <img
+          src={categoryImages[category.slug]}
+          alt={category.name}
+        />
       </div>
 
       <div className="category-content">
