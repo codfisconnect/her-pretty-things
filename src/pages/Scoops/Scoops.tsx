@@ -1,4 +1,4 @@
-import { Gift, Heart, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addCartItem } from "../../services/cartService";
