@@ -3,7 +3,7 @@ import type { Product } from "../types/product";
 
 export const products: Product[] = [
   {
-    id: 1,
+    id: "1",
     name: "Pink Surprise Scoop",
     category: "scoops",
     price: 499,
@@ -14,7 +14,7 @@ export const products: Product[] = [
     featured: true,
   },
   {
-    id: 2,
+    id: "2",
     name: "Pearl Bow Necklace",
     category: "jewellery",
     price: 399,
@@ -25,7 +25,7 @@ export const products: Product[] = [
     featured: true,
   },
   {
-    id: 3,
+    id: "3",
     name: "Kawaii Bunny Keychain",
     category: "kawaii",
     price: 249,
@@ -36,7 +36,7 @@ export const products: Product[] = [
     featured: true,
   },
   {
-    id: 4,
+    id: "4",
     name: "Cute Heart Bracelet",
     category: "jewellery",
     price: 299,
@@ -47,7 +47,7 @@ export const products: Product[] = [
     featured: true,
   },
   {
-    id: 5,
+    id: "5",
     name: "Mini Mystery Scoop",
     category: "scoops",
     price: 299,
@@ -57,7 +57,7 @@ export const products: Product[] = [
     stock: 8,
   },
   {
-    id: 6,
+    id: "6",
     name: "Pink Ribbon Earrings",
     category: "jewellery",
     price: 349,
@@ -67,7 +67,7 @@ export const products: Product[] = [
     stock: 10,
   },
   {
-    id: 7,
+    id: "7",
     name: "Kawaii Bear Charm",
     category: "kawaii",
     price: 199,
@@ -77,7 +77,7 @@ export const products: Product[] = [
     stock: 18,
   },
   {
-    id: 8,
+    id: "8",
     name: "Cherry Heart Pendant",
     category: "jewellery",
     price: 449,
