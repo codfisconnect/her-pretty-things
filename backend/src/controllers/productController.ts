@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express'
+
 import { getDatabase } from '../config/database.js'
 
 export async function getProducts(request: Request, response: Response) {
@@ -33,5 +34,43 @@ export async function getProducts(request: Request, response: Response) {
   response.json({
     success: true,
     data: formattedProducts,
+  })
+}
+
+export async function getProductById(
+  request: Request,
+  response: Response,
+) {
+  const database = getDatabase()
+
+  const product = await database.product.findUnique({
+    where: {
+      id: request.params.id,
+    },
+    include: {
+      images: true,
+    },
+  })
+
+  if (!product) {
+    response.status(404).json({
+      success: false,
+      message: 'Product not found.',
+    })
+    return
+  }
+
+  response.json({
+    success: true,
+    data: {
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      image: product.images[0]?.url ?? '',
+      rating: 5,
+      description: product.description ?? '',
+      stock: product.stock,
+    },
   })
 }

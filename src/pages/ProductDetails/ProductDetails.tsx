@@ -1,101 +1,110 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { addCartItem } from "../../services/cartService";
+import { getProductById } from "../../services/productService";
+import type { Product } from "../../types/product";
 
 function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+
+    setLoading(true);
+
+    getProductById(id)
+      .then(setProduct)
+      .catch((error) => {
+        console.error("Could not load product:", error);
+        setProduct(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [id]);
 
   const handleAddToCart = async () => {
+    if (!id || !product) return;
+
     const savedSessionId =
-  localStorage.getItem('hpt_session_id') ?? crypto.randomUUID()
+      localStorage.getItem("hpt_session_id") ?? crypto.randomUUID();
 
-localStorage.setItem('hpt_session_id', savedSessionId)
+    localStorage.setItem("hpt_session_id", savedSessionId);
 
-const savedCartId = localStorage.getItem('hpt_cart_id')
+    const savedCartId = localStorage.getItem("hpt_cart_id");
 
-const cart = await addCartItem({
-  cartId: savedCartId ?? undefined,
-  sessionId: savedSessionId,
-  productId: id,
-  quantity,
-});
+    const cart = await addCartItem({
+      cartId: savedCartId ?? undefined,
+      sessionId: savedSessionId,
+      productId: id,
+      quantity,
+    });
 
     localStorage.setItem("hpt_cart_id", cart.id);
     navigate("/cart");
   };
 
-  const isCherryEarrings = id === "glossy-red-cherry-drop-earrings";
+  if (loading) {
+    return (
+      <main className="product-details-page container">
+        <p>Loading product...</p>
+      </main>
+    );
+  }
 
-  const product = isCherryEarrings
-    ? {
-        name: "Glossy Red Cherry Drop Earrings",
-        image: "/images/glossy-red-cherry-drop-earrings.png",
-        price: "₹2",
-        description:
-          "A bold little pop of cherry red for your everyday pretty moments. ♡ These glossy drop earrings are designed to add a playful statement to any outfit.",
-        highlights: ["Lightweight", "Statement Wear", "Glossy Finish"],
-        details: (
-          <>
-            Material: Alloy
-            <br />
-            Finish: Glossy Red
-            <br />
-            Style: Cherry Drop Earrings
-            <br />
-            Weight: Lightweight
-            <br />
-            Occasion: Daily wear, outings, festive occasions & parties
-          </>
-        ),
-      }
-    : {
-        name: "Gold-Tone Floral Necklace & Earrings Set",
-        image: "/images/gold-floral-necklace.png",
-        price: "₹699",
-        description:
-          "A little floral sparkle for your everyday pretty moments. ♡ A delicate gold-tone necklace paired with matching floral earrings, designed to add an elegant touch without feeling too heavy.",
-        highlights: ["Anti-Tarnish", "Lightweight", "Complete Set"],
-        details: (
-          <>
-            Material: Alloy
-            <br />
-            Finish: Gold-tone
-            <br />
-            Set Includes: 1 Necklace + 1 Pair of Earrings
-            <br />
-            Style: Floral
-            <br />
-            Weight: Lightweight
-            <br />
-            Occasion: Daily wear, outings, festive occasions & parties
-          </>
-        ),
-      };
+  if (!product) {
+    return (
+      <main className="product-details-page container">
+        <h1>Product not found</h1>
+
+        <Link to="/kawaii" className="product-back-link">
+          ← Back to Kawaii
+        </Link>
+      </main>
+    );
+  }
+
+  const isJewellery = product.category === "jewellery";
 
   return (
     <main className="product-details-page container">
       <div className="product-details">
         <div className="product-details-gallery">
           <div className="product-details-main-image">
-            <img src={product.image} alt={product.name} />
+            {product.image ? (
+              <img src={product.image} alt={product.name} />
+            ) : (
+              <div>No image available</div>
+            )}
           </div>
         </div>
 
         <div className="product-details-info">
-          <p className="eyebrow">Jewellery</p>
+          <p className="eyebrow">
+            {isJewellery ? "Jewellery" : "Kawaii"}
+          </p>
 
           <h1>{product.name}</h1>
 
-          <p className="product-details-price">{product.price}</p>
+          <p className="product-details-price">
+            ₹{product.price}
+          </p>
 
-          <p className="product-details-description">{product.description}</p>
+          <p className="product-details-description">
+            {product.description}
+          </p>
 
           <div className="product-details-highlights">
-            {product.highlights.map((highlight) => (
-              <span key={highlight}>{highlight}</span>
-            ))}
+            <span>
+              {isJewellery ? "Jewellery" : "Kawaii"}
+            </span>
+
+            <span>Quality Product</span>
           </div>
 
           <div className="product-details-quantity">
@@ -105,7 +114,9 @@ const cart = await addCartItem({
               <button
                 type="button"
                 onClick={() =>
-                  setQuantity((current) => Math.max(1, current - 1))
+                  setQuantity((current) =>
+                    Math.max(1, current - 1)
+                  )
                 }
               >
                 −
@@ -115,7 +126,9 @@ const cart = await addCartItem({
 
               <button
                 type="button"
-                onClick={() => setQuantity((current) => current + 1)}
+                onClick={() =>
+                  setQuantity((current) => current + 1)
+                }
               >
                 +
               </button>
@@ -131,7 +144,10 @@ const cart = await addCartItem({
               ADD TO CART
             </button>
 
-            <button type="button" className="product-buy-now">
+            <button
+              type="button"
+              className="product-buy-now"
+            >
               BUY IT NOW
             </button>
           </div>
@@ -140,16 +156,21 @@ const cart = await addCartItem({
             <section>
               <h2>Product Details</h2>
 
-              <p>{product.details}</p>
+              <p>
+                {product.description}
+              </p>
             </section>
 
             <section>
-              <h2>Jewellery Care</h2>
+              <h2>
+                {isJewellery
+                  ? "Jewellery Care"
+                  : "Product Care"}
+              </h2>
 
               <p>
-                Keep your jewellery away from water, perfume, sweat and harsh
-                chemicals. Store it in a dry place or jewellery pouch when not
-                in use.
+                Handle your product with care and store it
+                safely when not in use.
               </p>
             </section>
 
@@ -166,8 +187,11 @@ const cart = await addCartItem({
             </section>
           </div>
 
-          <Link to="/jewellery" className="product-back-link">
-            ← Back to Jewellery
+          <Link
+            to={isJewellery ? "/jewellery" : "/kawaii"}
+            className="product-back-link"
+          >
+            ← Back to {isJewellery ? "Jewellery" : "Kawaii"}
           </Link>
         </div>
       </div>

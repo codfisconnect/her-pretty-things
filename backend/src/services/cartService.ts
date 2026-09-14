@@ -233,8 +233,8 @@ export async function addCartItem(input: AddCartItemInput) {
     };
   } else {
     const product = await database.product.findUnique({
-      where: { slug: input.productId },
-    });
+  where: { id: input.productId },
+});
     if (!product) throw new HttpError(404, "Product not found.");
     data = {
       cartId: cart.id,

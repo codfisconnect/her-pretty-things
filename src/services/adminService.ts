@@ -40,3 +40,36 @@ export function getAdminDashboard() { return apiRequest<AdminDashboard>('/admin/
 export function getAdminOrders() { return apiRequest<AdminOrder[]>('/admin/orders') }
 export function getAdminOrder(orderId: string) { return apiRequest<AdminOrder>(`/admin/orders/${encodeURIComponent(orderId)}`) }
 export function updateAdminOrderStatus(orderId: string, status: AdminOrderStatus) { return apiRequest<AdminOrder>(`/admin/orders/${encodeURIComponent(orderId)}/status`, { method: 'PUT', body: JSON.stringify({ status }) }) }
+
+
+export interface CreateProductInput {
+  name: string
+  category: 'scoops' | 'jewellery' | 'kawaii'
+  price: number
+  description: string
+  stock: number
+  image?: string
+}
+
+export interface AdminProduct {
+  id: string
+  name: string
+  slug: string
+  category: string
+  price: number
+  description: string
+  stock: number
+  images: {
+    id: string
+    url: string
+    altText: string | null
+    sortOrder: number
+  }[]
+}
+
+export function createAdminProduct(input: CreateProductInput) {
+  return apiRequest<AdminProduct>('/admin/products', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}

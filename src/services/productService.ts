@@ -20,3 +20,16 @@ export async function getProducts(category?: string): Promise<Product[]> {
 
   return result.data
 }
+
+export async function getProductById(id: string): Promise<Product> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/products/${encodeURIComponent(id)}`,
+  )
+
+  if (!response.ok) {
+    throw new Error('Could not load product.')
+  }
+
+  const result = await response.json()
+  return result.data
+}

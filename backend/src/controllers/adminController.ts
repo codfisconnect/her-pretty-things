@@ -1,3 +1,4 @@
+import { createProduct } from '../services/productService.js'
 import type { Request, Response } from 'express'
 import { clearAdminSession, createAdminSession, isAdminSessionValid } from '../middleware/adminAuth.js'
 import { HttpError } from '../middleware/errorHandler.js'
@@ -42,4 +43,28 @@ export async function orderStatus(request: Request, response: Response) {
   const body = request.body as unknown
   if (typeof body !== 'object' || body === null) throw new HttpError(400, 'Status payload is required.')
   response.json({ success: true, data: await updateOrderStatus(readString(request.params.orderId, 'orderId'), readString((body as Record<string, unknown>).status, 'status')) })
+}
+
+export async function createAdminProduct(request: Request, response: Response) {
+  const body = request.body as unknown
+
+  if (typeof body !== 'object' || body === null) {
+    throw new HttpError(400, 'Product payload is required.')
+  }
+
+  const record = body as Record<string, unknown>
+
+  const product = await createProduct({
+    name: record.name as string,
+    category: record.category as string,
+    price: Number(record.price),
+    description: record.description as string | undefined,
+    stock: record.stock !== undefined ? Number(record.stock) : undefined,
+    image: record.image as string | undefined,
+  })
+
+  response.status(201).json({
+    success: true,
+    data: product,
+  })
 }
