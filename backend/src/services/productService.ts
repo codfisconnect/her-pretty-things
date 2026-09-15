@@ -91,3 +91,154 @@ export async function createProduct(input: CreateProductInput) {
     images: product.images,
   }
 }
+
+interface UpdateProductInput {
+  name?: string
+  category?: string
+  price?: number
+  description?: string
+  stock?: number
+  image?: string
+  active?: boolean
+}
+
+export async function updateProduct(
+  productId: string,
+  input: UpdateProductInput,
+) {
+  const database = getDatabase()
+
+  const existingProduct = await database.product.findUnique({
+    where: {
+      id: productId,
+    },
+  })
+
+  if (!existingProduct) {
+    throw new HttpError(404, 'Product not found.')
+  }
+
+  const data: {
+    name?: string
+    category?: string
+    price?: number
+    description?: string
+    stock?: number
+    active?: boolean
+  } = {}
+
+  if (input.name !== undefined) {
+    data.name = readRequiredString(input.name, 'name')
+  }
+
+  if (input.category !== undefined) {
+    data.category = readRequiredString(input.category, 'category')
+  }
+
+  if (input.price !== undefined) {
+    data.price = readPrice(input.price)
+  }
+
+  if (input.description !== undefined) {
+    data.description = input.description.trim()
+  }
+
+  if (input.stock !== undefined) {
+    data.stock = readStock(input.stock)
+  }
+
+  if (input.active !== undefined) {
+    data.active = input.active
+  }
+
+  const product = await database.product.update({
+    where: {
+      id: productId,
+    },
+    data,
+    include: {
+      images: true,
+    },
+  })
+
+  if (input.image !== undefined) {
+    await database.productImage.deleteMany({
+      where: {
+        productId,
+      },
+    })
+
+    if (input.image.trim()) {
+      await database.productImage.create({
+        data: {
+          productId,
+          url: input.image.trim(),
+          sortOrder: 0,
+        },
+      })
+    }
+  }
+
+  const updatedProduct = await database.product.findUnique({
+    where: {
+      id: productId,
+    },
+    include: {
+      images: true,
+    },
+  })
+
+  if (!updatedProduct) {
+    throw new HttpError(404, 'Product not found.')
+  }
+
+  return {
+    id: updatedProduct.id,
+    name: updatedProduct.name,
+    slug: updatedProduct.slug,
+    category: updatedProduct.category,
+    price: updatedProduct.price,
+    description: updatedProduct.description ?? '',
+    stock: updatedProduct.stock,
+    active: updatedProduct.active,
+    images: updatedProduct.images,
+  }
+}
+
+export async function deactivateProduct(productId: string) {
+  const database = getDatabase()
+
+  const existingProduct = await database.product.findUnique({
+    where: {
+      id: productId,
+    },
+  })
+
+  if (!existingProduct) {
+    throw new HttpError(404, 'Product not found.')
+  }
+
+  const product = await database.product.update({
+    where: {
+      id: productId,
+    },
+    data: {
+      active: false,
+    },
+    include: {
+      images: true,
+    },
+  })
+
+  return {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    category: product.category,
+    price: product.price,
+    description: product.description ?? '',
+    stock: product.stock,
+    active: product.active,
+    images: product.images,
+  }
+}
