@@ -57,25 +57,114 @@ function recalculateCart(items: Array<{ quantity: number; subtotal: number; isCu
 
 export async function createOrder(input: CreateOrderInput) {
   const database = getDatabase()
-  const cart = await database.cart.findUnique({ where: { id: input.cartId }, include: { items: { include: { product: true } } } })
-  if (!cart || cart.items.length === 0) throw new HttpError(400, 'Cart is empty or does not exist.')
+
+  const cart = await database.cart.findUnique({
+    where: {
+      id: input.cartId,
+    },
+    include: {
+      items: {
+        include: {
+          product: true,
+        },
+      },
+    },
+  })
+
+  if (!cart || cart.items.length === 0) {
+    throw new HttpError(400, 'Cart is empty or does not exist.')
+  }
+
   const totals = recalculateCart(cart.items)
 
   return database.$transaction(async (transaction) => {
-    const address = await transaction.address.create({ data: { ...input.shipping, userId: input.userId } })
+    // Validate and reserve stock for normal products.
+    // Customized Scoops do not use Product stock.
+    for (const item of cart.items) {
+      if (item.isCustomizedScoop) {
+        continue
+      }
+
+      if (!item.productId || !item.product) {
+        throw new HttpError(400, 'Product is missing for a cart item.')
+      }
+
+      if (!item.product.active) {
+        throw new HttpError(
+          409,
+          `${item.product.name} is no longer available.`,
+        )
+      }
+
+      const updatedStock = await transaction.product.updateMany({
+        where: {
+          id: item.productId,
+          active: true,
+          stock: {
+            gte: item.quantity,
+          },
+        },
+        data: {
+          stock: {
+            decrement: item.quantity,
+          },
+        },
+      })
+
+      if (updatedStock.count !== 1) {
+        throw new HttpError(
+          409,
+          `Insufficient stock for ${item.product.name}.`,
+        )
+      }
+    }
+
+    const address = await transaction.address.create({
+      data: {
+        ...input.shipping,
+        userId: input.userId,
+      },
+    })
+
     const order = await transaction.order.create({
       data: {
-        userId: input.userId, cartId: cart.id, addressId: address.id, ...totals,
-        items: { create: cart.items.map((item): Prisma.OrderItemUncheckedCreateWithoutOrderInput => ({
-          productId: item.productId, productName: item.product?.name ?? 'Customized Pretty Scoop', quantity: item.quantity,
-          unitPrice: item.isCustomizedScoop ? calculateScoopPrice(item.numberOfScoops ?? 0).subtotal : item.unitPrice,
-          totalPrice: item.isCustomizedScoop ? calculateScoopPrice(item.numberOfScoops ?? 0).subtotal * item.quantity : item.subtotal,
-          isCustomizedScoop: item.isCustomizedScoop, numberOfScoops: item.numberOfScoops, colourTheme: item.colourTheme,
-          preferredCharacter: item.preferredCharacter, preferredItems: item.preferredItems, excludedItems: item.excludedItems, additionalMessage: item.additionalMessage,
-        })) },
+        userId: input.userId,
+        cartId: cart.id,
+        addressId: address.id,
+        ...totals,
+        items: {
+          create: cart.items.map(
+            (
+              item,
+            ): Prisma.OrderItemUncheckedCreateWithoutOrderInput => ({
+              productId: item.productId,
+              productName:
+                item.product?.name ?? 'Customized Pretty Scoop',
+              quantity: item.quantity,
+              unitPrice: item.isCustomizedScoop
+                ? calculateScoopPrice(item.numberOfScoops ?? 0).subtotal
+                : item.unitPrice,
+              totalPrice: item.isCustomizedScoop
+                ? calculateScoopPrice(item.numberOfScoops ?? 0).subtotal *
+                  item.quantity
+                : item.subtotal,
+              isCustomizedScoop: item.isCustomizedScoop,
+              numberOfScoops: item.numberOfScoops,
+              colourTheme: item.colourTheme,
+              preferredCharacter: item.preferredCharacter,
+              preferredItems: item.preferredItems,
+              excludedItems: item.excludedItems,
+              additionalMessage: item.additionalMessage,
+            }),
+          ),
+        },
       },
-      include: { address: true, items: true },
+      include: {
+        address: true,
+        items: true,
+      },
     })
+
     return order
   })
 }

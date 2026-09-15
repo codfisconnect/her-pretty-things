@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { createPayment, verifyPayment } from '../../services/paymentService'
+import {
+  cancelPayment,
+  createPayment,
+  verifyPayment,
+} from '../../services/paymentService'
 import { getOrder, type OrderResponse } from '../../services/orderService'
 
 declare global {
@@ -131,11 +135,21 @@ function Payment() {
         },
 
         modal: {
-          ondismiss: () => {
-            setMessage('Payment was cancelled.')
-            setIsProcessing(false)
-          },
-        },
+  ondismiss: async () => {
+    try {
+      await cancelPayment(order.id)
+      setMessage('Payment was cancelled.')
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Payment was cancelled, but we could not update the order.',
+      )
+    } finally {
+      setIsProcessing(false)
+    }
+  },
+},
       })
 
       razorpay.open()

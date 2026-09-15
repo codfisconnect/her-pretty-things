@@ -23,6 +23,11 @@ export interface VerifyPaymentResponse {
   razorpayPaymentId: string
 }
 
+export interface CancelPaymentResponse {
+  orderId: string
+  paymentStatus: string
+}
+
 export function createPayment(orderId: string) {
   return apiRequest<CreatePaymentResponse>('/payments/create', {
     method: 'POST',
@@ -34,5 +39,12 @@ export function verifyPayment(request: VerifyPaymentRequest) {
   return apiRequest<VerifyPaymentResponse>('/payments/verify', {
     method: 'POST',
     body: JSON.stringify(request),
+  })
+}
+
+export function cancelPayment(orderId: string) {
+  return apiRequest<CancelPaymentResponse>('/payments/cancel', {
+    method: 'POST',
+    body: JSON.stringify({ orderId }),
   })
 }
