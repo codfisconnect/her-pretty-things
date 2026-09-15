@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "noImplicitAny": true
   },
-  "include": ["src", "../src/services/productService.ts"]
+  "include": ["src"]
 }

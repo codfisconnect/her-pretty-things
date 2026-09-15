@@ -1,4 +1,8 @@
-import { createProduct } from '../services/productService.js'
+import {
+  createProduct,
+  updateProduct,
+  deactivateProduct,
+} from '../services/productService.js'
 import type { Request, Response } from 'express'
 import { clearAdminSession, createAdminSession, isAdminSessionValid } from '../middleware/adminAuth.js'
 import { HttpError } from '../middleware/errorHandler.js'
@@ -64,6 +68,56 @@ export async function createAdminProduct(request: Request, response: Response) {
   })
 
   response.status(201).json({
+    success: true,
+    data: product,
+  })
+}
+
+export async function updateAdminProduct(
+  request: Request,
+  response: Response,
+) {
+  const productId = readString(request.params.productId, 'productId')
+
+  const body = request.body as unknown
+
+  if (typeof body !== 'object' || body === null) {
+    throw new HttpError(400, 'Product payload is required.')
+  }
+
+  const record = body as Record<string, unknown>
+
+  const product = await updateProduct(productId, {
+    name: record.name as string | undefined,
+    category: record.category as string | undefined,
+    price: record.price !== undefined ? Number(record.price) : undefined,
+    description:
+      record.description !== undefined
+        ? (record.description as string)
+        : undefined,
+    stock: record.stock !== undefined ? Number(record.stock) : undefined,
+    image: record.image !== undefined ? (record.image as string) : undefined,
+    active:
+      record.active !== undefined
+        ? Boolean(record.active)
+        : undefined,
+  })
+
+  response.json({
+    success: true,
+    data: product,
+  })
+}
+
+export async function deactivateAdminProduct(
+  request: Request,
+  response: Response,
+) {
+  const productId = readString(request.params.productId, 'productId')
+
+  const product = await deactivateProduct(productId)
+
+  response.json({
     success: true,
     data: product,
   })

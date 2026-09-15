@@ -45,7 +45,7 @@ export async function getProductById(
 
   const product = await database.product.findUnique({
     where: {
-      id: request.params.id,
+      id: String(request.params.id),
     },
     include: {
       images: true,
