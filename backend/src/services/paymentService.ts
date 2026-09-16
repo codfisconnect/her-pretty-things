@@ -202,3 +202,86 @@ export async function handleWebhook(rawBody: Buffer, signature: string | string[
     })
   }
 }
+
+export async function refundPayment(orderId: string) {
+  const database = getDatabase()
+
+  const order = await database.order.findUnique({
+    where: {
+      id: orderId,
+    },
+  })
+
+  if (!order) {
+    throw new HttpError(404, 'Order not found.')
+  }
+
+  if (order.paymentStatus === 'REFUNDED') {
+    return {
+      orderId: order.id,
+      paymentStatus: order.paymentStatus,
+      message: 'Payment has already been refunded.',
+    }
+  }
+
+  if (order.paymentStatus !== 'PAID') {
+    throw new HttpError(
+      409,
+      'Only paid orders can be refunded.',
+    )
+  }
+
+  if (!order.razorpayPaymentId) {
+    throw new HttpError(
+      409,
+      'No Razorpay payment is associated with this order.',
+    )
+  }
+
+  const { client } = getRazorpayClient()
+
+  let refund
+
+  try {
+    refund = await client.payments.refund(
+      order.razorpayPaymentId,
+      {
+        amount: order.totalAmount * 100,
+        notes: {
+          orderId: order.id,
+        },
+      },
+    )
+  } catch {
+    throw new HttpError(
+      502,
+      'Razorpay refund could not be initiated.',
+    )
+  }
+
+  if (
+    refund.amount !== order.totalAmount * 100 ||
+    refund.currency !== 'INR'
+  ) {
+    throw new HttpError(
+      502,
+      'Razorpay refund amount or currency does not match the order.',
+    )
+  }
+
+  const updatedOrder = await database.order.update({
+    where: {
+      id: order.id,
+    },
+    data: {
+      paymentStatus: 'REFUNDED',
+    },
+  })
+
+  return {
+    orderId: updatedOrder.id,
+    paymentStatus: updatedOrder.paymentStatus,
+    razorpayPaymentId: order.razorpayPaymentId,
+    razorpayRefundId: refund.id,
+  }
+}

@@ -3,6 +3,7 @@ import { getDatabase } from '../config/database.js'
 import { HttpError } from '../middleware/errorHandler.js'
 import { calculateScoopPrice } from '../utils/pricing.js'
 import type { ScoopConfigurationInput } from './cartService.js'
+import { refundPayment } from './paymentService.js'
 
 export interface ShippingInput {
   fullName: string
@@ -59,7 +60,30 @@ export async function createOrder(input: CreateOrderInput) {
   const database = getDatabase()
   const cart = await database.cart.findUnique({ where: { id: input.cartId }, include: { items: { include: { product: true } } } })
   if (!cart || cart.items.length === 0) throw new HttpError(400, 'Cart is empty or does not exist.')
-  const totals = recalculateCart(cart.items)
+  for (const item of cart.items) {
+  if (item.isCustomizedScoop) {
+    continue
+  }
+
+  if (!item.product) {
+    throw new HttpError(400, 'Product not found.')
+  }
+
+  if (!item.product.active) {
+    throw new HttpError(
+      409,
+      `${item.product.name} is no longer available.`,
+    )
+  }
+
+  if (item.product.stock < item.quantity) {
+    throw new HttpError(
+      409,
+      `${item.product.name} has only ${item.product.stock} item(s) available.`,
+    )
+  }
+}
+    const totals = recalculateCart(cart.items)
 
   return database.$transaction(async (transaction) => {
     const address = await transaction.address.create({ data: { ...input.shipping, userId: input.userId } })
@@ -85,4 +109,81 @@ export async function getOrder(orderId: string) {
   const order = await database.order.findUnique({ where: { id: orderId }, include: { address: true, items: true } })
   if (!order) throw new HttpError(404, 'Order not found.')
   return order
+}
+
+export async function cancelOrder(orderId: string) {
+  const database = getDatabase()
+
+  const order = await database.order.findUnique({
+    where: {
+      id: orderId,
+    },
+    include: {
+      items: true,
+    },
+  })
+
+  if (!order) {
+    throw new HttpError(404, 'Order not found.')
+  }
+
+  if (order.orderStatus === 'CANCELLED') {
+    throw new HttpError(409, 'Order is already cancelled.')
+  }
+
+  if (
+    order.orderStatus === 'SHIPPED' ||
+    order.orderStatus === 'DELIVERED'
+  ) {
+    throw new HttpError(
+      409,
+      'Shipped or delivered orders cannot be cancelled.',
+    )
+  }
+
+  // Refund paid orders before completing cancellation.
+  if (order.paymentStatus === 'PAID') {
+    await refundPayment(order.id)
+  }
+
+  return database.$transaction(async (transaction) => {
+    for (const item of order.items) {
+      if (item.isCustomizedScoop) {
+        continue
+      }
+
+      if (!item.productId) {
+        throw new HttpError(
+          400,
+          `Product information is missing for order item ${item.id}.`,
+        )
+      }
+
+      await transaction.product.update({
+        where: {
+          id: item.productId,
+        },
+        data: {
+          stock: {
+            increment: item.quantity,
+          },
+        },
+      })
+    }
+
+    const cancelledOrder = await transaction.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        orderStatus: 'CANCELLED',
+      },
+      include: {
+        address: true,
+        items: true,
+      },
+    })
+
+    return cancelledOrder
+  })
 }
