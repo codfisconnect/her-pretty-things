@@ -67,9 +67,86 @@ export interface AdminProduct {
   }[]
 }
 
-export function createAdminProduct(input: CreateProductInput) {
+export function createAdminProduct(
+  input: CreateProductInput,
+  imageFiles?: File[],
+) {
+  if (imageFiles && imageFiles.length > 0) {
+    const formData = new FormData()
+
+    formData.append('name', input.name)
+    formData.append('category', input.category)
+    formData.append('price', String(input.price))
+    formData.append('description', input.description)
+    formData.append('stock', String(input.stock))
+    imageFiles.forEach((imageFile) => {
+  formData.append('image', imageFile)
+})
+
+    return apiRequest<AdminProduct>('/admin/products', {
+      method: 'POST',
+      body: formData,
+    })
+  }
+
   return apiRequest<AdminProduct>('/admin/products', {
     method: 'POST',
     body: JSON.stringify(input),
   })
+}
+
+export async function uploadAdminProductImages(
+  imageFiles: File[],
+): Promise<string[]> {
+  const uploadedUrls: string[] = []
+
+  for (const imageFile of imageFiles) {
+    const formData = new FormData()
+    formData.append('image', imageFile)
+
+    const result = await apiRequest<{
+      url: string
+      publicId: string
+      width: number
+      height: number
+      format: string
+    }>('/admin/products/upload-image', {
+      method: 'POST',
+      body: formData,
+    })
+
+    uploadedUrls.push(result.url)
+  }
+
+  return uploadedUrls
+}
+
+export async function updateAdminProduct(
+  productId: string,
+  input: {
+    name?: string
+    category?: 'scoops' | 'jewellery' | 'kawaii'
+    price?: number
+    description?: string
+    stock?: number
+    images?: string[]
+    active?: boolean
+  },
+) {
+  return apiRequest<AdminProduct>(
+    `/admin/products/${encodeURIComponent(productId)}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    },
+  )
+}
+
+export async function deleteAdminProduct(productId: string) {
+  return apiRequest<AdminProduct>(
+    `/admin/products/${encodeURIComponent(productId)}`,
+    {
+      method: 'DELETE',
+    },
+  )
 }

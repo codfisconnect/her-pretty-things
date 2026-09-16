@@ -7,7 +7,7 @@ interface CreateProductInput {
   price: number
   description?: string
   stock?: number
-  image?: string
+  images?: string[]
 }
 
 function readRequiredString(value: unknown, field: string) {
@@ -58,7 +58,7 @@ export async function createProduct(input: CreateProductInput) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')}-${Date.now()}`
 
-  const product = await database.product.create({
+    const product = await database.product.create({
     data: {
       name,
       slug,
@@ -66,14 +66,15 @@ export async function createProduct(input: CreateProductInput) {
       price,
       description,
       stock,
-      images: input.image
-        ? {
-            create: {
-              url: input.image.trim(),
-              sortOrder: 0,
-            },
-          }
-        : undefined,
+      images:
+        input.images && input.images.length > 0
+          ? {
+              create: input.images.map((url, index) => ({
+                url: url.trim(),
+                sortOrder: index,
+              })),
+            }
+          : undefined,
     },
     include: {
       images: true,
@@ -98,7 +99,7 @@ interface UpdateProductInput {
   price?: number
   description?: string
   stock?: number
-  image?: string
+  images?: string[]
   active?: boolean
 }
 
@@ -161,23 +162,25 @@ export async function updateProduct(
     },
   })
 
-  if (input.image !== undefined) {
-    await database.productImage.deleteMany({
-      where: {
-        productId,
-      },
-    })
+  if (input.images !== undefined) {
+  await database.productImage.deleteMany({
+    where: {
+      productId,
+    },
+  })
 
-    if (input.image.trim()) {
-      await database.productImage.create({
-        data: {
+  if (input.images.length > 0) {
+    await database.productImage.createMany({
+      data: input.images
+        .filter((url) => url.trim().length > 0)
+        .map((url, index) => ({
           productId,
-          url: input.image.trim(),
-          sortOrder: 0,
-        },
-      })
-    }
+          url: url.trim(),
+          sortOrder: index,
+        })),
+    })
   }
+}
 
   const updatedProduct = await database.product.findUnique({
     where: {

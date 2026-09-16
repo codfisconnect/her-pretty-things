@@ -62,14 +62,77 @@ export async function getOrder(orderId: string) {
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {
-  if (!Object.values(OrderStatus).includes(status as OrderStatus)) throw new HttpError(400, 'Invalid order status.')
+  if (!Object.values(OrderStatus).includes(status as OrderStatus)) {
+    throw new HttpError(400, 'Invalid order status.')
+  }
+
   const order = await getOrderRecord(orderId)
   const nextStatus = status as OrderStatus
-  const fulfilmentStatuses: OrderStatus[] = [OrderStatus.PROCESSING, OrderStatus.SHIPPED, OrderStatus.DELIVERED]
-  if (fulfilmentStatuses.includes(nextStatus) && order.paymentStatus !== PaymentStatus.PAID) {
-    throw new HttpError(409, 'Only paid orders can be processed, shipped, or delivered.')
+  const currentStatus = order.orderStatus
+
+  if (currentStatus === OrderStatus.CANCELLED) {
+    throw new HttpError(
+      409,
+      'A cancelled order cannot be changed.',
+    )
   }
+
+  if (currentStatus === OrderStatus.DELIVERED) {
+    throw new HttpError(
+      409,
+      'A delivered order cannot be changed.',
+    )
+  }
+
+  if (nextStatus === OrderStatus.CANCELLED) {
+    throw new HttpError(
+      400,
+      'Use the order cancellation endpoint to cancel an order.',
+    )
+  }
+
+  const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
+    [OrderStatus.PENDING_PAYMENT]: [
+      OrderStatus.PROCESSING,
+    ],
+    [OrderStatus.PROCESSING]: [
+      OrderStatus.SHIPPED,
+    ],
+    [OrderStatus.SHIPPED]: [
+      OrderStatus.DELIVERED,
+    ],
+    [OrderStatus.DELIVERED]: [],
+    [OrderStatus.CANCELLED]: [],
+  }
+
+  if (!allowedTransitions[currentStatus].includes(nextStatus)) {
+    throw new HttpError(
+      409,
+      `Order cannot move from ${currentStatus} to ${nextStatus}.`,
+    )
+  }
+
+  if (
+    nextStatus === OrderStatus.PROCESSING &&
+    order.paymentStatus !== PaymentStatus.PAID
+  ) {
+    throw new HttpError(
+      409,
+      'Only paid orders can be processed.',
+    )
+  }
+
   const database = getDatabase()
-  const updated = await database.order.update({ where: { id: orderId }, data: { orderStatus: nextStatus }, include: orderInclude })
+
+  const updated = await database.order.update({
+    where: {
+      id: orderId,
+    },
+    data: {
+      orderStatus: nextStatus,
+    },
+    include: orderInclude,
+  })
+
   return serializeOrder(updated)
 }
