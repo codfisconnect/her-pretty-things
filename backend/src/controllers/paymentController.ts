@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import {
+  cancelPayment as cancelRazorpayPayment,
   createPayment as createRazorpayPayment,
   verifyPayment as verifyRazorpayPayment,
   handleWebhook as handleRazorpayWebhook,
@@ -11,7 +12,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function readOrderId(body: unknown): string {
-  if (!isRecord(body) || typeof body.orderId !== 'string' || body.orderId.length === 0) {
+  if (
+    !isRecord(body) ||
+    typeof body.orderId !== 'string' ||
+    body.orderId.length === 0
+  ) {
     throw new HttpError(400, 'orderId is required.')
   }
 
@@ -19,7 +24,11 @@ function readOrderId(body: unknown): string {
 }
 
 function readString(body: unknown, name: string): string {
-  if (!isRecord(body) || typeof body[name] !== 'string' || body[name].length === 0) {
+  if (
+    !isRecord(body) ||
+    typeof body[name] !== 'string' ||
+    body[name].length === 0
+  ) {
     throw new HttpError(400, `${name} is required.`)
   }
 
@@ -54,12 +63,24 @@ export async function verifyPayment(request: Request, response: Response) {
   })
 }
 
+export async function cancelPayment(request: Request, response: Response) {
+  const result = await cancelRazorpayPayment(readOrderId(request.body))
+
+  response.json({
+    success: true,
+    data: result,
+  })
+}
+
 export async function handleWebhook(request: Request, response: Response) {
   if (!Buffer.isBuffer(request.body)) {
     throw new HttpError(400, 'Webhook body must be provided as raw JSON.')
   }
 
-  await handleRazorpayWebhook(request.body, request.headers['x-razorpay-signature'])
+  await handleRazorpayWebhook(
+    request.body,
+    request.headers['x-razorpay-signature'],
+  )
 
   response.json({
     success: true,
