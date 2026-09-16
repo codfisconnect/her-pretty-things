@@ -40,8 +40,8 @@ export async function getProducts(
 
   const limit =
     Number.isInteger(limitParam) &&
-    limitParam > 0 &&
-    limitParam <= 100
+      limitParam > 0 &&
+      limitParam <= 100
       ? limitParam
       : 20
 
@@ -49,19 +49,19 @@ export async function getProducts(
     ...(category ? { category } : {}),
     ...(search
       ? {
-          name: {
-            contains: search,
-            mode: 'insensitive' as const,
-          },
-        }
+        name: {
+          contains: search,
+          mode: 'insensitive' as const,
+        },
+      }
       : {}),
     ...(activeParam === 'true' || activeParam === 'false'
       ? {
-          active: activeParam === 'true',
-        }
+        active: activeParam === 'true',
+      }
       : {
-          active: true,
-        }),
+        active: true,
+      }),
   }
 
   const [products, total] = await Promise.all([
@@ -88,6 +88,7 @@ export async function getProducts(
     category: product.category,
     price: product.price,
     image: product.images[0]?.url ?? '',
+    images: product.images.map((item) => item.url),
     rating: 5,
     description: product.description ?? '',
     stock: product.stock,
@@ -137,6 +138,7 @@ export async function getProductById(
       category: product.category,
       price: product.price,
       image: product.images[0]?.url ?? '',
+      images: product.images.map((item) => item.url),
       rating: 5,
       description: product.description ?? '',
       stock: product.stock,

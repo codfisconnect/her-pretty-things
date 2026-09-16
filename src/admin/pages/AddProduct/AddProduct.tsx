@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { FormEvent } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
 import { createAdminProduct } from '../../../services/adminService'
 
 function AddProduct() {
@@ -8,7 +8,7 @@ function AddProduct() {
   const [price, setPrice] = useState('')
   const [description, setDescription] = useState('')
   const [stock, setStock] = useState('')
-  const [image, setImage] = useState('')
+  const [imageFiles, setImageFiles] = useState<File[]>([])
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -18,14 +18,16 @@ function AddProduct() {
     setMessage('')
 
     try {
-      await createAdminProduct({
-        name,
-        category,
-        price: Number(price),
-        description,
-        stock: Number(stock),
-        image: image || undefined,
-      })
+      await createAdminProduct(
+        {
+          name,
+          category,
+          price: Number(price),
+          description,
+          stock: Number(stock),
+        },
+        imageFiles,
+      )
 
       setMessage('Product created successfully.')
 
@@ -33,7 +35,15 @@ function AddProduct() {
       setPrice('')
       setDescription('')
       setStock('')
-      setImage('')
+      setImageFiles([])
+
+      const fileInput = document.getElementById(
+        'product-image',
+      ) as HTMLInputElement | null
+
+      if (fileInput) {
+        fileInput.value = ''
+      }
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -107,14 +117,23 @@ function AddProduct() {
         </label>
 
         <label>
-          Product Image URL
+          Product Image
           <input
-            type="url"
-            value={image}
-            onChange={(event) => setImage(event.target.value)}
-            placeholder="https://..."
+            id="product-image"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+              setImageFiles(Array.from(event.target.files ?? []))
+            }
           />
         </label>
+
+        {imageFiles.length > 0 && (
+          <p>
+            {imageFiles.length} image{imageFiles.length > 1 ? 's' : ''} selected
+          </p>
+        )}
 
         <label>
           Description

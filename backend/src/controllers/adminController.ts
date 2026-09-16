@@ -7,6 +7,7 @@ import type { Request, Response } from 'express'
 import { clearAdminSession, createAdminSession, isAdminSessionValid } from '../middleware/adminAuth.js'
 import { HttpError } from '../middleware/errorHandler.js'
 import { getDashboard, getOrder, listOrders, updateOrderStatus } from '../services/adminService.js'
+import { uploadProductImage } from '../services/cloudinaryService.js'
 
 function readString(value: unknown, field: string) {
   if (typeof value !== 'string' || value.trim().length === 0) throw new HttpError(400, `${field} is required.`)
@@ -49,7 +50,10 @@ export async function orderStatus(request: Request, response: Response) {
   response.json({ success: true, data: await updateOrderStatus(readString(request.params.orderId, 'orderId'), readString((body as Record<string, unknown>).status, 'status')) })
 }
 
-export async function createAdminProduct(request: Request, response: Response) {
+export async function createAdminProduct(
+  request: Request,
+  response: Response,
+) {
   const body = request.body as unknown
 
   if (typeof body !== 'object' || body === null) {
@@ -58,18 +62,45 @@ export async function createAdminProduct(request: Request, response: Response) {
 
   const record = body as Record<string, unknown>
 
+  const uploadedImages =
+    request.files as Express.Multer.File[] | undefined
+
+  const imageUrls: string[] = []
+
+  if (uploadedImages && uploadedImages.length > 0) {
+    for (const uploadedImage of uploadedImages) {
+      const cloudinaryResult = await uploadProductImage(
+        uploadedImage.buffer,
+        uploadedImage.originalname,
+      )
+
+      imageUrls.push(cloudinaryResult.secure_url)
+    }
+  }
+
   const product = await createProduct({
     name: record.name as string,
     category: record.category as string,
     price: Number(record.price),
     description: record.description as string | undefined,
-    stock: record.stock !== undefined ? Number(record.stock) : undefined,
-    image: record.image as string | undefined,
+    stock:
+      record.stock !== undefined
+        ? Number(record.stock)
+        : undefined,
+    images: imageUrls,
   })
 
   response.status(201).json({
     success: true,
     data: product,
+    uploadedImages: uploadedImages
+      ? uploadedImages.map((image, index) => ({
+          originalName: image.originalname,
+          size: image.size,
+          mimetype: image.mimetype,
+          url: imageUrls[index],
+        }))
+      : [],
   })
 }
 
@@ -96,7 +127,10 @@ export async function updateAdminProduct(
         ? (record.description as string)
         : undefined,
     stock: record.stock !== undefined ? Number(record.stock) : undefined,
-    image: record.image !== undefined ? (record.image as string) : undefined,
+    images:
+  Array.isArray(record.images)
+    ? (record.images as string[])
+    : undefined,
     active:
       record.active !== undefined
         ? Boolean(record.active)
