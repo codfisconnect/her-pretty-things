@@ -38,7 +38,7 @@ export function adminLogout() { return apiRequest<void>('/api/admin/logout', { m
 export function getAdminSession() { return apiRequest<{ authenticated: boolean }>('/api/admin/session') }
 export function getAdminDashboard() { return apiRequest<AdminDashboard>('/api/admin/dashboard') }
 export function getAdminOrders() { return apiRequest<AdminOrder[]>('/api/admin/orders') }
-export function getAdminOrder(orderId: string) { return apiRequest<AdminOrder>(`/admin/orders/${encodeURIComponent(orderId)}`) }
+export function getAdminOrder(orderId: string) { return apiRequest<AdminOrder>(`/api/admin/orders/${encodeURIComponent(orderId)}`) }
 export function updateAdminOrderStatus(orderId: string, status: AdminOrderStatus) { return apiRequest<AdminOrder>(`/api/admin/orders/${encodeURIComponent(orderId)}/status`, { method: 'PUT', body: JSON.stringify({ status }) }) }
 
 
@@ -134,7 +134,7 @@ export async function updateAdminProduct(
   },
 ) {
   return apiRequest<AdminProduct>(
-    `/admin/products/${encodeURIComponent(productId)}`,
+    `/api/admin/products/${encodeURIComponent(productId)}`,
     {
       method: 'PUT',
       body: JSON.stringify(input),
@@ -144,7 +144,7 @@ export async function updateAdminProduct(
 
 export async function deleteAdminProduct(productId: string) {
   return apiRequest<AdminProduct>(
-    `/admin/products/${encodeURIComponent(productId)}`,
+    `/api/admin/products/${encodeURIComponent(productId)}`,
     {
       method: 'DELETE',
     },
