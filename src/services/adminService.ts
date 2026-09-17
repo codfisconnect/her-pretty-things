@@ -34,12 +34,12 @@ export interface AdminOrder {
 export interface AdminDashboard { metrics: { totalOrders: number; pendingPayment: number; paidOrders: number; processing: number; shipped: number; delivered: number; revenue: number }; recentOrders: AdminOrder[] }
 
 export function adminLogin(email: string, password: string) { return apiRequest<{ email: string }>('/api/admin/login', { method: 'POST', body: JSON.stringify({ email, password }) }) }
-export function adminLogout() { return apiRequest<void>('/admin/logout', { method: 'POST' }) }
-export function getAdminSession() { return apiRequest<{ authenticated: boolean }>('/admin/session') }
-export function getAdminDashboard() { return apiRequest<AdminDashboard>('/admin/dashboard') }
-export function getAdminOrders() { return apiRequest<AdminOrder[]>('/admin/orders') }
+export function adminLogout() { return apiRequest<void>('/api/admin/logout', { method: 'POST' }) }
+export function getAdminSession() { return apiRequest<{ authenticated: boolean }>('/api/admin/session') }
+export function getAdminDashboard() { return apiRequest<AdminDashboard>('/api/admin/dashboard') }
+export function getAdminOrders() { return apiRequest<AdminOrder[]>('/api/admin/orders') }
 export function getAdminOrder(orderId: string) { return apiRequest<AdminOrder>(`/admin/orders/${encodeURIComponent(orderId)}`) }
-export function updateAdminOrderStatus(orderId: string, status: AdminOrderStatus) { return apiRequest<AdminOrder>(`/admin/orders/${encodeURIComponent(orderId)}/status`, { method: 'PUT', body: JSON.stringify({ status }) }) }
+export function updateAdminOrderStatus(orderId: string, status: AdminOrderStatus) { return apiRequest<AdminOrder>(`/api/admin/orders/${encodeURIComponent(orderId)}/status`, { method: 'PUT', body: JSON.stringify({ status }) }) }
 
 
 export interface CreateProductInput {
@@ -83,13 +83,13 @@ export function createAdminProduct(
   formData.append('image', imageFile)
 })
 
-    return apiRequest<AdminProduct>('/admin/products', {
+    return apiRequest<AdminProduct>('/api/admin/products', {
       method: 'POST',
       body: formData,
     })
   }
 
-  return apiRequest<AdminProduct>('/admin/products', {
+  return apiRequest<AdminProduct>('/api/admin/products', {
     method: 'POST',
     body: JSON.stringify(input),
   })
@@ -110,7 +110,7 @@ export async function uploadAdminProductImages(
       width: number
       height: number
       format: string
-    }>('/admin/products/upload-image', {
+    }>('/api/admin/products/upload-image', {
       method: 'POST',
       body: formData,
     })

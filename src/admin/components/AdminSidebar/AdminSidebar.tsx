@@ -13,7 +13,7 @@ function AdminSidebar() {
 
 	const logout = async () => {
 		await adminLogout().catch(() => undefined)
-		navigate('/admin/login')
+		navigate('/api/admin/login')
 	}
 
 	return (
