@@ -33,7 +33,7 @@ export interface AdminOrder {
 
 export interface AdminDashboard { metrics: { totalOrders: number; pendingPayment: number; paidOrders: number; processing: number; shipped: number; delivered: number; revenue: number }; recentOrders: AdminOrder[] }
 
-export function adminLogin(email: string, password: string) { return apiRequest<{ email: string }>('/admin/login', { method: 'POST', body: JSON.stringify({ email, password }) }) }
+export function adminLogin(email: string, password: string) { return apiRequest<{ email: string }>('/api/admin/login', { method: 'POST', body: JSON.stringify({ email, password }) }) }
 export function adminLogout() { return apiRequest<void>('/admin/logout', { method: 'POST' }) }
 export function getAdminSession() { return apiRequest<{ authenticated: boolean }>('/admin/session') }
 export function getAdminDashboard() { return apiRequest<AdminDashboard>('/admin/dashboard') }
