@@ -8,9 +8,7 @@ export async function getProducts(category?: string): Promise<Product[]> {
     ? `?category=${encodeURIComponent(category)}`
     : ''
 
-  const response = await fetch(
-    `${API_BASE_URL}/api/products${query}`,
-  )
+  const response = await fetch(`${API_BASE_URL}/products${query}`)
 
   if (!response.ok) {
     throw new Error('Could not load products.')
@@ -23,7 +21,7 @@ export async function getProducts(category?: string): Promise<Product[]> {
 
 export async function getProductById(id: string): Promise<Product> {
   const response = await fetch(
-    `${API_BASE_URL}/api/products/${encodeURIComponent(id)}`,
+    `${API_BASE_URL}/products/${encodeURIComponent(id)}`,
   )
 
   if (!response.ok) {
