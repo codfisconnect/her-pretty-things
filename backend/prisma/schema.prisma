@@ -83,6 +83,7 @@ model CartItem {
 	total               Int
 	isCustomizedScoop   Boolean  @default(false)
 	numberOfScoops      Int?
+	age 				Int?
 	colourTheme         String?
 	preferredCharacter  String?
 	preferredItems      String[] @default([])
@@ -143,6 +144,7 @@ model OrderItem {
 	totalPrice          Int
 	isCustomizedScoop   Boolean  @default(false)
 	numberOfScoops      Int?
+	age 				Int?
 	colourTheme         String?
 	preferredCharacter  String?
 	preferredItems      String[] @default([])
@@ -151,4 +153,56 @@ model OrderItem {
 	order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 	product             Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 	@@index([orderId])
+}
+
+model ScoopSetting {
+  id                    String   @id @default(cuid())
+  firstScoopPrice       Int
+  additionalScoopPrice  Int
+  maxScoops             Int      @default(10)
+  maxPreferredItems     Int      @default(3)
+  maxExcludedItems      Int      @default(3)
+  active                Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  shippingRules ScoopShippingRule[]
+}
+
+model ScoopShippingRule {
+  id          String       @id @default(cuid())
+  scoopCount  Int          @unique
+  shipping    Int
+  active      Boolean      @default(true)
+  settingId   String
+  setting     ScoopSetting @relation(fields: [settingId], references: [id], onDelete: Cascade)
+
+  @@index([settingId])
+}
+
+model ScoopColour {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ScoopCharacter {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ScoopItem {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

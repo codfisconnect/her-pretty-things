@@ -1,3 +1,4 @@
+import scoopRoutes from './routes/scoopRoutes.js'
 import 'dotenv/config'
 import cors from 'cors'
 import express from 'express'
@@ -24,6 +25,7 @@ app.use('/api/cart', cartRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/payments', paymentRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/scoop', scoopRoutes)
 app.use(errorHandler)
 
 app.listen(port, () => {

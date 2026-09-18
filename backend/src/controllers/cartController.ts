@@ -9,7 +9,7 @@ function readParam(request: Request, name: string): string {
 }
 
 export async function createCartItem(request: Request, response: Response) {
-  const cart = await addCartItem(readAddCartItemInput(request.body))
+  const cart = await addCartItem(await readAddCartItemInput(request.body))
   response.status(201).json({ success: true, data: cart })
 }
 
@@ -19,7 +19,7 @@ export async function readCart(request: Request, response: Response) {
 }
 
 export async function editCartItem(request: Request, response: Response) {
-  const cart = await updateCartItem(readParam(request, 'itemId'), readUpdateCartItemInput(request.body))
+  const cart = await updateCartItem(readParam(request, 'itemId'), await readUpdateCartItemInput(request.body))
   response.json({ success: true, data: cart })
 }
 
