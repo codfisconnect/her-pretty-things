@@ -1,5 +1,8 @@
 import { Router } from 'express'
-
+import {
+  getAdminScoopConfigController,
+  updateAdminScoopSettingController,
+} from '../controllers/adminScoopController.js'
 import upload from '../middleware/upload.js'
 
 import {
@@ -67,6 +70,22 @@ adminRoutes.delete(
   '/products/:productId',
   requireAdmin,
   deactivateAdminProduct,
+)
+
+/* =========================
+   SCOOP MANAGEMENT
+========================= */
+
+adminRoutes.get(
+  '/scoop/config',
+  requireAdmin,
+  getAdminScoopConfigController,
+)
+
+adminRoutes.put(
+  '/scoop/config',
+  requireAdmin,
+  updateAdminScoopSettingController,
 )
 
 adminRoutes.post('/logout', requireAdmin, adminLogout)

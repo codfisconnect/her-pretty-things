@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import ScoopManagement from "../pages/ScoopManagement/ScoopManagement";
 
 import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
 import AdminNavbar from "../components/AdminNavbar/AdminNavbar";
@@ -82,7 +83,10 @@ function AdminRoutes() {
                     path="products/:productId/edit"
                     element={<EditProduct />}
                   />
-
+                  <Route
+                    path="scoop-management"
+                    element={<ScoopManagement />}
+                  />
                   <Route
                     path="*"
                     element={

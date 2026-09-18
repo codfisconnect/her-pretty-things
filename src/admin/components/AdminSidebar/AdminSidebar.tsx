@@ -4,6 +4,7 @@ import {
 	Package,
 	PackageSearch,
 	Plus,
+	Settings2,
 } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { adminLogout } from '../../../services/adminService'
@@ -40,6 +41,11 @@ function AdminSidebar() {
 				<NavLink to="/admin/products">
 					<Package size={17} />
 					Products
+				</NavLink>
+
+				<NavLink to="/admin/scoop-management">
+					<Settings2 size={17} />
+					Scoop Management
 				</NavLink>
 
 				<NavLink to="/admin/products/add">
