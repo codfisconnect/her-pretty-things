@@ -1,6 +1,25 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getProducts } from '../../services/productService'
+import type { Product } from '../../types/product'
 
 function Jewellery() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    getProducts('jewellery')
+      .then(setProducts)
+      .catch((err) => {
+        console.error(err)
+        setError('Could not load jewellery products.')
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
+
   return (
     <section className="jewellery-page container">
       <div className="jewellery-intro">
@@ -15,159 +34,60 @@ function Jewellery() {
       </div>
 
       <div className="jewellery-product-grid">
+        {loading && <p>Loading jewellery products...</p>}
 
-        {/* Product 1 */}
-        <article className="jewellery-product">
-          <Link
-            to="/product/gold-tone-floral-necklace-earrings-set"
-            className="jewellery-product-image"
-          >
-            <img
-              src="/images/gold-floral-necklace.png"
-              alt="Gold-Tone Floral Necklace & Earrings Set"
-            />
-          </Link>
+        {!loading && error && <p>{error}</p>}
 
-          <div className="jewellery-product-info">
-            <p className="jewellery-product-category">
-              Jewellery
-            </p>
+        {!loading && !error && products.length === 0 && (
+          <p>No jewellery products available.</p>
+        )}
 
-            <h2>
-              <Link to="/product/gold-tone-floral-necklace-earrings-set">
-                Gold-Tone Floral Necklace & Earrings Set
+        {!loading &&
+          !error &&
+          products.map((product) => (
+            <article className="jewellery-product" key={product.id}>
+              <Link
+                to={`/product/${product.id}`}
+                className="jewellery-product-image"
+              >
+                {product.image ? (
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                  />
+                ) : (
+                  <span>No image</span>
+                )}
               </Link>
-            </h2>
 
-            <p className="jewellery-product-price">
-              ₹699
-            </p>
+              <div className="jewellery-product-info">
+                <p className="jewellery-product-category">
+                  {product.category}
+                </p>
 
-            <div className="jewellery-product-badges">
-              <span>Anti-Tarnish</span>
-              <span>Lightweight</span>
-            </div>
+                <h2>
+                  <Link to={`/product/${product.id}`}>
+                    {product.name}
+                  </Link>
+                </h2>
 
-            <button
-              type="button"
-              className="jewellery-view-button"
-            >
-              MAKE IT YOURS
-            </button>
-          </div>
-        </article>
+                <p className="jewellery-product-price">
+                  ₹{product.price}
+                </p>
 
-        {/* Product 2 */}
-<article className="jewellery-product">
-  <Link
-    to="/product/glossy-red-cherry-drop-earrings"
-    className="jewellery-product-image"
-  >
-    <img
-      src="/images/glossy-red-cherry-drop-earrings.png"
-      alt="Glossy Red Cherry Drop Earrings"
-    />
-  </Link>
+                <div className="jewellery-product-badges">
+                  <span>Available</span>
+                </div>
 
-  <div className="jewellery-product-info">
-    <p className="jewellery-product-category">
-      Jewellery
-    </p>
-
-    <h2>
-      <Link to="/product/glossy-red-cherry-drop-earrings">
-        Glossy Red Cherry Drop Earrings
-      </Link>
-    </h2>
-
-    <p className="jewellery-product-price">
-      ₹999
-    </p>
-
-    <div className="jewellery-product-badges">
-      <span>Lightweight</span>
-      <span>Statement Wear</span>
-    </div>
-
-    <button
-      type="button"
-      className="jewellery-view-button"
-    >
-      MAKE IT YOURS
-    </button>
-  </div>
-</article>
-
-        {/* Temporary Product 3 */}
-        <article className="jewellery-product">
-          <div className="jewellery-product-image">
-            <img
-              src="/images/gold-floral-necklace.png"
-              alt="Golden Pearl Bracelet"
-            />
-          </div>
-
-          <div className="jewellery-product-info">
-            <p className="jewellery-product-category">
-              Jewellery
-            </p>
-
-            <h2>
-              Golden Pearl Bracelet
-            </h2>
-
-            <p className="jewellery-product-price">
-              ₹599
-            </p>
-
-            <div className="jewellery-product-badges">
-              <span>Anti-Tarnish</span>
-            </div>
-
-            <button
-              type="button"
-              className="jewellery-view-button"
-            >
-              MAKE IT YOURS
-            </button>
-          </div>
-        </article>
-
-        {/* Temporary Product 4 */}
-        <article className="jewellery-product">
-          <div className="jewellery-product-image">
-            <img
-              src="/images/gold-floral-necklace.png"
-              alt="Everyday Gold-Tone Set"
-            />
-          </div>
-
-          <div className="jewellery-product-info">
-            <p className="jewellery-product-category">
-              Jewellery
-            </p>
-
-            <h2>
-              Everyday Gold-Tone Set
-            </h2>
-
-            <p className="jewellery-product-price">
-              ₹799
-            </p>
-
-            <div className="jewellery-product-badges">
-              <span>Complete Set</span>
-            </div>
-
-            <button
-              type="button"
-              className="jewellery-view-button"
-            >
-              MAKE IT YOURS
-            </button>
-          </div>
-        </article>
-
+                <Link
+                  to={`/product/${product.id}`}
+                  className="jewellery-view-button"
+                >
+                  MAKE IT YOURS
+                </Link>
+              </div>
+            </article>
+          ))}
       </div>
     </section>
   )
