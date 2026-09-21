@@ -1,13 +1,32 @@
 import { Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addCartItem } from "../../services/cartService";
+import { apiRequest } from "../../services/api";
 import ScoopCustomizer from "./ScoopCustomizer";
 import ScoopPriceSummary from "./ScoopPriceSummary";
 import type { ScoopConfiguration } from "./scoopTypes";
 
 function Scoops() {
   const [selectedScoops, setSelectedScoops] = useState<number | "">("");
+  const [scoopImageUrl, setScoopImageUrl] = useState(
+    "/images/Scoop-Board.png",
+  );
+
+  useEffect(() => {
+  apiRequest<{
+    imageUrl: string | null;
+  }>("/scoop/config")
+    .then((config) => {
+      if (config.imageUrl) {
+        setScoopImageUrl(config.imageUrl);
+      }
+    })
+    .catch((error) => {
+      console.error("Could not load Scoop image:", error);
+    });
+}, []);
+
   const navigate = useNavigate();
 
   const handleConfigurationReady = async (
@@ -57,7 +76,7 @@ function Scoops() {
         <div className="scoop-builder-visual">
           <div className="scoop-visual-card">
             <img
-              src="/images/Scoop-Board.png"
+              src={scoopImageUrl}
               alt="Pretty Things Scoop Board"
               className="scoop-board-image"
             />

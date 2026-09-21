@@ -2,6 +2,9 @@ import { Router } from 'express'
 import {
   getAdminScoopConfigController,
   updateAdminScoopSettingController,
+  updateAdminScoopOptionController,
+  createAdminScoopOptionController,
+  deleteAdminScoopOptionController,
 } from '../controllers/adminScoopController.js'
 import upload from '../middleware/upload.js'
 
@@ -16,6 +19,7 @@ import {
   createAdminProduct,
   updateAdminProduct,
   deactivateAdminProduct,
+  uploadAdminScoopImage,
 } from '../controllers/adminController.js'
 
 import { requireAdmin } from '../middleware/adminAuth.js'
@@ -86,6 +90,30 @@ adminRoutes.put(
   '/scoop/config',
   requireAdmin,
   updateAdminScoopSettingController,
+)
+
+adminRoutes.put(
+  '/scoop/options/:type/:id',
+  requireAdmin,
+  updateAdminScoopOptionController,
+)
+
+adminRoutes.post(
+  '/scoop/options',
+  requireAdmin,
+  createAdminScoopOptionController,
+)
+adminRoutes.delete(
+  '/scoop/options/:type/:id',
+  requireAdmin,
+  deleteAdminScoopOptionController,
+)
+
+adminRoutes.post(
+  '/scoop/image',
+  requireAdmin,
+  upload.single('image'),
+  uploadAdminScoopImage,
 )
 
 adminRoutes.post('/logout', requireAdmin, adminLogout)

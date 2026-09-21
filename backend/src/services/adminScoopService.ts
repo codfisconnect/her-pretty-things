@@ -38,6 +38,7 @@ export async function getAdminScoopConfig() {
       maxPreferredItems: setting.maxPreferredItems,
       maxExcludedItems: setting.maxExcludedItems,
       active: setting.active,
+      imageUrl: setting.imageUrl,
     },
 
     shippingRules: setting.shippingRules.map((rule) => ({
@@ -76,6 +77,7 @@ export interface UpdateScoopSettingInput {
   maxScoops: number
   maxPreferredItems: number
   maxExcludedItems: number
+  imageUrl?: string
 }
 
 export async function updateAdminScoopSetting(
@@ -149,6 +151,184 @@ export async function updateAdminScoopSetting(
       maxScoops: input.maxScoops,
       maxPreferredItems: input.maxPreferredItems,
       maxExcludedItems: input.maxExcludedItems,
+      ...(input.imageUrl !== undefined && {
+        imageUrl: input.imageUrl,
+      }),
     },
+  })
+}
+export type ScoopOptionType =
+  | 'colour'
+  | 'character'
+  | 'item'
+
+export interface UpdateScoopOptionInput {
+  type: ScoopOptionType
+  id: string
+  name?: string
+  active?: boolean
+  sortOrder?: number
+}
+
+export async function updateAdminScoopOption(
+  input: UpdateScoopOptionInput,
+) {
+  const database = getDatabase()
+
+  if (!input.id.trim()) {
+    throw new HttpError(400, 'Option ID is required.')
+  }
+
+  if (
+    input.name !== undefined &&
+    input.name.trim().length === 0
+  ) {
+    throw new HttpError(400, 'Option name cannot be empty.')
+  }
+
+  if (
+    input.sortOrder !== undefined &&
+    (!Number.isInteger(input.sortOrder) ||
+      input.sortOrder < 0)
+  ) {
+    throw new HttpError(
+      400,
+      'Sort order must be a valid non-negative number.',
+    )
+  }
+
+  if (input.type === 'colour') {
+    return database.scoopColour.update({
+      where: { id: input.id },
+      data: {
+        ...(input.name !== undefined && {
+          name: input.name.trim(),
+        }),
+        ...(input.active !== undefined && {
+          active: input.active,
+        }),
+        ...(input.sortOrder !== undefined && {
+          sortOrder: input.sortOrder,
+        }),
+      },
+    })
+  }
+
+  if (input.type === 'character') {
+    return database.scoopCharacter.update({
+      where: { id: input.id },
+      data: {
+        ...(input.name !== undefined && {
+          name: input.name.trim(),
+        }),
+        ...(input.active !== undefined && {
+          active: input.active,
+        }),
+        ...(input.sortOrder !== undefined && {
+          sortOrder: input.sortOrder,
+        }),
+      },
+    })
+  }
+
+  return database.scoopItem.update({
+    where: { id: input.id },
+    data: {
+      ...(input.name !== undefined && {
+        name: input.name.trim(),
+      }),
+      ...(input.active !== undefined && {
+        active: input.active,
+      }),
+      ...(input.sortOrder !== undefined && {
+        sortOrder: input.sortOrder,
+      }),
+    },
+  })
+}
+export interface CreateScoopOptionInput {
+  type: ScoopOptionType
+  name: string
+  sortOrder?: number
+}
+
+export async function createAdminScoopOption(
+  input: CreateScoopOptionInput,
+) {
+  const database = getDatabase()
+
+  const name = input.name.trim()
+
+  if (!name) {
+    throw new HttpError(400, 'Option name is required.')
+  }
+
+  const sortOrder =
+    input.sortOrder !== undefined
+      ? input.sortOrder
+      : 0
+
+  if (!Number.isInteger(sortOrder) || sortOrder < 0) {
+    throw new HttpError(
+      400,
+      'Sort order must be a valid non-negative number.',
+    )
+  }
+
+  if (input.type === 'colour') {
+    return database.scoopColour.create({
+      data: {
+        name,
+        active: true,
+        sortOrder,
+      },
+    })
+  }
+
+  if (input.type === 'character') {
+    return database.scoopCharacter.create({
+      data: {
+        name,
+        active: true,
+        sortOrder,
+      },
+    })
+  }
+
+  return database.scoopItem.create({
+    data: {
+      name,
+      active: true,
+      sortOrder,
+    },
+  })
+}
+
+export async function deleteAdminScoopOption(
+  input: {
+    type: ScoopOptionType
+    id: string
+  },
+) {
+  const database = getDatabase()
+
+  if (!input.id.trim()) {
+    throw new HttpError(400, 'Option ID is required.')
+  }
+
+  if (input.type === 'colour') {
+    return database.scoopColour.delete({
+      where: { id: input.id },
+    })
+  }
+
+  if (input.type === 'character') {
+    return database.scoopCharacter.delete({
+      where: { id: input.id },
+    })
+  }
+
+  return database.scoopItem.delete({
+    where: { id: input.id },
   })
 }

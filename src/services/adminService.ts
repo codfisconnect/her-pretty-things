@@ -228,6 +228,7 @@ export interface AdminScoopSetting {
   maxPreferredItems: number
   maxExcludedItems: number
   active: boolean
+  imageUrl: string | null
 }
 
 export interface AdminScoopShippingRule {
@@ -262,9 +263,60 @@ export function updateAdminScoopSetting(input: {
   maxScoops: number
   maxPreferredItems: number
   maxExcludedItems: number
+  imageUrl?: string
 }) {
   return apiRequest('/admin/scoop/config', {
     method: 'PUT',
     body: JSON.stringify(input),
   })
+}
+
+export function uploadAdminScoopImage(file: File) {
+  const formData = new FormData()
+  formData.append('image', file)
+
+  return apiRequest<{ imageUrl: string }>('/admin/scoop/image', {
+    method: 'POST',
+    body: formData,
+  })
+}
+
+export function updateAdminScoopOption(
+  type: 'colour' | 'character' | 'item',
+  id: string,
+  input: {
+    name?: string
+    active?: boolean
+    sortOrder?: number
+  },
+) {
+  return apiRequest(
+    `/admin/scoop/options/${type}/${id}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    },
+  )
+}
+export function createAdminScoopOption(input: {
+  type: 'colour' | 'character' | 'item'
+  name: string
+  sortOrder?: number
+}) {
+  return apiRequest<AdminScoopOption>('/admin/scoop/options', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
+export function deleteAdminScoopOption(
+  type: 'colour' | 'character' | 'item',
+  id: string,
+) {
+  return apiRequest(
+    `/admin/scoop/options/${type}/${id}`,
+    {
+      method: 'DELETE',
+    },
+  )
 }

@@ -1374,6 +1374,15 @@
   padding: 28px;
   position: relative;
 }
+
+.scoop-visual-card .scoop-board-image {
+  display: block;
+  width: 100%;
+  height: 329px;
+  object-fit: contain;
+  object-position: center;
+}
+
 .scoop-visual-card::before,
 .scoop-visual-card::after {
   border: 1px solid rgba(255, 255, 255, 0.55);

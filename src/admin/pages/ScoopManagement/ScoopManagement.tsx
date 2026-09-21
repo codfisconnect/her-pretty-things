@@ -1,7 +1,12 @@
+import './ScoopManagement.css'
 import { useEffect, useState } from 'react'
 import {
   getAdminScoopConfig,
+  updateAdminScoopOption,
   updateAdminScoopSetting,
+  uploadAdminScoopImage,
+  createAdminScoopOption,
+  deleteAdminScoopOption,
 } from '../../../services/adminService'
 import type {
   AdminScoopConfig,
@@ -20,6 +25,17 @@ function ScoopManagement() {
   const [maxScoops, setMaxScoops] = useState('')
   const [maxPreferredItems, setMaxPreferredItems] = useState('')
   const [maxExcludedItems, setMaxExcludedItems] = useState('')
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [imageMessage, setImageMessage] = useState('')
+
+  const [addingOptionType, setAddingOptionType] = useState<
+    'colour' | 'character' | 'item' | null
+  >(null)
+
+  const [newOptionName, setNewOptionName] = useState('')
+  const [addingOption, setAddingOption] = useState(false)
+
+
 
   useEffect(() => {
     getAdminScoopConfig()
@@ -45,6 +61,7 @@ function ScoopManagement() {
         setMaxExcludedItems(
           String(data.setting.maxExcludedItems),
         )
+        setImageMessage('')
       })
       .catch((error) => {
         console.error(
@@ -60,6 +77,43 @@ function ScoopManagement() {
         setLoading(false)
       })
   }, [])
+
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0]
+
+    if (!file) {
+      return
+    }
+
+    setUploadingImage(true)
+    setImageMessage('')
+
+    try {
+      const result = await uploadAdminScoopImage(file)
+
+      await updateAdminScoopSetting({
+        firstScoopPrice: Number(firstScoopPrice),
+        additionalScoopPrice: Number(additionalScoopPrice),
+        maxScoops: Number(maxScoops),
+        maxPreferredItems: Number(maxPreferredItems),
+        maxExcludedItems: Number(maxExcludedItems),
+        imageUrl: result.imageUrl,
+      })
+
+      const updatedConfig = await getAdminScoopConfig()
+      setConfig(updatedConfig)
+
+      setImageMessage('Scoop image uploaded successfully.')
+    } catch (error) {
+      console.error('Could not upload Scoop image:', error)
+      setImageMessage('Could not upload Scoop image.')
+    } finally {
+      setUploadingImage(false)
+      event.target.value = ''
+    }
+  }
 
   const handleSaveSettings = async () => {
     setMessage('')
@@ -157,8 +211,100 @@ function ScoopManagement() {
     }
   }
 
+  const handleOptionToggle = async (
+    type: 'colour' | 'character' | 'item',
+    option: AdminScoopOption,
+  ) => {
+    try {
+      setError('')
+
+      await updateAdminScoopOption(type, option.id, {
+        active: !option.active,
+      })
+
+      const refreshedConfig = await getAdminScoopConfig()
+      setConfig(refreshedConfig)
+    } catch (error) {
+      console.error('Could not update Scoop option:', error)
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Could not update Scoop option.',
+      )
+    }
+  }
+
+  const handleDeleteOption = async (
+    type: 'colour' | 'character' | 'item',
+    option: AdminScoopOption,
+  ) => {
+    const confirmed = window.confirm(
+      `Delete "${option.name}"? This cannot be undone.`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      setError('')
+      setMessage('')
+
+      await deleteAdminScoopOption(type, option.id)
+
+      const refreshedConfig = await getAdminScoopConfig()
+      setConfig(refreshedConfig)
+
+      setMessage('Scoop option deleted successfully.')
+    } catch (error) {
+      console.error('Could not delete Scoop option:', error)
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Could not delete Scoop option.',
+      )
+    }
+  }
+
+  const handleAddOption = async () => {
+    if (!addingOptionType || !newOptionName.trim()) {
+      return
+    }
+
+    try {
+      setAddingOption(true)
+      setError('')
+      setMessage('')
+
+      await createAdminScoopOption({
+        type: addingOptionType,
+        name: newOptionName.trim(),
+      })
+
+      const refreshedConfig = await getAdminScoopConfig()
+      setConfig(refreshedConfig)
+
+      setNewOptionName('')
+      setAddingOptionType(null)
+      setMessage('Scoop option added successfully.')
+    } catch (error) {
+      console.error('Could not add Scoop option:', error)
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Could not add Scoop option.',
+      )
+    } finally {
+      setAddingOption(false)
+    }
+  }
+
   const renderOptions = (
     title: string,
+    type: 'colour' | 'character' | 'item',
     options: AdminScoopOption[],
   ) => (
     <section className="admin-scoop-section">
@@ -173,7 +319,58 @@ function ScoopManagement() {
               : 'options'}
           </p>
         </div>
+
+        <button
+          type="button"
+          className="admin-scoop-add-button"
+          onClick={() => {
+            setAddingOptionType(type)
+            setNewOptionName('')
+            setError('')
+            setMessage('')
+          }}
+        >
+          + Add
+        </button>
       </div>
+
+      {addingOptionType === type && (
+        <div className="admin-scoop-add-form">
+          <input
+            type="text"
+            value={newOptionName}
+            onChange={(event) =>
+              setNewOptionName(event.target.value)
+            }
+            placeholder={`Enter ${title.slice(0, -1).toLowerCase()} name`}
+            autoFocus
+          />
+
+          <button
+            type="button"
+            className="admin-scoop-save-button"
+            onClick={handleAddOption}
+            disabled={
+              addingOption ||
+              !newOptionName.trim()
+            }
+          >
+            {addingOption ? 'Adding...' : 'Add'}
+          </button>
+
+          <button
+            type="button"
+            className="admin-scoop-cancel-button"
+            onClick={() => {
+              setAddingOptionType(null)
+              setNewOptionName('')
+            }}
+            disabled={addingOption}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
 
       <div className="admin-scoop-options">
         {options.map((option) => (
@@ -189,17 +386,37 @@ function ScoopManagement() {
               </span>
             </div>
 
-            <span
+            <button
+              type="button"
               className={
                 option.active
-                  ? 'admin-scoop-status active'
-                  : 'admin-scoop-status inactive'
+                  ? 'admin-scoop-toggle active'
+                  : 'admin-scoop-toggle'
               }
+              onClick={() =>
+                handleOptionToggle(type, option)
+              }
+              aria-pressed={option.active}
             >
-              {option.active
-                ? 'Active'
-                : 'Inactive'}
-            </span>
+              <span className="admin-scoop-toggle-track">
+                <span className="admin-scoop-toggle-thumb" />
+              </span>
+
+              <span>
+                {option.active
+                  ? 'Active'
+                  : 'Inactive'}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              className="admin-scoop-delete-button"
+              onClick={() => handleDeleteOption(type, option)}
+            >
+              Delete
+            </button>
+
           </div>
         ))}
       </div>
@@ -253,6 +470,44 @@ function ScoopManagement() {
         </div>
       </div>
 
+      <section className="scoop-management-section">
+        <div className="scoop-management-section-header">
+          <div>
+            <h2>Scoop Image</h2>
+            <p>
+              Upload the image displayed for Mystery Scoop in the admin product list.
+            </p>
+          </div>
+        </div>
+
+        {config?.setting.imageUrl && (
+          <div className="scoop-image-preview">
+            <img
+              src={config.setting.imageUrl}
+              alt="Mystery Scoop"
+            />
+          </div>
+        )}
+
+        <label className="scoop-image-upload">
+          <span>
+            {uploadingImage ? 'Uploading...' : 'Choose Image'}
+          </span>
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            disabled={uploadingImage}
+          />
+        </label>
+
+        {imageMessage && (
+          <p className="scoop-image-message">
+            {imageMessage}
+          </p>
+        )}
+      </section>
       <section className="admin-scoop-section">
         <div className="admin-scoop-section-header">
           <div>
@@ -439,16 +694,19 @@ function ScoopManagement() {
 
       {renderOptions(
         'Colours',
+        'colour',
         config.colours,
       )}
 
       {renderOptions(
         'Characters',
+        'character',
         config.characters,
       )}
 
       {renderOptions(
         'Scoop Items',
+        'item',
         config.items,
       )}
     </div>

@@ -1,5 +1,6 @@
 import "./Products.css";
 import { useEffect, useState } from "react";
+import { getAdminScoopConfig } from "../../../services/adminService";
 import { Link } from "react-router-dom";
 import { Plus, ChevronRight } from "lucide-react";
 import { getProducts } from "../../../services/productService";
@@ -22,12 +23,16 @@ const categories = [
 
 function Products() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [scoopConfig, setScoopConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    getProducts()
-      .then(setProducts)
+    Promise.all([getProducts(), getAdminScoopConfig()])
+      .then(([productData, scoopData]) => {
+        setProducts(productData);
+        setScoopConfig(scoopData);
+      })
       .catch((error) => {
         console.error("Could not load products:", error);
         setMessage("Could not load products.");
@@ -83,10 +88,13 @@ function Products() {
 
       <div className="product-category-sections">
         {categories.map((category) => {
-          const categoryProducts = products.filter(
-            (product) =>
-              product.category.toLowerCase() === category.key
-          );
+          const categoryProducts =
+            category.key === "scoops"
+              ? []
+              : products.filter(
+                (product) =>
+                  product.category.toLowerCase() === category.key
+              );
 
           const visibleProducts =
             categoryProducts.slice(0, 5);
@@ -101,10 +109,14 @@ function Products() {
                   <h2>{category.title}</h2>
 
                   <span>
-                    {categoryProducts.length}{" "}
-                    {categoryProducts.length === 1
-                      ? "product"
-                      : "products"}
+                    {category.key === "scoops"
+                      ? scoopConfig
+                        ? "1 product"
+                        : "0 products"
+                      : `${categoryProducts.length} ${categoryProducts.length === 1
+                        ? "product"
+                        : "products"
+                      }`}
                   </span>
                 </div>
 
@@ -119,7 +131,34 @@ function Products() {
                 )}
               </div>
 
-              {visibleProducts.length > 0 ? (
+              {category.key === "scoops" ? (
+                <div className="admin-product-grid">
+                  {scoopConfig && (
+                    <Link
+                      to="/admin/scoop-management"
+                      className="admin-product-tile"
+                    >
+                      <div className="admin-product-tile-image">
+                        <span>Mystery Scoop</span>
+                      </div>
+
+                      <div className="admin-product-tile-info">
+                        <h3>Mystery Scoop</h3>
+
+                        <div className="admin-product-tile-meta">
+                          <strong>
+                            ₹{scoopConfig.firstScoopPrice}
+                          </strong>
+
+                          <span>
+                            Additional: ₹{scoopConfig.additionalScoopPrice}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  )}
+                </div>
+              ) : visibleProducts.length > 0 ? (
                 <div className="admin-product-grid">
                   {visibleProducts.map((product) => (
                     <Link

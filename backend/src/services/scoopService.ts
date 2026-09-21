@@ -57,6 +57,7 @@ export async function getScoopConfig() {
       firstScoop: setting.firstScoopPrice,
       additionalScoop: setting.additionalScoopPrice,
     },
+    imageUrl: setting.imageUrl,
 
     limits: {
       maxScoops: setting.maxScoops,

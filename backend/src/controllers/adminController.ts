@@ -156,3 +156,26 @@ export async function deactivateAdminProduct(
     data: product,
   })
 }
+
+export async function uploadAdminScoopImage(
+  request: Request,
+  response: Response,
+) {
+  const uploadedImage = request.file
+
+  if (!uploadedImage) {
+    throw new HttpError(400, 'Scoop image is required.')
+  }
+
+  const cloudinaryResult = await uploadProductImage(
+    uploadedImage.buffer,
+    uploadedImage.originalname,
+  )
+
+  response.json({
+    success: true,
+    data: {
+      imageUrl: cloudinaryResult.secure_url,
+    },
+  })
+}
