@@ -1,6 +1,28 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { getProducts } from '../../services/productService'
+import ProductGrid from '../../components/ProductGrid/ProductGrid'
+import type { Product } from '../../types/product'
 
 function Jewellery() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    getProducts('jewellery')
+      .then((data) => {
+        setProducts(data)
+        setError('')
+      })
+      .catch((error) => {
+        console.error('Could not load Jewellery products:', error)
+        setError('Could not load Jewellery products.')
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
+
   return (
     <section className="jewellery-page container">
       <div className="jewellery-intro">
@@ -14,161 +36,21 @@ function Jewellery() {
         </p>
       </div>
 
-      <div className="jewellery-product-grid">
+      {loading && (
+        <p>Loading Jewellery products...</p>
+      )}
 
-        {/* Product 1 */}
-        <article className="jewellery-product">
-          <Link
-            to="/product/gold-tone-floral-necklace-earrings-set"
-            className="jewellery-product-image"
-          >
-            <img
-              src="/images/gold-floral-necklace.png"
-              alt="Gold-Tone Floral Necklace & Earrings Set"
-            />
-          </Link>
+      {!loading && error && (
+        <p>{error}</p>
+      )}
 
-          <div className="jewellery-product-info">
-            <p className="jewellery-product-category">
-              Jewellery
-            </p>
+      {!loading && !error && products.length === 0 && (
+        <p>No Jewellery products found.</p>
+      )}
 
-            <h2>
-              <Link to="/product/gold-tone-floral-necklace-earrings-set">
-                Gold-Tone Floral Necklace & Earrings Set
-              </Link>
-            </h2>
-
-            <p className="jewellery-product-price">
-              ₹699
-            </p>
-
-            <div className="jewellery-product-badges">
-              <span>Anti-Tarnish</span>
-              <span>Lightweight</span>
-            </div>
-
-            <button
-              type="button"
-              className="jewellery-view-button"
-            >
-              MAKE IT YOURS
-            </button>
-          </div>
-        </article>
-
-        {/* Product 2 */}
-<article className="jewellery-product">
-  <Link
-    to="/product/glossy-red-cherry-drop-earrings"
-    className="jewellery-product-image"
-  >
-    <img
-      src="/images/glossy-red-cherry-drop-earrings.png"
-      alt="Glossy Red Cherry Drop Earrings"
-    />
-  </Link>
-
-  <div className="jewellery-product-info">
-    <p className="jewellery-product-category">
-      Jewellery
-    </p>
-
-    <h2>
-      <Link to="/product/glossy-red-cherry-drop-earrings">
-        Glossy Red Cherry Drop Earrings
-      </Link>
-    </h2>
-
-    <p className="jewellery-product-price">
-      ₹999
-    </p>
-
-    <div className="jewellery-product-badges">
-      <span>Lightweight</span>
-      <span>Statement Wear</span>
-    </div>
-
-    <button
-      type="button"
-      className="jewellery-view-button"
-    >
-      MAKE IT YOURS
-    </button>
-  </div>
-</article>
-
-        {/* Temporary Product 3 */}
-        <article className="jewellery-product">
-          <div className="jewellery-product-image">
-            <img
-              src="/images/gold-floral-necklace.png"
-              alt="Golden Pearl Bracelet"
-            />
-          </div>
-
-          <div className="jewellery-product-info">
-            <p className="jewellery-product-category">
-              Jewellery
-            </p>
-
-            <h2>
-              Golden Pearl Bracelet
-            </h2>
-
-            <p className="jewellery-product-price">
-              ₹599
-            </p>
-
-            <div className="jewellery-product-badges">
-              <span>Anti-Tarnish</span>
-            </div>
-
-            <button
-              type="button"
-              className="jewellery-view-button"
-            >
-              MAKE IT YOURS
-            </button>
-          </div>
-        </article>
-
-        {/* Temporary Product 4 */}
-        <article className="jewellery-product">
-          <div className="jewellery-product-image">
-            <img
-              src="/images/gold-floral-necklace.png"
-              alt="Everyday Gold-Tone Set"
-            />
-          </div>
-
-          <div className="jewellery-product-info">
-            <p className="jewellery-product-category">
-              Jewellery
-            </p>
-
-            <h2>
-              Everyday Gold-Tone Set
-            </h2>
-
-            <p className="jewellery-product-price">
-              ₹799
-            </p>
-
-            <div className="jewellery-product-badges">
-              <span>Complete Set</span>
-            </div>
-
-            <button
-              type="button"
-              className="jewellery-view-button"
-            >
-              MAKE IT YOURS
-            </button>
-          </div>
-        </article>
-
-      </div>
+      {!loading && !error && products.length > 0 && (
+        <ProductGrid products={products} />
+      )}
     </section>
   )
 }

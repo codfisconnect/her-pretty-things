@@ -10,18 +10,24 @@ function ProductDetails() {
 
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState<Product | null>(null);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
 
     setLoading(true);
+    setError("");
 
     getProductById(id)
-      .then(setProduct)
+      .then((data) => {
+        setProduct(data);
+        setError("");
+      })
       .catch((error) => {
         console.error("Could not load product:", error);
         setProduct(null);
+        setError("Could not load product. Please try again.");
       })
       .finally(() => {
         setLoading(false);
@@ -57,13 +63,27 @@ function ProductDetails() {
     );
   }
 
+  if (error) {
+    return (
+      <main className="product-details-page container">
+        <h1>Unable to load product</h1>
+
+        <p>{error}</p>
+
+        <Link to="/jewellery" className="product-back-link">
+          ← Back to Jewellery
+        </Link>
+      </main>
+    );
+  }
+
   if (!product) {
     return (
       <main className="product-details-page container">
         <h1>Product not found</h1>
 
-        <Link to="/kawaii" className="product-back-link">
-          ← Back to Kawaii
+        <Link to="/jewellery" className="product-back-link">
+          ← Back to Jewellery
         </Link>
       </main>
     );
@@ -156,9 +176,7 @@ function ProductDetails() {
             <section>
               <h2>Product Details</h2>
 
-              <p>
-                {product.description}
-              </p>
+              <p>{product.description}</p>
             </section>
 
             <section>

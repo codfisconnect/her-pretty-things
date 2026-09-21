@@ -1,16 +1,25 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { getProducts } from '../../services/productService'
+import ProductGrid from '../../components/ProductGrid/ProductGrid'
 import type { Product } from '../../types/product'
 
 function Kawaii() {
   const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     getProducts('kawaii')
-      .then(setProducts)
+      .then((data) => {
+        setProducts(data)
+        setError('')
+      })
       .catch((error) => {
         console.error('Could not load Kawaii products:', error)
+        setError('Could not load Kawaii products.')
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }, [])
 
@@ -27,55 +36,21 @@ function Kawaii() {
         </p>
       </div>
 
-      <div className="jewellery-product-grid">
-        {products.map((product) => (
-          <article
-            className="jewellery-product"
-            key={product.id}
-          >
-            <Link
-              to={`/product/${product.id}`}
-              className="jewellery-product-image"
-            >
-              {product.image ? (
-                <img
-                  src={product.image}
-                  alt={product.name}
-                />
-              ) : (
-                <div>No image available</div>
-              )}
-            </Link>
+      {loading && (
+        <p>Loading Kawaii products...</p>
+      )}
 
-            <div className="jewellery-product-info">
-              <p className="jewellery-product-category">
-                Kawaii
-              </p>
+      {!loading && error && (
+        <p>{error}</p>
+      )}
 
-              <h2>
-                <Link to={`/product/${product.id}`}>
-                  {product.name}
-                </Link>
-              </h2>
+      {!loading && !error && products.length === 0 && (
+        <p>No Kawaii products found.</p>
+      )}
 
-              <p className="jewellery-product-price">
-                ₹{product.price}
-              </p>
-
-              <div className="jewellery-product-badges">
-                <span>Kawaii</span>
-              </div>
-
-              <Link
-                to={`/product/${product.id}`}
-                className="jewellery-view-button"
-              >
-                MAKE IT YOURS
-              </Link>
-            </div>
-          </article>
-        ))}
-      </div>
+      {!loading && !error && products.length > 0 && (
+        <ProductGrid products={products} />
+      )}
     </section>
   )
 }

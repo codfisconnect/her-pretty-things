@@ -1,21 +1,21 @@
 import { Link } from 'react-router-dom'
 
-function Contact() {
+function Returns() {
   return (
     <main className="container">
       <section className="jewellery-page">
         <div className="jewellery-intro">
           <p className="eyebrow">Customer Care</p>
 
-          <h1>Contact Us</h1>
+          <h1>Returns</h1>
 
           <p>
-            Have a question about your order or our products?
-            We would love to hear from you.
+            If you have any issue with your order, please contact us
+            and our team will help you.
           </p>
 
           <p>
-            Email us at{' '}
+            For return-related questions, email us at{' '}
             <a href="mailto:shop.herprettythings@gmail.com">
               shop.herprettythings@gmail.com
             </a>
@@ -30,4 +30,4 @@ function Contact() {
   )
 }
 
-export default Contact
+export default Returns

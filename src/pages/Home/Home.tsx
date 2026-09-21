@@ -36,30 +36,45 @@ const categories: Category[] = [
 ];
 
 function Home() {
+  const [scoopProducts, setScoopProducts] = useState<Product[]>([]);
   const [jewelleryProducts, setJewelleryProducts] = useState<Product[]>([]);
   const [kawaiiProducts, setKawaiiProducts] = useState<Product[]>([]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     async function loadProducts() {
       try {
-        const [jewellery, kawaii] = await Promise.all([
+        setLoading(true);
+        setError(false);
+
+        const [scoops, jewellery, kawaii] = await Promise.all([
+          getProducts("scoops"),
           getProducts("jewellery"),
           getProducts("kawaii"),
         ]);
 
+        setScoopProducts(scoops);
         setJewelleryProducts(jewellery);
         setKawaiiProducts(kawaii);
       } catch (error) {
         console.error("Could not load homepage products:", error);
+        setError(true);
+      } finally {
+        setLoading(false);
       }
     }
 
     loadProducts();
   }, []);
 
+  const oneScoop = scoopProducts[0];
+
   return (
     <>
       <Hero />
+
       <main>
         <section className="section container category-section">
           <div className="section-heading">
@@ -67,10 +82,12 @@ function Home() {
               <p className="eyebrow">Made to make you smile</p>
               <h2>Shop Your Pretty Picks</h2>
             </div>
+
             <Link className="text-link desktop-link" to="/scoops">
               View all <ArrowRight size={16} />
             </Link>
           </div>
+
           <div className="category-grid">
             {categories.map((category) => (
               <CategoryCard key={category.name} category={category} />
@@ -87,19 +104,62 @@ function Home() {
                 </p>
                 <h2>Pretty Picks For You</h2>
               </div>
+
               <Link className="text-link desktop-link" to="/scoops">
                 Shop everything <ArrowRight size={16} />
               </Link>
             </div>
-            <div className="product-grid">
-              {jewelleryProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
 
-              {kawaiiProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            {loading && (
+              <div className="product-grid">
+                <p>Loading pretty picks...</p>
+              </div>
+            )}
+
+            {!loading && error && (
+              <div className="product-grid">
+                <p>Could not load products. Please try again.</p>
+              </div>
+            )}
+
+            {!loading && !error && (
+              <>
+                {/* First row: exactly one Scoop + Jewellery */}
+                <div className="product-grid">
+                  {oneScoop && (
+                    <ProductCard
+                      key={oneScoop.id}
+                      product={oneScoop}
+                    />
+                  )}
+
+                  {jewelleryProducts.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                    />
+                  ))}
+                </div>
+
+                {/* Second row: Kawaii only */}
+                {kawaiiProducts.length > 0 && (
+                  <div className="product-grid">
+                    {kawaiiProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {!oneScoop &&
+                  jewelleryProducts.length === 0 &&
+                  kawaiiProducts.length === 0 && (
+                    <p>No products available right now.</p>
+                  )}
+              </>
+            )}
           </div>
         </section>
 
@@ -112,18 +172,23 @@ function Home() {
               <br />
               with <span>♡</span>
             </div>
+
             <div className="story-flower">✿</div>
             <div className="story-bow">⌁</div>
           </div>
+
           <div className="story-copy">
             <p className="eyebrow">A little about us</p>
+
             <h2>A Little About Her Pretty Things</h2>
+
             <p>
               Her Pretty Things is a tiny corner of the internet filled with
               cute surprises, pretty jewellery, and Kawaii finds. Every piece is
               chosen to add a little sparkle to your day and make gifting feel
               extra lovely.
             </p>
+
             <Link className="button button-outline" to="/about">
               Know Our Story <ChevronRight size={17} />
             </Link>

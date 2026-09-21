@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Heart, Menu, Search, ShoppingBag, X } from 'lucide-react'
 import { NavLink, Link } from 'react-router-dom'
 import { getCart } from '../../services/cartService'
+import { jewelleryProducts } from '../../data/jewelleryProducts'
 
 const navigation = [
   { label: 'Home', to: '/' },
@@ -13,6 +14,8 @@ const navigation = [
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const [cartCount, setCartCount] = useState(0)
 
   useEffect(() => {
@@ -41,13 +44,34 @@ function Navbar() {
     loadCartCount()
   }, [])
 
+  const query = searchQuery.toLowerCase().trim()
+
+  const filteredProducts = jewelleryProducts.filter((product) => {
+    if (!query) return false
+
+    return (
+      product.name.toLowerCase().includes(query) ||
+      product.category.toLowerCase().includes(query)
+    )
+  })
+
   return (
     <header className="site-header">
+
       <div className="announcement-bar">
-        🇮🇳 PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped
+        <div className="announcement-track">
+          <div className="announcement-content">
+            IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped
+          </div>
+
+          <div className="announcement-content">
+            IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped
+          </div>
+        </div>
       </div>
 
       <div className="nav-wrap container">
+
         <Link
           className="brand"
           to="/"
@@ -56,6 +80,58 @@ function Navbar() {
           <span className="brand-mark">✦</span>
           <span>Her Pretty Things</span>
         </Link>
+
+        {isSearchOpen && (
+          <div className="search-bar">
+
+            <input
+              type="text"
+              placeholder="Search pretty things..."
+              autoFocus
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+            />
+
+            {searchQuery.trim() && (
+              <div className="search-results">
+
+                {filteredProducts.length > 0 ? (
+
+                  filteredProducts.map((product) => (
+                    <Link
+                      key={product.id}
+                      to={`/product/${product.id}`}
+                      className="search-result-item"
+                      onClick={() => setIsSearchOpen(false)}
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                      />
+
+                      <div>
+                        <strong>{product.name}</strong>
+
+                        <span>
+                          ₹{product.price.toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    </Link>
+                  ))
+
+                ) : (
+
+                  <p className="search-no-results">
+                    No products found.
+                  </p>
+
+                )}
+
+              </div>
+            )}
+
+          </div>
+        )}
 
         <nav
           className={`main-nav ${isMenuOpen ? 'is-open' : ''}`}
@@ -76,10 +152,12 @@ function Navbar() {
         </nav>
 
         <div className="nav-actions">
+
           <button
             className="icon-button"
             type="button"
             aria-label="Search"
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
           >
             <Search size={19} strokeWidth={1.8} />
           </button>
@@ -118,7 +196,9 @@ function Navbar() {
               <Menu size={21} />
             )}
           </button>
+
         </div>
+
       </div>
     </header>
   )

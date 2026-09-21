@@ -52,6 +52,7 @@ function Hero() {
           </div>
         </div>
 
+        
         <div className="hero-art">
           <div className="hero-slideshow">
             <img src={heroImages[currentSlide]} alt="Pretty Things Scoops" />
