@@ -12,6 +12,8 @@ function ProductDetails() {
   const [product, setProduct] = useState<Product | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [showAllImages, setShowAllImages] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -95,12 +97,47 @@ function ProductDetails() {
     <main className="product-details-page container">
       <div className="product-details">
         <div className="product-details-gallery">
-          <div className="product-details-main-image">
-            {product.image ? (
-              <img src={product.image} alt={product.name} />
-            ) : (
-              <div>No image available</div>
-            )}
+          <div className="product-details-image-layout">
+            <div className="product-details-thumbnails">
+              {product.images.slice(0, 3).map((image, index) => (
+                <button
+                  key={image}
+                  type="button"
+                  className={`product-details-thumbnail ${selectedImage === index ? "active" : ""
+                    }`}
+                  onClick={() => setSelectedImage(index)}
+                >
+                  <img
+                    src={image}
+                    alt={`${product.name} ${index + 1}`}
+                  />
+                </button>
+              ))}
+
+              {product.images.length > 3 && (
+                <button
+                  type="button"
+                  className="product-details-see-all"
+                  onClick={() => setShowAllImages(true)}
+                >
+                  <span>+{product.images.length - 3}</span>
+                  <small>See All</small>
+                </button>
+              )}
+            </div>
+
+            <div className="product-details-main-image">
+              {product.images[selectedImage] ? (
+                <img
+                  src={product.images[selectedImage]}
+                  alt={product.name}
+                />
+              ) : product.image ? (
+                <img src={product.image} alt={product.name} />
+              ) : (
+                <div>No image available</div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -213,6 +250,45 @@ function ProductDetails() {
           </Link>
         </div>
       </div>
+      {showAllImages && (
+        <div
+          className="product-image-modal"
+          onClick={() => setShowAllImages(false)}
+        >
+          <div
+            className="product-image-modal-content"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="product-image-modal-close"
+              onClick={() => setShowAllImages(false)}
+              aria-label="Close gallery"
+            >
+              ×
+            </button>
+
+            <div className="product-image-modal-grid">
+              {product.images.map((image, index) => (
+                <button
+                  key={image}
+                  type="button"
+                  className="product-image-modal-item"
+                  onClick={() => {
+                    setSelectedImage(index)
+                    setShowAllImages(false)
+                  }}
+                >
+                  <img
+                    src={image}
+                    alt={`${product.name} ${index + 1}`}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

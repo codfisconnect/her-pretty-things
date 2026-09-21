@@ -36,13 +36,9 @@ function Jewellery() {
         </p>
       </div>
 
-      {loading && (
-        <p>Loading Jewellery products...</p>
-      )}
+      {loading && <p>Loading Jewellery products...</p>}
 
-      {!loading && error && (
-        <p>{error}</p>
-      )}
+      {!loading && error && <p>{error}</p>}
 
       {!loading && !error && products.length === 0 && (
         <p>No Jewellery products found.</p>

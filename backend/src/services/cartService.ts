@@ -1,7 +1,7 @@
 import type { CartItem, Prisma } from "@prisma/client";
 import { getDatabase } from "../config/database.js";
 import { HttpError } from "../middleware/errorHandler.js";
-import { calculateScoopPrice } from "../utils/pricing.js";
+import { getScoopConfig } from "./scoopService.js";
 
 const cartInclude = {
   items: { include: { product: { include: { images: true } } } },
@@ -11,6 +11,7 @@ type CartWithItems = Prisma.CartGetPayload<{ include: typeof cartInclude }>;
 
 export interface ScoopConfigurationInput {
   numberOfScoops: number;
+  age: number;
   colourTheme?: string;
   preferredCharacter?: string;
   preferredItems?: string[];
@@ -42,7 +43,9 @@ function readStringArray(value: unknown, fieldName: string): string[] {
   return value;
 }
 
-export function readAddCartItemInput(value: unknown): AddCartItemInput {
+export async function readAddCartItemInput(
+  value: unknown,
+): Promise<AddCartItemInput> {
   if (!isRecord(value))
     throw new HttpError(400, "Cart item payload must be an object.");
   const scoopConfiguration = value.scoopConfiguration;
@@ -57,11 +60,13 @@ export function readAddCartItemInput(value: unknown): AddCartItemInput {
     scoopConfiguration:
       scoopConfiguration === undefined
         ? undefined
-        : readScoopConfiguration(scoopConfiguration),
+        : await readScoopConfiguration(scoopConfiguration),
   };
 }
 
-export function readUpdateCartItemInput(value: unknown): UpdateCartItemInput {
+export async function readUpdateCartItemInput(
+  value: unknown,
+): Promise<UpdateCartItemInput> {
   if (!isRecord(value))
     throw new HttpError(400, "Cart item update payload must be an object.");
   return {
@@ -70,64 +75,110 @@ export function readUpdateCartItemInput(value: unknown): UpdateCartItemInput {
     scoopConfiguration:
       value.scoopConfiguration === undefined
         ? undefined
-        : readScoopConfiguration(value.scoopConfiguration),
+        : await readScoopConfiguration(value.scoopConfiguration),
   };
 }
 
-function readScoopConfiguration(value: unknown): ScoopConfigurationInput {
-  if (!isRecord(value))
+async function readScoopConfiguration(
+  value: unknown,
+): Promise<ScoopConfigurationInput> {
+  if (!isRecord(value)) {
     throw new HttpError(400, "scoopConfiguration must be an object.");
+  }
+
+  const scoopConfig = await getScoopConfig();
+
   const numberOfScoops = value.numberOfScoops;
+
   if (
     typeof numberOfScoops !== "number" ||
     !Number.isInteger(numberOfScoops) ||
     numberOfScoops < 1 ||
-    numberOfScoops > 10
+    numberOfScoops > scoopConfig.limits.maxScoops
   ) {
     throw new HttpError(
       400,
-      "numberOfScoops must be an integer between 1 and 10.",
+      `numberOfScoops must be an integer between 1 and ${scoopConfig.limits.maxScoops}.`,
     );
   }
+
+  const age = value.age;
+
+  if (
+    typeof age !== "number" ||
+    !Number.isInteger(age) ||
+    age < 1 ||
+    age > 100
+  ) {
+    throw new HttpError(
+      400,
+      "age must be an integer between 1 and 100.",
+    );
+  }
+
   const preferredItems = readStringArray(
     value.preferredItems,
     "preferredItems",
   );
-  const excludedItems = readStringArray(value.excludedItems, "excludedItems");
-  if (preferredItems.length > 3)
+
+  const excludedItems = readStringArray(
+    value.excludedItems,
+    "excludedItems",
+  );
+
+  if (
+    preferredItems.length > scoopConfig.limits.maxPreferredItems
+  ) {
     throw new HttpError(
       400,
-      "preferredItems cannot contain more than 3 items.",
+      `preferredItems cannot contain more than ${scoopConfig.limits.maxPreferredItems} items.`,
     );
-  if (excludedItems.length > 3)
-    throw new HttpError(400, "excludedItems cannot contain more than 3 items.");
+  }
+
+  if (
+    excludedItems.length > scoopConfig.limits.maxExcludedItems
+  ) {
+    throw new HttpError(
+      400,
+      `excludedItems cannot contain more than ${scoopConfig.limits.maxExcludedItems} items.`,
+    );
+  }
+
   if (
     new Set(preferredItems).size !== preferredItems.length ||
     new Set(excludedItems).size !== excludedItems.length
-  )
+  ) {
     throw new HttpError(
       400,
       "Scoop item preferences cannot contain duplicates.",
     );
-  if (preferredItems.some((item) => excludedItems.includes(item)))
+  }
+
+  if (preferredItems.some((item) => excludedItems.includes(item))) {
     throw new HttpError(
       400,
       "preferredItems and excludedItems cannot overlap.",
     );
+  }
+
   if (
     value.additionalMessage !== undefined &&
     (typeof value.additionalMessage !== "string" ||
       value.additionalMessage.length > 300)
-  )
+  ) {
     throw new HttpError(
       400,
       "additionalMessage must be 300 characters or fewer.",
     );
+  }
 
   return {
     numberOfScoops,
+    age,
     colourTheme:
-      typeof value.colourTheme === "string" ? value.colourTheme : undefined,
+      typeof value.colourTheme === "string"
+        ? value.colourTheme
+        : undefined,
     preferredCharacter:
       typeof value.preferredCharacter === "string"
         ? value.preferredCharacter
@@ -148,7 +199,7 @@ function validateQuantity(quantity: number | undefined): number {
   return quantity;
 }
 
-function calculateCartShipping(items: CartWithItems['items']) {
+async function calculateCartShipping(items: CartWithItems['items']) {
   const totalScoops = items.reduce((sum, item) => {
     if (!item.isCustomizedScoop) return sum
 
@@ -156,21 +207,19 @@ function calculateCartShipping(items: CartWithItems['items']) {
   }, 0)
 
   if (totalScoops === 0) return 0
-  if (totalScoops === 1) return 149
-  if (totalScoops === 2) return 249
-  if (totalScoops === 3) return 339
-  if (totalScoops === 4) return 419
-  if (totalScoops === 5) return 489
-  if (totalScoops === 6) return 549
-  if (totalScoops === 7) return 599
-  if (totalScoops === 8) return 639
 
-  return 669 + (totalScoops - 9) * 30
+  const scoopConfig = await getScoopConfig()
+
+  return (
+    scoopConfig.shippingRules.find(
+      (rule) => rule.scoopCount === totalScoops,
+    )?.shipping ?? 0
+  )
 }
 
-function cartTotals(items: CartWithItems['items']) {
+async function cartTotals(items: CartWithItems['items']) {
   const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0)
-  const shipping = calculateCartShipping(items)
+  const shipping = await calculateCartShipping(items)
 
   return {
     subtotal,
@@ -179,8 +228,8 @@ function cartTotals(items: CartWithItems['items']) {
   }
 }
 
-function serializeCart(cart: CartWithItems) {
-  const totals = cartTotals(cart.items);
+async function serializeCart(cart: CartWithItems) {
+  const totals = await cartTotals(cart.items);
   return {
     id: cart.id,
     userId: cart.userId,
@@ -197,7 +246,7 @@ export async function getCart(cartId: string) {
     include: cartInclude,
   });
   if (!cart) throw new HttpError(404, "Cart not found.");
-  return serializeCart(cart);
+  return await serializeCart(cart);
 }
 
 export async function addCartItem(input: AddCartItemInput) {
@@ -215,16 +264,28 @@ export async function addCartItem(input: AddCartItemInput) {
 
   let data: Prisma.CartItemUncheckedCreateInput;
   if (input.scoopConfiguration) {
-    const price = calculateScoopPrice(input.scoopConfiguration.numberOfScoops);
+    const scoopConfig = await getScoopConfig();
+    const shipping =
+      scoopConfig.shippingRules.find(
+        (rule) =>
+          rule.scoopCount === input.scoopConfiguration!.numberOfScoops,
+      )?.shipping ?? 0;
+
+    const subtotal =
+      scoopConfig.pricing.firstScoop +
+      (input.scoopConfiguration.numberOfScoops - 1) *
+      scoopConfig.pricing.additionalScoop;
+
     data = {
       cartId: cart.id,
       quantity,
-      unitPrice: price.subtotal,
-      subtotal: price.subtotal * quantity,
-      shipping: price.shipping,
-      total: price.subtotal * quantity,
+      unitPrice: subtotal,
+      subtotal: subtotal * quantity,
+      shipping,
+      total: subtotal * quantity,
       isCustomizedScoop: true,
       numberOfScoops: input.scoopConfiguration.numberOfScoops,
+      age: input.scoopConfiguration.age,
       colourTheme: input.scoopConfiguration.colourTheme,
       preferredCharacter: input.scoopConfiguration.preferredCharacter,
       preferredItems: input.scoopConfiguration.preferredItems ?? [],
@@ -233,8 +294,8 @@ export async function addCartItem(input: AddCartItemInput) {
     };
   } else {
     const product = await database.product.findUnique({
-  where: { id: input.productId },
-});
+      where: { id: input.productId },
+    });
     if (!product) throw new HttpError(404, "Product not found.");
     data = {
       cartId: cart.id,
@@ -379,6 +440,7 @@ export async function updateCartItem(
   if (item.isCustomizedScoop) {
     const currentConfiguration: ScoopConfigurationInput = {
       numberOfScoops: item.numberOfScoops ?? 0,
+      age: item.age ?? 0,
       colourTheme: item.colourTheme ?? undefined,
       preferredCharacter: item.preferredCharacter ?? undefined,
       preferredItems: item.preferredItems,
@@ -386,12 +448,23 @@ export async function updateCartItem(
       additionalMessage: item.additionalMessage ?? undefined,
     };
     const configuration = input.scoopConfiguration ?? currentConfiguration;
-    const price = calculateScoopPrice(configuration.numberOfScoops);
-    data.unitPrice = price.subtotal;
-    data.subtotal = price.subtotal * quantity;
-    data.shipping = price.shipping;
-    data.total = price.subtotal * quantity;
+    const scoopConfig = await getScoopConfig();
+    const shipping =
+      scoopConfig.shippingRules.find(
+        (rule) => rule.scoopCount === configuration.numberOfScoops,
+      )?.shipping ?? 0;
+
+    const subtotal =
+      scoopConfig.pricing.firstScoop +
+      (configuration.numberOfScoops - 1) *
+      scoopConfig.pricing.additionalScoop;
+
+    data.unitPrice = subtotal;
+    data.subtotal = subtotal * quantity;
+    data.shipping = shipping;
+    data.total = subtotal * quantity;
     data.numberOfScoops = configuration.numberOfScoops;
+    data.age = configuration.age;
     data.colourTheme = configuration.colourTheme;
     data.preferredCharacter = configuration.preferredCharacter;
     data.preferredItems = configuration.preferredItems ?? [];
