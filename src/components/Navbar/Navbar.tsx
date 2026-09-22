@@ -43,9 +43,18 @@ function Navbar() {
 
   return (
     <header className="site-header">
-      <div className="announcement-bar">
-        <marquee behavior="" direction="">🇮🇳 PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped</marquee>
-      </div>
+      <div className="announcement-wrapper">
+  <div className="announcement-bar">
+    🇮🇳 PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped ✦&nbsp;
+  </div>
+  <div className="announcement-bar" aria-hidden="true">
+    🇮🇳 PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped ✦&nbsp;
+  </div>
+  <div className="announcement-bar" aria-hidden="true">
+    🇮🇳 PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped ✦&nbsp;
+  </div>
+</div>
+
 
       <div className="nav-wrap container">
         <Link
