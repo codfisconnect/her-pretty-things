@@ -27,6 +27,7 @@
   padding: 9px 20px;
   text-align: center;
   text-transform: uppercase;
+  overflow: hidden;
 }
 .announcement-bar span {
   color: #cc7184;
