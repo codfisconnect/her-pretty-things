@@ -45,13 +45,13 @@ function Navbar() {
     <header className="site-header">
       <div className="announcement-wrapper">
   <div className="announcement-bar">
-    🇮🇳 PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped ✦&nbsp;
+    IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped ✦&nbsp;
   </div>
   <div className="announcement-bar" aria-hidden="true">
-    🇮🇳 PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped ✦&nbsp;
+    IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped ✦&nbsp;
   </div>
   <div className="announcement-bar" aria-hidden="true">
-    🇮🇳 PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped ✦&nbsp;
+    IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped ✦&nbsp;
   </div>
 </div>
 
