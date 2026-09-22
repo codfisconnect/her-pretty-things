@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { addCartItem } from "../../services/cartService";
 import { getProductById } from "../../services/productService";
 import type { Product } from "../../types/product";
+import "./ProductDetails.css";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -132,9 +133,30 @@ function ProductDetails() {
             ₹{product.price}
           </p>
 
-          <p className="product-details-description">
-            {product.description}
-          </p>
+          <div className="product-details-description">
+            {product.description
+              .split(/(?=Material:|Main Stones:|Accent Stones:|Design:|Finish:|Style:)/)
+              .map((section, index) => {
+                const match = section.match(
+                  /^(Material|Main Stones|Accent Stones|Design|Finish|Style):\s*(.*)$/s,
+                );
+
+                if (match) {
+                  return (
+                    <div className="product-detail-row" key={index}>
+                      <strong>{match[1]}</strong>
+                      <span>{match[2]}</span>
+                    </div>
+                  );
+                }
+
+                return (
+                  <p className="product-about" key={index}>
+                    {section.trim()}
+                  </p>
+                );
+              })}
+          </div>
 
           <div className="product-details-highlights">
             <span>

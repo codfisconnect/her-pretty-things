@@ -170,7 +170,7 @@ export async function createOrder(input: CreateOrderInput) {
                 : item.unitPrice,
               totalPrice: item.isCustomizedScoop
                 ? calculateScoopPrice(item.numberOfScoops ?? 0).subtotal *
-                  item.quantity
+                item.quantity
                 : item.subtotal,
               isCustomizedScoop: item.isCustomizedScoop,
               numberOfScoops: item.numberOfScoops,
@@ -179,6 +179,7 @@ export async function createOrder(input: CreateOrderInput) {
               preferredItems: item.preferredItems,
               excludedItems: item.excludedItems,
               additionalMessage: item.additionalMessage,
+              age: item.age,
             }),
           ),
         },
