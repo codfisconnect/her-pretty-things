@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { getProducts } from '../../services/productService'
 import type { Product } from '../../types/product'
+import './Kawaii.css'
 
 function Kawaii() {
   const [products, setProducts] = useState<Product[]>([])
+  const navigate = useNavigate()
 
   useEffect(() => {
     getProducts('kawaii')
@@ -16,15 +18,16 @@ function Kawaii() {
 
   return (
     <section className="jewellery-page container">
+      <button
+        type="button"
+        className="category-back-button"
+        onClick={() => navigate(-1)}
+      >
+        ← Back
+      </button>
+
       <div className="jewellery-intro">
-        <p className="eyebrow">Collection 03</p>
-
         <h1>Kawaii</h1>
-
-        <p>
-          Cute little pieces, playful details, and charming finds
-          designed to add a little more joy to your everyday style.
-        </p>
       </div>
 
       <div className="jewellery-product-grid">
@@ -48,9 +51,7 @@ function Kawaii() {
             </Link>
 
             <div className="jewellery-product-info">
-              <p className="jewellery-product-category">
-                Kawaii
-              </p>
+              
 
               <h2>
                 <Link to={`/product/${product.id}`}>
@@ -61,10 +62,6 @@ function Kawaii() {
               <p className="jewellery-product-price">
                 ₹{product.price}
               </p>
-
-              <div className="jewellery-product-badges">
-                <span>Kawaii</span>
-              </div>
 
               <Link
                 to={`/product/${product.id}`}

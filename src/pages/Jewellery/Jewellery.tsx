@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { getProducts } from '../../services/productService'
 import type { Product } from '../../types/product'
+import './Jewellery.css'
 
 function Jewellery() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     getProducts('jewellery')
@@ -22,15 +25,16 @@ function Jewellery() {
 
   return (
     <section className="jewellery-page container">
+      <button
+        type="button"
+        className="category-back-button"
+        onClick={() => navigate(-1)}
+      >
+        ← Back
+      </button>
+
       <div className="jewellery-intro">
-        <p className="eyebrow">Collection 02</p>
-
         <h1>Jewellery</h1>
-
-        <p>
-          Delicate details, everyday sparkle, and pretty little pieces
-          designed to make every outfit feel a little more special.
-        </p>
       </div>
 
       <div className="jewellery-product-grid">
@@ -61,9 +65,7 @@ function Jewellery() {
               </Link>
 
               <div className="jewellery-product-info">
-                <p className="jewellery-product-category">
-                  {product.category}
-                </p>
+                
 
                 <h2>
                   <Link to={`/product/${product.id}`}>
@@ -74,10 +76,6 @@ function Jewellery() {
                 <p className="jewellery-product-price">
                   ₹{product.price}
                 </p>
-
-                <div className="jewellery-product-badges">
-                  <span>Available</span>
-                </div>
 
                 <Link
                   to={`/product/${product.id}`}

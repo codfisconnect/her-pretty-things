@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, ShoppingBag, Star } from "lucide-react";
+import { Heart, ShoppingBag } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { addCartItem } from "../../services/cartService";
 import {
@@ -7,6 +7,7 @@ import {
   toggleWishlist,
 } from "../../services/wishlistService";
 import type { Product } from "../../types/product";
+import "./ProductCard.css";
 
 interface ProductCardProps {
   product: Product;
@@ -56,41 +57,39 @@ const ProductCard = ({ product }: ProductCardProps) => {
             className="product-image"
           />
         </Link>
-
-        <button
-          type="button"
-          className={`wishlist-button ${isWishlisted ? "is-wishlisted" : ""
-            }`}
-          aria-label={
-            isWishlisted
-              ? `Remove ${product.name} from wishlist`
-              : `Add ${product.name} to wishlist`
-          }
-          onClick={() => {
-            const added = toggleWishlist(product);
-            setIsWishlisted(added);
-          }}
-        >
-          <Heart
-            size={18}
-            fill={isWishlisted ? "currentColor" : "none"}
-          />
-        </button>
       </div>
 
       <div className="product-info">
-        <p className="product-category">{product.category}</p>
+        <div className="product-category-row">
+          <p className="product-category">{product.category}</p>
+
+          <button
+            type="button"
+            className={`wishlist-button ${
+              isWishlisted ? "is-wishlisted" : ""
+            }`}
+            aria-label={
+              isWishlisted
+                ? `Remove ${product.name} from wishlist`
+                : `Add ${product.name} to wishlist`
+            }
+            onClick={() => {
+              const added = toggleWishlist(product);
+              setIsWishlisted(added);
+            }}
+          >
+            <Heart
+              size={15}
+              fill={isWishlisted ? "currentColor" : "none"}
+            />
+          </button>
+        </div>
 
         <h3 className="product-name">
           <Link to={`/product/${product.id}`}>
             {product.name}
           </Link>
         </h3>
-
-        <div className="product-rating">
-          <Star size={15} fill="currentColor" />
-          <span>{product.rating}</span>
-        </div>
 
         <div className="product-bottom">
           <span className="product-price">
@@ -103,7 +102,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             aria-label={`Add ${product.name} to cart`}
             onClick={handleAddToCart}
           >
-            <ShoppingBag size={17} />
+            <ShoppingBag size={15} />
             <span>Add</span>
           </button>
         </div>

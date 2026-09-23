@@ -63,11 +63,15 @@ function ProductDetails() {
   if (!product) {
     return (
       <main className="product-details-page container">
-        <h1>Product not found</h1>
+        <button
+          type="button"
+          className="category-back-button"
+          onClick={() => navigate(-1)}
+        >
+          ← Back
+        </button>
 
-        <Link to="/kawaii" className="product-back-link">
-          ← Back to Kawaii
-        </Link>
+        <h1>Product not found</h1>
       </main>
     );
   }
@@ -76,6 +80,14 @@ function ProductDetails() {
 
   return (
     <main className="product-details-page container">
+      <button
+        type="button"
+        className="category-back-button"
+        onClick={() => navigate(-1)}
+      >
+        ← Back
+      </button>
+
       <div className="product-details">
         <div className="product-details-gallery">
           <div className="product-details-image-layout">
@@ -84,8 +96,9 @@ function ProductDetails() {
                 <button
                   key={image}
                   type="button"
-                  className={`product-details-thumbnail ${selectedImage === index ? "active" : ""
-                    }`}
+                  className={`product-details-thumbnail ${
+                    selectedImage === index ? "active" : ""
+                  }`}
                   onClick={() => setSelectedImage(index)}
                 >
                   <img
@@ -114,7 +127,10 @@ function ProductDetails() {
                   alt={product.name}
                 />
               ) : product.image ? (
-                <img src={product.image} alt={product.name} />
+                <img
+                  src={product.image}
+                  alt={product.name}
+                />
               ) : (
                 <div>No image available</div>
               )}
@@ -135,7 +151,9 @@ function ProductDetails() {
 
           <div className="product-details-description">
             {product.description
-              .split(/(?=Material:|Main Stones:|Accent Stones:|Design:|Finish:|Style:)/)
+              .split(
+                /(?=Material:|Main Stones:|Accent Stones:|Design:|Finish:|Style:)/
+              )
               .map((section, index) => {
                 const match = section.match(
                   /^(Material|Main Stones|Accent Stones|Design|Finish|Style):\s*(.*)$/s,
@@ -143,7 +161,10 @@ function ProductDetails() {
 
                 if (match) {
                   return (
-                    <div className="product-detail-row" key={index}>
+                    <div
+                      className="product-detail-row"
+                      key={index}
+                    >
                       <strong>{match[1]}</strong>
                       <span>{match[2]}</span>
                     </div>
@@ -151,7 +172,10 @@ function ProductDetails() {
                 }
 
                 return (
-                  <p className="product-about" key={index}>
+                  <p
+                    className="product-about"
+                    key={index}
+                  >
                     {section.trim()}
                   </p>
                 );
@@ -213,14 +237,6 @@ function ProductDetails() {
 
           <div className="product-details-sections">
             <section>
-              <h2>Product Details</h2>
-
-              <p>
-                {product.description}
-              </p>
-            </section>
-
-            <section>
               <h2>
                 {isJewellery
                   ? "Jewellery Care"
@@ -254,6 +270,7 @@ function ProductDetails() {
           </Link>
         </div>
       </div>
+
       {showAllImages && (
         <div
           className="product-image-modal"
@@ -279,8 +296,8 @@ function ProductDetails() {
                   type="button"
                   className="product-image-modal-item"
                   onClick={() => {
-                    setSelectedImage(index)
-                    setShowAllImages(false)
+                    setSelectedImage(index);
+                    setShowAllImages(false);
                   }}
                 >
                   <img
