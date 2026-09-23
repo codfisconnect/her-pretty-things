@@ -1,0 +1,43 @@
+/* Jewellery product image hover animation */
+
+.jewellery-product-image {
+  display: block;
+  overflow: hidden;
+}
+
+.jewellery-product-image img {
+  display: block;
+  width: 100%;
+  transition: transform 0.3s ease;
+  transform-origin: center center;
+}
+
+.jewellery-product-image:hover img {
+  transform: scale(1.06);
+}
+
+.category-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 1px;
+  padding: 5px 10px;
+  border: 1px solid #eadcde;
+  border-radius: 999px;
+  background: #fffaf9;
+  color: #6f555b;
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.category-back-button:hover {
+  background: #fff0f3;
+  border-color: #d48a98;
+  transform: translateX(-2px);
+}

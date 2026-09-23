@@ -1,0 +1,252 @@
+.kawaii-page {
+  padding-top: 8px;
+  padding-bottom: 40px;
+}
+
+/* Back button */
+.category-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 6px;
+  padding: 5px 10px;
+  border: 1px solid #eadcde;
+  border-radius: 999px;
+  background: #fffaf9;
+  color: #6f555b;
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Heading */
+.kawaii-intro {
+  margin-bottom: 18px;
+}
+
+.kawaii-intro h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: #3f3033;
+}
+
+/* Grid */
+.kawaii-product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px 18px;
+}
+
+/* Card */
+.kawaii-product {
+  min-width: 0;
+}
+
+/* SQUARE IMAGE CARD */
+.kawaii-product-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #fffaf9;
+}
+
+/* IMAGE INSIDE CARD */
+.kawaii-product-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.kawaii-product-image:hover img {
+  transform: scale(1.06);
+}
+
+/* Product information */
+.kawaii-product-info {
+  padding: 8px 2px 4px;
+}
+
+.kawaii-product-info h2 {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.kawaii-product-info h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.kawaii-product-price {
+  margin: 6px 0 8px;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: #3f3033;
+}
+
+/* MAKE IT YOURS */
+.kawaii-view-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 32px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 0;
+  background: #241f20;
+  color: #fff;
+  text-decoration: none;
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+.kawaii-view-button:hover {
+  background: #3a3234;
+  color: #fff;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .kawaii-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px 14px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 650px) {
+  .kawaii-page {
+    padding-top: 6px;
+    padding-bottom: 30px;
+  }
+
+  .category-back-button {
+    margin-bottom: 5px;
+    padding: 5px 9px;
+    font-size: 9px;
+  }
+
+  .kawaii-intro {
+    margin-bottom: 14px;
+  }
+
+  .kawaii-intro h1 {
+    font-size: 20px;
+  }
+
+  .kawaii-product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 22px 12px;
+  }
+
+  .kawaii-product {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .kawaii-product-image {
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #fffaf9;
+    box-sizing: border-box;
+  }
+
+  .kawaii-product-image img {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center;
+  }
+
+  .kawaii-product-info {
+    width: 100%;
+    padding: 7px 1px 3px;
+    box-sizing: border-box;
+  }
+
+  .kawaii-product-info h2 {
+    font-size: 11px;
+  }
+
+  .kawaii-product-price {
+    margin: 5px 0 7px;
+    font-size: 10px;
+  }
+
+  .kawaii-view-button {
+    display: flex;
+    width: 100%;
+    height: 30px;
+    padding: 0 8px;
+    box-sizing: border-box;
+    font-size: 7px;
+  }
+}
+
+.kawaii-product-info {
+  padding: 8px 2px 4px;
+}
+
+.kawaii-product-info h2 {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.kawaii-product-info h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.kawaii-product-price {
+  margin: 6px 0 8px;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: #3f3033;
+}
+
+.kawaii-view-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 32px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 0;
+  background: #241f20;
+  color: #fff;
+  text-decoration: none;
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  box-sizing: border-box;
+}

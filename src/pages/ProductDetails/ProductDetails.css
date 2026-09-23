@@ -47,3 +47,8 @@
     font-size: 14px;
   }
 }
+
+.product-about {
+  text-align: justify;
+  text-justify: inter-word;
+}

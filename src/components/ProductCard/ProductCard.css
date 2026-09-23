@@ -1,0 +1,131 @@
+.product-info {
+  padding: 8px 2px 4px;
+}
+
+.product-category-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 18px;
+}
+
+.product-category {
+  margin: 0;
+  font-size: 8px;
+  line-height: 1.2;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #b4868d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-category-row .wishlist-button {
+  position: static;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #a79597;
+}
+
+.product-category-row .wishlist-button:hover {
+  color: var(--pink);
+}
+
+.product-category-row .wishlist-button.is-wishlisted {
+  color: var(--pink);
+}
+
+.product-name {
+  margin: 3px 0 0;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+.product-name a {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.product-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.product-price {
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.add-cart-button {
+  flex: 0 0 auto;
+  gap: 4px;
+  padding: 5px 8px;
+  font-size: 9px;
+}
+
+@media (max-width: 650px) {
+  .product-info {
+    padding: 7px 1px 3px;
+  }
+
+  .product-category {
+    font-size: 7px;
+  }
+
+  .product-category-row .wishlist-button {
+    width: 20px;
+    height: 20px;
+  }
+
+  .product-name {
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 1.25;
+  }
+
+  .product-bottom {
+    margin-top: 5px;
+  }
+
+  .product-price {
+    font-size: 10px;
+  }
+
+  .add-cart-button {
+    width: auto;
+    padding: 4px 7px;
+    font-size: 8px;
+  }
+}
+
+/* Product image hover animation - all product cards */
+.product-card .product-image {
+  display: block;
+  width: 100%;
+  transition: transform 0.3s ease;
+  transform-origin: center center;
+}
+
+.product-card .product-image-link {
+  display: block;
+  overflow: hidden;
+}
+
+.product-card .product-image:hover {
+  transform: scale(1.06);
+}
