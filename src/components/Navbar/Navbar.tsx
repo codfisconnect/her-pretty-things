@@ -93,13 +93,13 @@ function Navbar() {
             <Search size={19} strokeWidth={1.8} />
           </button>
 
-          <button
-            className="icon-button desktop-only"
-            type="button"
+          <Link
+            className="icon-button"
+            to="/wishlist"
             aria-label="Wishlist"
           >
             <Heart size={19} strokeWidth={1.8} />
-          </button>
+          </Link>
 
           <Link
             className="icon-button cart-button"

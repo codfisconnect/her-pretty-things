@@ -14,8 +14,6 @@ import Scoops from './pages/Scoops/Scoops'
 import './App.css'
 import AdminRoutes from './admin/routes/AdminRoutes'
 import { useEffect } from 'react'
-import FAQ from './pages/FAQ/FAQ.tsx'
-import Returns from "./pages/Returns/Returns.tsx"
 
 function ScrollToTop() {
   const location = useLocation()
@@ -30,7 +28,7 @@ function ScrollToTop() {
 function App() {
   return (
     <BrowserRouter>
-    <ScrollToTop />
+      <ScrollToTop />
       <Navbar />
       <Routes>
         <Route path="/admin/*" element={<AdminRoutes />} />
@@ -41,6 +39,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/shipping" element={<Shipping />} />
         <Route path="/payment/:orderId" element={<Payment />} />
         <Route path="/payment/success/:orderId" element={<PaymentSuccess />} />

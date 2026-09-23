@@ -15,6 +15,7 @@ export interface AdminOrderItem {
   totalPrice: number
   isCustomizedScoop: boolean
   numberOfScoops: number | null
+  age: number | null
   colourTheme: string | null
   preferredCharacter: string | null
   preferredItems: string[]
