@@ -11,10 +11,12 @@ import Payment from './pages/Payment/Payment'
 import PaymentSuccess from './pages/PaymentSuccess/PaymentSuccess'
 import Shipping from './pages/Shipping/Shipping'
 import Scoops from './pages/Scoops/Scoops'
+import Returns from './pages/Returns/Returns'
+import Wishlist from './pages/Wishlist/Wishlist'
+import FAQ from './pages/FAQ/FAQ'
 import './App.css'
 import AdminRoutes from './admin/routes/AdminRoutes'
 import { useEffect } from 'react'
-import Wishlist from "./pages/Wishlist/Wishlist";
 
 function ScrollToTop() {
   const location = useLocation()
@@ -44,6 +46,8 @@ function App() {
         <Route path="/shipping" element={<Shipping />} />
         <Route path="/payment/:orderId" element={<Payment />} />
         <Route path="/payment/success/:orderId" element={<PaymentSuccess />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/return" element={<Returns/>}></Route>
       </Routes>
       <Footer />
     </BrowserRouter>
