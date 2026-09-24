@@ -1,12 +1,12 @@
-import { Router } from 'express'
+import { Router } from "express";
 import {
   getAdminScoopConfigController,
   updateAdminScoopSettingController,
   updateAdminScoopOptionController,
   createAdminScoopOptionController,
   deleteAdminScoopOptionController,
-} from '../controllers/adminScoopController.js'
-import upload from '../middleware/upload.js'
+} from "../controllers/adminScoopController.js";
+import upload from "../middleware/upload.js";
 
 import {
   adminLogin,
@@ -18,38 +18,40 @@ import {
   orderStatus,
   createAdminProduct,
   updateAdminProduct,
+  adminProductDetails,
   deactivateAdminProduct,
   uploadAdminScoopImage,
-} from '../controllers/adminController.js'
+  deleteAdminProductImage,
+} from "../controllers/adminController.js";
 
-import { requireAdmin } from '../middleware/adminAuth.js'
-import { HttpError } from '../middleware/errorHandler.js'
-import { uploadProductImage } from '../services/cloudinaryService.js'
+import { requireAdmin } from "../middleware/adminAuth.js";
+import { HttpError } from "../middleware/errorHandler.js";
+import { uploadProductImage } from "../services/cloudinaryService.js";
 
-const adminRoutes = Router()
+const adminRoutes = Router();
 
-adminRoutes.post('/login', adminLogin)
+adminRoutes.post("/login", adminLogin);
 
 adminRoutes.post(
-  '/products',
+  "/products",
   requireAdmin,
-  upload.array('image', 10),
+  upload.array("image", 10),
   createAdminProduct,
-)
+);
 
 adminRoutes.post(
-  '/products/upload-image',
+  "/products/upload-image",
   requireAdmin,
-  upload.single('image'),
+  upload.single("image"),
   async (request, response) => {
     if (!request.file) {
-      throw new HttpError(400, 'Image file is required.')
+      throw new HttpError(400, "Image file is required.");
     }
 
     const result = await uploadProductImage(
       request.file.buffer,
       request.file.originalname,
-    )
+    );
 
     response.status(201).json({
       success: true,
@@ -60,72 +62,72 @@ adminRoutes.post(
         height: result.height,
         format: result.format,
       },
-    })
+    });
   },
-)
+);
 
-adminRoutes.put(
-  '/products/:productId',
-  requireAdmin,
-  updateAdminProduct,
-)
+adminRoutes.get("/products/:productId", requireAdmin, adminProductDetails);
+
+adminRoutes.put("/products/:productId", requireAdmin, updateAdminProduct);
 
 adminRoutes.delete(
-  '/products/:productId',
+  "/products/:productId/images/:imageId",
+  requireAdmin,
+  deleteAdminProductImage,
+);
+
+adminRoutes.delete(
+  "/products/:productId",
   requireAdmin,
   deactivateAdminProduct,
-)
+);
 
 /* =========================
    SCOOP MANAGEMENT
 ========================= */
 
-adminRoutes.get(
-  '/scoop/config',
-  requireAdmin,
-  getAdminScoopConfigController,
-)
+adminRoutes.get("/scoop/config", requireAdmin, getAdminScoopConfigController);
 
 adminRoutes.put(
-  '/scoop/config',
+  "/scoop/config",
   requireAdmin,
   updateAdminScoopSettingController,
-)
+);
 
 adminRoutes.put(
-  '/scoop/options/:type/:id',
+  "/scoop/options/:type/:id",
   requireAdmin,
   updateAdminScoopOptionController,
-)
+);
 
 adminRoutes.post(
-  '/scoop/options',
+  "/scoop/options",
   requireAdmin,
   createAdminScoopOptionController,
-)
+);
 adminRoutes.delete(
-  '/scoop/options/:type/:id',
+  "/scoop/options/:type/:id",
   requireAdmin,
   deleteAdminScoopOptionController,
-)
+);
 
 adminRoutes.post(
-  '/scoop/image',
+  "/scoop/image",
   requireAdmin,
-  upload.single('image'),
+  upload.single("image"),
   uploadAdminScoopImage,
-)
+);
 
-adminRoutes.post('/logout', requireAdmin, adminLogout)
+adminRoutes.post("/logout", requireAdmin, adminLogout);
 
-adminRoutes.get('/session', adminSession)
+adminRoutes.get("/session", adminSession);
 
-adminRoutes.get('/dashboard', requireAdmin, dashboard)
+adminRoutes.get("/dashboard", requireAdmin, dashboard);
 
-adminRoutes.get('/orders', requireAdmin, orders)
+adminRoutes.get("/orders", requireAdmin, orders);
 
-adminRoutes.get('/orders/:orderId', requireAdmin, orderDetails)
+adminRoutes.get("/orders/:orderId", requireAdmin, orderDetails);
 
-adminRoutes.put('/orders/:orderId/status', requireAdmin, orderStatus)
+adminRoutes.put("/orders/:orderId/status", requireAdmin, orderStatus);
 
-export default adminRoutes
+export default adminRoutes;

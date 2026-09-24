@@ -245,3 +245,36 @@ export async function deactivateProduct(productId: string) {
     images: product.images,
   }
 }
+
+export async function getAdminProduct(productId: string) {
+  const database = getDatabase()
+
+  const product = await database.product.findUnique({
+    where: {
+      id: productId,
+    },
+    include: {
+      images: {
+        orderBy: {
+          sortOrder: 'asc',
+        },
+      },
+    },
+  })
+
+  if (!product) {
+    throw new HttpError(404, 'Product not found.')
+  }
+
+  return {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    category: product.category,
+    price: product.price,
+    description: product.description ?? '',
+    stock: product.stock,
+    active: product.active,
+    images: product.images,
+  }
+}

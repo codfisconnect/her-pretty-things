@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
-import { getProductById } from "../../../services/productService";
 import {
   deleteAdminProduct,
+  deleteAdminProductImage,
+  getAdminProduct,
   updateAdminProduct,
   uploadAdminProductImages,
 } from "../../../services/adminService";
@@ -23,6 +24,14 @@ function EditProduct() {
   const [stock, setStock] = useState("");
 
   const [currentImages, setCurrentImages] = useState<string[]>([]);
+  const [currentImageRecords, setCurrentImageRecords] = useState<
+    {
+      id: string;
+      url: string;
+      altText: string | null;
+      sortOrder: number;
+    }[]
+  >([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -37,7 +46,7 @@ function EditProduct() {
       try {
         setLoading(true);
 
-        const product = await getProductById(productId);
+        const product = await getAdminProduct(productId);
 
         console.log("Edit product loaded:", product);
 
@@ -47,14 +56,11 @@ function EditProduct() {
         setDescription(product.description ?? "");
         setStock(String(product.stock ?? ""));
 
-        const images =
-          product.images && product.images.length > 0
-            ? product.images
-            : product.image
-              ? [product.image]
-              : [];
+        setCurrentImages(
+  product.images?.map((image) => image.url) ?? [],
+);
 
-        setCurrentImages(images);
+setCurrentImageRecords(product.images ?? []);
       } catch (error) {
         console.error("Could not load product:", error);
         setMessage("Could not load product.");
@@ -103,9 +109,7 @@ function EditProduct() {
       console.error("Could not update product:", error);
 
       setMessage(
-        error instanceof Error
-          ? error.message
-          : "Could not update product."
+        error instanceof Error ? error.message : "Could not update product.",
       );
     } finally {
       setSaving(false);
@@ -116,7 +120,7 @@ function EditProduct() {
     if (!productId) return;
 
     const confirmed = window.confirm(
-      `Are you sure you want to delete "${name}"?`
+      `Are you sure you want to delete "${name}"?`,
     );
 
     if (!confirmed) return;
@@ -132,9 +136,7 @@ function EditProduct() {
       console.error("Could not delete product:", error);
 
       setMessage(
-        error instanceof Error
-          ? error.message
-          : "Could not delete product."
+        error instanceof Error ? error.message : "Could not delete product.",
       );
 
       setDeleting(false);
@@ -144,34 +146,25 @@ function EditProduct() {
   if (loading) {
     return (
       <div className="admin-page">
-        <div className="products-loading">
-          Loading product...
-        </div>
+        <div className="products-loading">Loading product...</div>
       </div>
     );
   }
 
   return (
     <div className="admin-page edit-product-page">
-      <Link
-        to={`/admin/products/${productId}`}
-        className="product-back-button"
-      >
+      <Link to={`/admin/products/${productId}`} className="product-back-button">
         <ArrowLeft size={17} />
         Back to Product
       </Link>
 
       <div className="edit-product-header">
         <div>
-          <span className="admin-eyebrow">
-            PRODUCT MANAGEMENT
-          </span>
+          <span className="admin-eyebrow">PRODUCT MANAGEMENT</span>
 
           <h1>Edit Product</h1>
 
-          <p>
-            Update your product details and images.
-          </p>
+          <p>Update your product details and images.</p>
         </div>
       </div>
 
@@ -181,7 +174,6 @@ function EditProduct() {
       >
         <label>
           Product Name
-
           <input
             type="text"
             value={name}
@@ -194,12 +186,9 @@ function EditProduct() {
         <div className="edit-form-row">
           <label>
             Category
-
             <select
               value={category}
-              onChange={(event) =>
-                setCategory(event.target.value as Category)
-              }
+              onChange={(event) => setCategory(event.target.value as Category)}
             >
               <option value="kawaii">Kawaii</option>
               <option value="jewellery">Jewellery</option>
@@ -209,72 +198,96 @@ function EditProduct() {
 
           <label>
             Price (₹)
-
             <input
               type="number"
               min="0"
               value={price}
-              onChange={(event) =>
-                setPrice(event.target.value)
-              }
+              onChange={(event) => setPrice(event.target.value)}
               required
             />
           </label>
 
           <label>
             Stock
-
             <input
               type="number"
               min="0"
               value={stock}
-              onChange={(event) =>
-                setStock(event.target.value)
-              }
+              onChange={(event) => setStock(event.target.value)}
               required
             />
           </label>
         </div>
 
         <div className="edit-current-images">
-          <div className="edit-field-title">
-            Current Product Images
-          </div>
+          <div className="edit-field-title">Current Product Images</div>
 
-          {currentImages.length > 0 ? (
+          {currentImageRecords.length > 0 ? (
             <div className="edit-image-preview-grid">
-              {currentImages.map((image, index) => (
-                <div
-                  className="edit-image-preview"
-                  key={`${image}-${index}`}
-                >
+              {currentImageRecords.map((image, index) => (
+                <div className="edit-image-preview" key={image.id}>
                   <img
-                    src={image}
-                    alt={`${name} ${index + 1}`}
+                    src={image.url}
+                    alt={image.altText || `${name} ${index + 1}`}
                   />
+
+                  <button
+                    type="button"
+                    className="edit-image-delete-button"
+                    onClick={async () => {
+                      if (!productId) return;
+
+                      const confirmed = window.confirm(
+                        "Are you sure you want to delete this image?",
+                      );
+
+                      if (!confirmed) return;
+
+                      try {
+                        setMessage("");
+
+                        await deleteAdminProductImage(productId, image.id);
+
+                        setCurrentImageRecords((previousImages) =>
+                          previousImages.filter(
+                            (currentImage) => currentImage.id !== image.id,
+                          ),
+                        );
+
+                        setMessage("Image deleted successfully.");
+                      } catch (error) {
+                        console.error("Could not delete product image:", error);
+
+                        setMessage(
+                          error instanceof Error
+                            ? error.message
+                            : "Could not delete image.",
+                        );
+                      }
+                    }}
+                    disabled={saving || deleting}
+                  >
+                    <Trash2 size={15} />
+                    Delete
+                  </button>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="edit-no-image">
-              No product images
-            </div>
+            <div className="edit-no-image">No product images</div>
           )}
         </div>
 
         <label>
           Replace Product Images
-
           <input
             type="file"
             accept="image/*"
             multiple
             onChange={handleImageChange}
           />
-
           <small>
-            Select new images only if you want to replace
-            the existing images.
+            Select new images only if you want to replace the existing images.
           </small>
         </label>
 
@@ -287,12 +300,9 @@ function EditProduct() {
 
         <label>
           Description
-
           <textarea
             value={description}
-            onChange={(event) =>
-              setDescription(event.target.value)
-            }
+            onChange={(event) => setDescription(event.target.value)}
             placeholder="Enter product description"
             rows={7}
             required
@@ -307,9 +317,7 @@ function EditProduct() {
           >
             <Save size={17} />
 
-            {saving
-              ? "Saving Changes..."
-              : "Save Changes"}
+            {saving ? "Saving Changes..." : "Save Changes"}
           </button>
 
           <button
@@ -320,17 +328,11 @@ function EditProduct() {
           >
             <Trash2 size={17} />
 
-            {deleting
-              ? "Deleting..."
-              : "Delete Product"}
+            {deleting ? "Deleting..." : "Delete Product"}
           </button>
         </div>
 
-        {message && (
-          <p className="edit-product-message">
-            {message}
-          </p>
-        )}
+        {message && <p className="edit-product-message">{message}</p>}
       </form>
     </div>
   );
