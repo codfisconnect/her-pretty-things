@@ -1117,6 +1117,7 @@
     min-height: 255px;
     background: url("../public/images/banners/scoops-banner.png");
     background-size: cover;
+    width: auto;
   }
 
   .hero-copy {
