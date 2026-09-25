@@ -1,83 +1,124 @@
-import { useEffect, useState } from 'react'
-import { Heart, Menu, Search, ShoppingBag, X } from 'lucide-react'
-import { NavLink, Link } from 'react-router-dom'
-import { getCart } from '../../services/cartService'
-import { products } from '../../data/products'
-import Logo from "../../../public/images/Logo/HPTlog.png"
+import { useEffect, useState } from "react";
+import { Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
+import { NavLink, Link } from "react-router-dom";
+import { getCart } from "../../services/cartService";
+import { getProducts } from "../../services/productService";
+import Logo from "../../../public/images/Logo/HPTlog.png";
 
 const navigation = [
-  { label: 'Home', to: '/' },
-  { label: 'Scoops', to: '/scoops' },
-  { label: 'Jewellery', to: '/jewellery' },
-  { label: 'Kawaii', to: '/kawaii' },
-  { label: 'About Us', to: '/about' },
-]
+  { label: "Home", to: "/" },
+  { label: "Scoops", to: "/scoops" },
+  { label: "Jewellery", to: "/jewellery" },
+  { label: "Kawaii", to: "/kawaii" },
+  { label: "About Us", to: "/about" },
+];
 
 function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [cartCount, setCartCount] = useState(0)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
 
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
+  const [searchResults, setSearchResults] = useState<
+    Awaited<ReturnType<typeof getProducts>>
+  >([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Load cart count
   useEffect(() => {
     const loadCartCount = async () => {
-      const cartId = localStorage.getItem('hpt_cart_id')
+      const cartId = localStorage.getItem("hpt_cart_id");
 
       if (!cartId) {
-        setCartCount(0)
-        return
+        setCartCount(0);
+        return;
       }
 
       try {
-        const cart = await getCart(cartId)
+        const cart = await getCart(cartId);
 
         const totalQuantity = cart.items.reduce(
           (total, item) => total + item.quantity,
-          0
-        )
+          0,
+        );
 
-        setCartCount(totalQuantity)
+        setCartCount(totalQuantity);
       } catch {
-        setCartCount(0)
+        setCartCount(0);
       }
+    };
+
+    loadCartCount();
+  }, []);
+
+  // Search products from backend
+  useEffect(() => {
+    const query = searchQuery.trim();
+
+    if (!isSearchOpen || !query) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
     }
 
-    loadCartCount()
-  }, [])
-const searchResults = products.filter((product) =>
-    product.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  )
+    let isCurrentSearch = true;
+
+    const searchProducts = async () => {
+      setIsSearching(true);
+
+      try {
+        const data = await getProducts(undefined, query);
+
+        if (isCurrentSearch) {
+          setSearchResults(data);
+        }
+      } catch (error) {
+        if (isCurrentSearch) {
+          console.error("Failed to search products:", error);
+          setSearchResults([]);
+        }
+      } finally {
+        if (isCurrentSearch) {
+          setIsSearching(false);
+        }
+      }
+    };
+
+    searchProducts();
+
+    return () => {
+      isCurrentSearch = false;
+    };
+  }, [isSearchOpen, searchQuery]);
 
   return (
     <header className="site-header">
-
       {/* Announcement Bar */}
       <div className="announcement-wrapper">
         <div className="announcement-bar">
-          IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped ✦&nbsp;
+          IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY{" "}
+          <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little
+          joys, beautifully wrapped ✦&nbsp;
         </div>
 
         <div className="announcement-bar" aria-hidden="true">
-          IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped ✦&nbsp;
+          IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY{" "}
+          <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little
+          joys, beautifully wrapped ✦&nbsp;
         </div>
 
         <div className="announcement-bar" aria-hidden="true">
-          IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little joys, beautifully wrapped ✦&nbsp;
+          IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY{" "}
+          <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little
+          joys, beautifully wrapped ✦&nbsp;
         </div>
       </div>
 
       {/* Navigation */}
       <div className="nav-wrap container">
-
         {/* Logo */}
-        <Link
-          className="brand"
-          to="/"
-          onClick={() => setIsMenuOpen(false)}
-        >
+        <Link className="brand" to="/" onClick={() => setIsMenuOpen(false)}>
           <span className="brand-mark">
             <img src={Logo} alt="" />
           </span>
@@ -87,7 +128,7 @@ const searchResults = products.filter((product) =>
 
         {/* Navigation Links */}
         <nav
-          className={`main-nav ${isMenuOpen ? 'is-open' : ''}`}
+          className={`main-nav ${isMenuOpen ? "is-open" : ""}`}
           aria-label="Main navigation"
         >
           {navigation.map((item) => (
@@ -95,9 +136,7 @@ const searchResults = products.filter((product) =>
               key={item.to}
               to={item.to}
               onClick={() => setIsMenuOpen(false)}
-              className={({ isActive }) =>
-                isActive ? 'active' : ''
-              }
+              className={({ isActive }) => (isActive ? "active" : "")}
             >
               {item.label}
             </NavLink>
@@ -106,13 +145,19 @@ const searchResults = products.filter((product) =>
 
         {/* Navigation Actions */}
         <div className="nav-actions">
-
           {/* Search Button */}
           <button
             className="icon-button"
             type="button"
             aria-label="Search"
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            onClick={() => {
+              setIsSearchOpen(!isSearchOpen);
+
+              if (isSearchOpen) {
+                setSearchQuery("");
+                setSearchResults([]);
+              }
+            }}
           >
             {isSearchOpen ? (
               <X size={19} strokeWidth={1.8} />
@@ -122,11 +167,7 @@ const searchResults = products.filter((product) =>
           </button>
 
           {/* Wishlist */}
-          <Link
-            className="icon-button"
-            to="/wishlist"
-            aria-label="Wishlist"
-          >
+          <Link className="icon-button" to="/wishlist" aria-label="Wishlist">
             <Heart size={19} strokeWidth={1.8} />
           </Link>
 
@@ -138,34 +179,24 @@ const searchResults = products.filter((product) =>
           >
             <ShoppingBag size={19} strokeWidth={1.8} />
 
-            <span className="cart-count">
-              {cartCount}
-            </span>
+            <span className="cart-count">{cartCount}</span>
           </Link>
 
           {/* Mobile Menu */}
           <button
             className="icon-button menu-toggle"
             type="button"
-            aria-label={
-              isMenuOpen ? 'Close menu' : 'Open menu'
-            }
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? (
-              <X size={21} />
-            ) : (
-              <Menu size={21} />
-            )}
+            {isMenuOpen ? <X size={21} /> : <Menu size={21} />}
           </button>
-
         </div>
       </div>
 
       {/* Search Panel */}
       {isSearchOpen && (
         <div className="search-panel container">
-
           <input
             type="text"
             placeholder="Search pretty things..."
@@ -177,44 +208,41 @@ const searchResults = products.filter((product) =>
           {/* Search Results */}
           {searchQuery.trim() && (
             <div className="search-results">
+              {isSearching ? (
+                <p className="search-no-results">Searching...</p>
+              ) : (
+                <>
+                  {searchResults.map((product) => (
+                    <Link
+                      key={product.id}
+                      to={`/product/${product.id}`}
+                      className="search-result-item"
+                      onClick={() => {
+                        setIsSearchOpen(false);
+                        setSearchQuery("");
+                        setSearchResults([]);
+                      }}
+                    >
+                      <img src={product.image} alt={product.name} />
 
-              {searchResults.map((product) => (
-                <Link
-                  key={product.id}
-                  to={`/product/${product.id}`}
-                  className="search-result-item"
-                  onClick={() => {
-                    setIsSearchOpen(false)
-                    setSearchQuery('')
-                  }}
-                >
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                  />
+                      <div>
+                        <strong>{product.name}</strong>
+                        <span>₹{product.price}</span>
+                      </div>
+                    </Link>
+                  ))}
 
-                  <div>
-                    <strong>{product.name}</strong>
-                    <span>₹{product.price}</span>
-                  </div>
-                </Link>
-              ))}
-
-              {/* No Results */}
-              {searchResults.length === 0 && (
-                <p className="search-no-results">
-                  No products found.
-                </p>
+                  {searchResults.length === 0 && (
+                    <p className="search-no-results">No products found.</p>
+                  )}
+                </>
               )}
-
             </div>
           )}
-
         </div>
       )}
-
     </header>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;

@@ -207,22 +207,45 @@ export async function deleteAdminProductImage(
     },
   });
 
+  console.log("IMAGE DELETE REQUEST:", {
+    productId,
+    imageId,
+    foundImage: image?.id,
+    imageUrl: image?.url,
+  });
+
   if (!image) {
     throw new HttpError(404, "Product image not found.");
   }
 
+  // Delete the image from Cloudinary first.
   await deleteProductImage(image.url);
 
+  // Remove the image record from the database.
   await database.productImage.delete({
     where: {
       id: image.id,
     },
   });
 
+  console.log("IMAGE DELETE DB COMPLETE:", image.id);
+
+  // Verify that the database record is actually gone.
+  const deletedImage = await database.productImage.findUnique({
+    where: {
+      id: image.id,
+    },
+  });
+  console.log("IMAGE DELETE DB VERIFY:", deletedImage);
+  if (deletedImage) {
+    throw new HttpError(500, "Image could not be deleted from the database.");
+  }
+
   response.json({
     success: true,
     data: {
       imageId: image.id,
+      message: "Product image deleted successfully.",
     },
   });
 }
