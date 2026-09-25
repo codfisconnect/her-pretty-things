@@ -21,6 +21,7 @@ export interface AdminOrderItem {
 
 export interface AdminOrder {
   id: string;
+  orderNumber: string | null;
   createdAt: string;
   subtotal: number;
   shippingAmount: number;

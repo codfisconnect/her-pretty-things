@@ -48,7 +48,13 @@ function EditProduct() {
 
         const product = await getAdminProduct(productId);
 
-        console.log("Edit product loaded:", product);
+        console.log(
+          "Edit product image URLs:",
+          product.images.map((image) => ({
+            id: image.id,
+            url: image.url,
+          })),
+        );
 
         setName(product.name ?? "");
         setCategory((product.category as Category) ?? "kawaii");
@@ -56,11 +62,9 @@ function EditProduct() {
         setDescription(product.description ?? "");
         setStock(String(product.stock ?? ""));
 
-        setCurrentImages(
-  product.images?.map((image) => image.url) ?? [],
-);
+        setCurrentImages(product.images?.map((image) => image.url) ?? []);
 
-setCurrentImageRecords(product.images ?? []);
+        setCurrentImageRecords(product.images ?? []);
       } catch (error) {
         console.error("Could not load product:", error);
         setMessage("Could not load product.");
@@ -88,7 +92,9 @@ setCurrentImageRecords(product.images ?? []);
       let images = currentImages;
 
       if (imageFiles.length > 0) {
-        images = await uploadAdminProductImages(imageFiles);
+        const uploadedImages = await uploadAdminProductImages(imageFiles);
+
+        images = [...currentImages, ...uploadedImages];
       }
 
       await updateAdminProduct(productId, {
@@ -251,6 +257,12 @@ setCurrentImageRecords(product.images ?? []);
                         setCurrentImageRecords((previousImages) =>
                           previousImages.filter(
                             (currentImage) => currentImage.id !== image.id,
+                          ),
+                        );
+
+                        setCurrentImages((previousImages) =>
+                          previousImages.filter(
+                            (imageUrl) => imageUrl !== image.url,
                           ),
                         );
 

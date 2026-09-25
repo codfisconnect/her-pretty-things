@@ -2691,6 +2691,16 @@
   box-shadow: 0 13px 40px rgba(117, 76, 83, 0.07);
 }
 
+.shipping-info {
+  margin: 8px 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #faf5f6;
+  color: #6f5a5f;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .cart-items,
 .payment-address,
 .shipping-form {

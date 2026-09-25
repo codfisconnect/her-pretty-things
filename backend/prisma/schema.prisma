@@ -114,6 +114,7 @@ model Address {
 
 model Order {
 	id             String        @id @default(cuid())
+	orderNumber    String?       @unique
 	userId         String?
 	cartId         String?
 	addressId      String

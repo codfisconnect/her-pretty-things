@@ -1,12 +1,13 @@
-import { OrderStatus, PaymentStatus } from '@prisma/client'
-import { getDatabase } from '../config/database.js'
-import { HttpError } from '../middleware/errorHandler.js'
+import { OrderStatus, PaymentStatus } from "@prisma/client";
+import { getDatabase } from "../config/database.js";
+import { HttpError } from "../middleware/errorHandler.js";
 
-const orderInclude = { address: true, items: true } as const
+const orderInclude = { address: true, items: true } as const;
 
 function serializeOrder(order: Awaited<ReturnType<typeof getOrderRecord>>) {
   return {
     id: order.id,
+    orderNumber: order.orderNumber,
     createdAt: order.createdAt,
     subtotal: order.subtotal,
     shippingAmount: order.shippingAmount,
@@ -14,115 +15,144 @@ function serializeOrder(order: Awaited<ReturnType<typeof getOrderRecord>>) {
     orderStatus: order.orderStatus,
     paymentStatus: order.paymentStatus,
     razorpayPaymentId: order.razorpayPaymentId,
-    customer: { name: order.address.fullName, email: order.address.email, phone: order.address.phoneNumber },
+    customer: {
+      name: order.address.fullName,
+      email: order.address.email,
+      phone: order.address.phoneNumber,
+    },
     address: order.address,
     items: order.items.map((item) => ({
-      id: item.id, productName: item.productName, quantity: item.quantity, unitPrice: item.unitPrice, totalPrice: item.totalPrice,
-      isCustomizedScoop: item.isCustomizedScoop, numberOfScoops: item.numberOfScoops, colourTheme: item.colourTheme,
-      preferredCharacter: item.preferredCharacter, preferredItems: item.preferredItems, excludedItems: item.excludedItems, additionalMessage: item.additionalMessage,
+      id: item.id,
+      productName: item.productName,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      totalPrice: item.totalPrice,
+      isCustomizedScoop: item.isCustomizedScoop,
+      numberOfScoops: item.numberOfScoops,
+      age: item.age,
+      colourTheme: item.colourTheme,
+      preferredCharacter: item.preferredCharacter,
+      preferredItems: item.preferredItems,
+      excludedItems: item.excludedItems,
+      additionalMessage: item.additionalMessage,
     })),
-  }
+  };
 }
 
 async function getOrderRecord(orderId: string) {
-  const database = getDatabase()
-  const order = await database.order.findUnique({ where: { id: orderId }, include: orderInclude })
-  if (!order) throw new HttpError(404, 'Order not found.')
-  return order
+  const database = getDatabase();
+  const order = await database.order.findUnique({
+    where: { id: orderId },
+    include: orderInclude,
+  });
+  if (!order) throw new HttpError(404, "Order not found.");
+  return order;
 }
 
-export { getOrderRecord }
+export { getOrderRecord };
 
 export async function getDashboard() {
-  const database = getDatabase()
-  const [totalOrders, pendingPayment, paidOrders, processing, shipped, delivered, revenue, recentOrders] = await Promise.all([
+  const database = getDatabase();
+  const [
+    totalOrders,
+    pendingPayment,
+    paidOrders,
+    processing,
+    shipped,
+    delivered,
+    revenue,
+    recentOrders,
+  ] = await Promise.all([
     database.order.count(),
     database.order.count({ where: { paymentStatus: PaymentStatus.PENDING } }),
     database.order.count({ where: { paymentStatus: PaymentStatus.PAID } }),
     database.order.count({ where: { orderStatus: OrderStatus.PROCESSING } }),
     database.order.count({ where: { orderStatus: OrderStatus.SHIPPED } }),
     database.order.count({ where: { orderStatus: OrderStatus.DELIVERED } }),
-    database.order.aggregate({ where: { paymentStatus: PaymentStatus.PAID }, _sum: { totalAmount: true } }),
-    database.order.findMany({ take: 8, orderBy: { createdAt: 'desc' }, include: orderInclude }),
-  ])
+    database.order.aggregate({
+      where: { paymentStatus: PaymentStatus.PAID },
+      _sum: { totalAmount: true },
+    }),
+    database.order.findMany({
+      take: 8,
+      orderBy: { createdAt: "desc" },
+      include: orderInclude,
+    }),
+  ]);
   return {
-    metrics: { totalOrders, pendingPayment, paidOrders, processing, shipped, delivered, revenue: revenue._sum.totalAmount ?? 0 },
+    metrics: {
+      totalOrders,
+      pendingPayment,
+      paidOrders,
+      processing,
+      shipped,
+      delivered,
+      revenue: revenue._sum.totalAmount ?? 0,
+    },
     recentOrders: recentOrders.map(serializeOrder),
-  }
+  };
 }
 
 export async function listOrders() {
-  const database = getDatabase()
-  const orders = await database.order.findMany({ orderBy: { createdAt: 'desc' }, include: orderInclude })
-  return orders.map(serializeOrder)
+  const database = getDatabase();
+  const orders = await database.order.findMany({
+    orderBy: { createdAt: "desc" },
+    include: orderInclude,
+  });
+  return orders.map(serializeOrder);
 }
 
 export async function getOrder(orderId: string) {
-  return serializeOrder(await getOrderRecord(orderId))
+  return serializeOrder(await getOrderRecord(orderId));
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {
   if (!Object.values(OrderStatus).includes(status as OrderStatus)) {
-    throw new HttpError(400, 'Invalid order status.')
+    throw new HttpError(400, "Invalid order status.");
   }
 
-  const order = await getOrderRecord(orderId)
-  const nextStatus = status as OrderStatus
-  const currentStatus = order.orderStatus
+  const order = await getOrderRecord(orderId);
+  const nextStatus = status as OrderStatus;
+  const currentStatus = order.orderStatus;
 
   if (currentStatus === OrderStatus.CANCELLED) {
-    throw new HttpError(
-      409,
-      'A cancelled order cannot be changed.',
-    )
+    throw new HttpError(409, "A cancelled order cannot be changed.");
   }
 
   if (currentStatus === OrderStatus.DELIVERED) {
-    throw new HttpError(
-      409,
-      'A delivered order cannot be changed.',
-    )
+    throw new HttpError(409, "A delivered order cannot be changed.");
   }
 
   if (nextStatus === OrderStatus.CANCELLED) {
     throw new HttpError(
       400,
-      'Use the order cancellation endpoint to cancel an order.',
-    )
+      "Use the order cancellation endpoint to cancel an order.",
+    );
   }
 
   const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
-    [OrderStatus.PENDING_PAYMENT]: [
-      OrderStatus.PROCESSING,
-    ],
-    [OrderStatus.PROCESSING]: [
-      OrderStatus.SHIPPED,
-    ],
-    [OrderStatus.SHIPPED]: [
-      OrderStatus.DELIVERED,
-    ],
+    [OrderStatus.PENDING_PAYMENT]: [OrderStatus.PROCESSING],
+    [OrderStatus.PROCESSING]: [OrderStatus.SHIPPED],
+    [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED],
     [OrderStatus.DELIVERED]: [],
     [OrderStatus.CANCELLED]: [],
-  }
+  };
 
   if (!allowedTransitions[currentStatus].includes(nextStatus)) {
     throw new HttpError(
       409,
       `Order cannot move from ${currentStatus} to ${nextStatus}.`,
-    )
+    );
   }
 
   if (
     nextStatus === OrderStatus.PROCESSING &&
     order.paymentStatus !== PaymentStatus.PAID
   ) {
-    throw new HttpError(
-      409,
-      'Only paid orders can be processed.',
-    )
+    throw new HttpError(409, "Only paid orders can be processed.");
   }
 
-  const database = getDatabase()
+  const database = getDatabase();
 
   const updated = await database.order.update({
     where: {
@@ -132,7 +162,7 @@ export async function updateOrderStatus(orderId: string, status: string) {
       orderStatus: nextStatus,
     },
     include: orderInclude,
-  })
+  });
 
-  return serializeOrder(updated)
+  return serializeOrder(updated);
 }
