@@ -148,22 +148,36 @@
   object-fit: contain;
 }
 .edit-image-delete-button {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 7px;
   width: calc(100% - 16px);
   margin: 0 8px 8px;
-  min-height: 32px;
+  min-height: 38px;
+  padding: 8px 12px;
   border: 1px solid #e0d8d4;
   border-radius: 8px;
   background: #fff;
   color: #a33;
   font-family: inherit;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.edit-image-delete-button:hover:not(:disabled) {
+  border-color: #c9aaa4;
+  background: #fff8f7;
+}
+
+.edit-image-delete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .edit-image-delete-button:hover:not(:disabled) {

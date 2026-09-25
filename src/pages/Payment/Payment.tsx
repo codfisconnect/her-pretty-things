@@ -175,7 +175,7 @@ function Payment() {
 
   return (
     <section className="checkout-page container">
-      <p className="eyebrow">Order {order.id}</p>
+      <p className="eyebrow">Order {order.orderNumber}</p>
       <h1>Payment</h1>
 
       <div className="checkout-layout">

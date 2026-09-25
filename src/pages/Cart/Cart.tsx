@@ -10,6 +10,7 @@ import {
 function Cart() {
   const [cart, setCart] = useState<CartResponse | null>(null);
   const [message, setMessage] = useState("");
+  const hasScoop = cart?.items.some((item) => item.isCustomizedScoop) ?? false;
 
   useEffect(() => {
     const cartId = localStorage.getItem("hpt_cart_id");
@@ -152,6 +153,14 @@ function Cart() {
 
           <p>
             Shipping <strong>₹{cart.shipping.toLocaleString("en-IN")}</strong>
+          </p>
+
+          <p className="shipping-info">
+            {hasScoop
+              ? "Scoop shipping charges are calculated according to the selected Scoop quantity."
+              : cart.subtotal >= 500
+                ? "🎉 Free shipping unlocked! Jewellery & Kawaii orders above ₹500 qualify for free shipping."
+                : `Add ₹${(500 - cart.subtotal).toLocaleString("en-IN")} more to get FREE shipping on Jewellery & Kawaii orders.`}
           </p>
 
           <div>

@@ -27,22 +27,100 @@
 
 .product-management-image {
   width: 100%;
-  height: 360px;
+  min-height: 360px;
   background: #f8f5f3;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 24px;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.product-management-image img {
+.product-management-image-carousel {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.product-management-image-track {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 4px;
+  scrollbar-width: thin;
+}
+
+.product-management-image-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.product-management-image-track::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #d8cfca;
+}
+
+.product-management-image-item {
+  flex: 0 0 110px;
+  width: 110px;
+  height: 110px;
+  padding: 8px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.product-management-image-item:hover {
+  transform: translateY(-2px);
+}
+
+.product-management-image-item.active {
+  border-color: #b89b8d;
+}
+
+.product-management-image-item img {
   width: 100%;
   height: 100%;
-  max-width: 620px;
   object-fit: contain;
   display: block;
-  border-radius: 12px;
+  border-radius: 8px;
+}
+
+.product-management-image-arrow {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ddd4cf;
+  border-radius: 50%;
+  background: #fff;
+  color: #5c514b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.product-management-image-arrow:hover {
+  background: #f5efec;
+  border-color: #c8b9b1;
+}
+
+.product-management-image-arrow:active {
+  transform: scale(0.95);
 }
 
 .product-management-image span {
@@ -177,4 +255,107 @@
   .product-delete-button {
     width: 100%;
   }
+}
+
+/* Product image zoom preview */
+
+.product-image-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  background: rgba(0, 0, 0, 0.78);
+  box-sizing: border-box;
+}
+
+.product-image-preview-modal {
+  position: relative;
+  width: min(90vw, 1100px);
+  height: min(88vh, 800px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 70px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.product-image-preview-large {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.product-image-preview-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #f5f1ef;
+  color: #4d4541;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-image-preview-close:hover {
+  background: #e9e1dd;
+}
+
+.product-image-preview-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  color: #4d4541;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.product-image-preview-arrow:hover {
+  background: #f5f1ef;
+}
+
+.product-image-preview-arrow-left {
+  left: 16px;
+}
+
+.product-image-preview-arrow-right {
+  right: 16px;
+}
+
+.product-image-preview-counter {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
 }

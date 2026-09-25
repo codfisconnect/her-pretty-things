@@ -13,6 +13,7 @@ export interface ShippingDetails {
 
 export interface OrderResponse {
 	id: string
+	orderNumber: string | null;
 	subtotal: number
 	shippingAmount: number
 	totalAmount: number
