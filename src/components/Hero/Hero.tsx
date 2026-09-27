@@ -38,12 +38,12 @@ function Hero() {
           </p>
 
           <div className="hero-actions">
-            <Link className="button button-dark" to="/scoops">
-              Shop Now <ArrowRight size={17} />
+            <Link className="button button-dark" to="/jewellery">
+              SHOP PRETTY THINGS <ArrowRight size={17} />
             </Link>
 
-            <Link className="text-link" to="/kawaii">
-              Explore Kawaii <ArrowRight size={16} />
+            <Link className="button button-outline" to="/byob">
+              BUILD YOUR OWN BOX
             </Link>
           </div>
 

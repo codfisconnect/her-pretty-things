@@ -1,48 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
-  cancelPayment,
   createPayment,
   verifyPayment,
 } from '../../services/paymentService'
 import { getOrder, type OrderResponse } from '../../services/orderService'
 
-declare global {
-  interface Window {
-    Razorpay: new (options: RazorpayOptions) => RazorpayInstance
-  }
-}
 
-interface RazorpayOptions {
-  key: string
-  amount: number
-  currency: string
-  name: string
-  description: string
-  order_id: string
-  prefill?: {
-    name?: string
-    email?: string
-    contact?: string
-  }
-  theme?: {
-    color?: string
-  }
-  handler: (response: RazorpayPaymentResponse) => void
-  modal?: {
-    ondismiss?: () => void
-  }
-}
-
-interface RazorpayInstance {
-  open: () => void
-}
-
-interface RazorpayPaymentResponse {
-  razorpay_order_id: string
-  razorpay_payment_id: string
-  razorpay_signature: string
-}
 
 function Payment() {
   const { orderId } = useParams()
@@ -108,7 +72,7 @@ function Payment() {
           color: '#e8a4b8',
         },
 
-        handler: async (response) => {
+        handler: async (response: any) => {
           try {
             setMessage('Verifying your payment...')
 
@@ -135,21 +99,11 @@ function Payment() {
         },
 
         modal: {
-  ondismiss: async () => {
-    try {
-      await cancelPayment(order.id)
-      setMessage('Payment was cancelled.')
-    } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : 'Payment was cancelled, but we could not update the order.',
-      )
-    } finally {
-      setIsProcessing(false)
-    }
-  },
-},
+          ondismiss: () => {
+            setMessage('Payment was dismissed. You can click "Continue to payment" below to retry.')
+            setIsProcessing(false)
+          },
+        },
       })
 
       razorpay.open()

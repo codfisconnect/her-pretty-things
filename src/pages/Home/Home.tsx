@@ -1,19 +1,18 @@
 import {
   ArrowLeft,
   ArrowRight,
-  ChevronRight,
   Sparkles,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { getProducts } from "../../services/productService";
-import BrandExperience from "../../components/BrandExperience/BrandExperience";
 import CategoryCard, {
   type Category,
 } from "../../components/CategoryCard/CategoryCard";
 import Hero from "../../components/Hero/Hero";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import SocialGallery from "../../components/SocialGallery/SocialGallery";
+import PrettyPlay from "../../components/PrettyPlay/PrettyPlay";
 import type { Product } from "../../types/product";
 import "./Home.css";
 
@@ -39,6 +38,13 @@ const categories: Category[] = [
     accent: "category-yellow",
     icon: "🐰",
   },
+  {
+    name: "Build Your Own Box",
+    slug: "byob",
+    description: "Your box. Your picks. Your custom gift set.",
+    accent: "category-pink",
+    icon: "🎁",
+  },
 ];
 
 interface ProductCarouselProps {
@@ -55,12 +61,8 @@ function ProductCarousel({
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const scrollCarousel = (direction: "left" | "right") => {
-    if (!carouselRef.current) {
-      return;
-    }
-
+    if (!carouselRef.current) return;
     const amount = carouselRef.current.clientWidth * 0.8;
-
     carouselRef.current.scrollBy({
       left: direction === "right" ? amount : -amount,
       behavior: "smooth",
@@ -121,7 +123,6 @@ function Home() {
           getProducts("jewellery"),
           getProducts("kawaii"),
         ]);
-
         setJewelleryProducts(jewellery);
         setKawaiiProducts(kawaii);
       } catch (error) {
@@ -130,7 +131,6 @@ function Home() {
         setLoading(false);
       }
     }
-
     loadProducts();
   }, []);
 
@@ -139,6 +139,7 @@ function Home() {
       <Hero />
 
       <main>
+        {/* 4 Primary Categories */}
         <section className="section container category-section">
           <div className="section-heading">
             <div>
@@ -146,7 +147,7 @@ function Home() {
               <h2>Shop Your Pretty Picks</h2>
             </div>
 
-            <Link className="text-link desktop-link" to="/scoops">
+            <Link className="text-link desktop-link" to="/jewellery">
               View all <ArrowRight size={16} />
             </Link>
           </div>
@@ -158,6 +159,7 @@ function Home() {
           </div>
         </section>
 
+        {/* Handpicked Products Carousel */}
         <section className="section featured-section">
           <div className="container">
             <div className="section-heading">
@@ -195,37 +197,82 @@ function Home() {
           </div>
         </section>
 
-        <BrandExperience />
-
-        <section className="story-section container">
-          <div className="story-art">
-            <div className="story-sticker">
-              made
-              <br />
-              with <span>♡</span>
+        {/* Mystery Scoop Spotlight Banner */}
+        <section className="container" style={{ margin: "2rem auto" }}>
+          <div style={{
+            background: "linear-gradient(135deg, #fdf2f8 0%, #fff1f2 100%)",
+            border: "1.5px solid #fbcfe8",
+            borderRadius: 24,
+            padding: "2rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "1.5rem"
+          }}>
+            <div style={{ maxWidth: 520 }}>
+              <span className="eyebrow" style={{ color: "#db2777" }}>
+                🍨 OUR SIGNATURE EXPERIENCE
+              </span>
+              <h2 style={{ fontSize: "1.8rem", margin: "0.3rem 0 0.5rem", color: "#2b2226" }}>
+                The Mystery Scoop Box
+              </h2>
+              <p style={{ color: "#716269", margin: "0 0 1.2rem", lineHeight: 1.5 }}>
+                Pick your scoop quantity, choose your favorite colour theme and character, and let us handpick a magical batch of jewellery, keychains, and stationery treasures.
+              </p>
+              <Link to="/scoops" className="button button-dark">
+                Configure Your Scoop <ArrowRight size={16} />
+              </Link>
             </div>
-            <div className="story-flower">✿</div>
-            <div className="story-bow">⌁</div>
-          </div>
-
-          <div className="story-copy">
-            <p className="eyebrow">A little about us</p>
-
-            <h2>A Little About Her Pretty Things</h2>
-
-            <p>
-              Her Pretty Things is a tiny corner of the internet filled with
-              cute surprises, pretty jewellery, and Kawaii finds. Every piece
-              is chosen to add a little sparkle to your day and make gifting
-              feel extra lovely.
-            </p>
-
-            <Link className="button button-outline" to="/about">
-              Know Our Story <ChevronRight size={17} />
-            </Link>
+            <div style={{ width: 160, height: 160, borderRadius: 20, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 24px rgba(219,39,119,0.12)" }}>
+              <img
+                src="/images/Scoop-Board.png"
+                alt="Mystery Scoop Board"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            </div>
           </div>
         </section>
 
+        {/* BYOB Callout Banner */}
+        <section className="container" style={{ margin: "2rem auto" }}>
+          <div style={{
+            background: "linear-gradient(135deg, #faf5f8 0%, #f3e8f0 100%)",
+            border: "1.5px solid #ebdbe5",
+            borderRadius: 24,
+            padding: "2rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "1.5rem"
+          }}>
+            <div style={{ maxWidth: 520 }}>
+              <span className="eyebrow" style={{ color: "#9d174d" }}>
+                🎁 CUSTOM GIFTING
+              </span>
+              <h2 style={{ fontSize: "1.8rem", margin: "0.3rem 0 0.5rem", color: "#2b2226" }}>
+                Build Your Own Box (BYOB)
+              </h2>
+              <p style={{ color: "#716269", margin: "0 0 1.2rem", lineHeight: 1.5 }}>
+                Your box. Your picks. Your way. Choose eligible Kawaii and Jewellery pieces, reach the ₹1,000 minimum, and we will package your personalized hamper with extra sweetness.
+              </p>
+              <Link to="/byob" className="button button-dark">
+                Start Building Your Box <ArrowRight size={16} />
+              </Link>
+            </div>
+            <div style={{ width: 160, height: 160, borderRadius: 20, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#fdf2f8", fontSize: "3.5rem" }}>
+              🎁✨
+            </div>
+          </div>
+        </section>
+
+        {/* Pretty Play Section */}
+        <section className="container" style={{ margin: "2.5rem auto" }}>
+          <PrettyPlay />
+        </section>
+
+        {/* Social / Instagram Gallery */}
         <SocialGallery />
       </main>
     </>

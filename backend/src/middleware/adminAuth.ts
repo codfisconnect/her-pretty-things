@@ -24,19 +24,33 @@ function parseCookies(header: string | undefined) {
 	return new Map<string, string>(entries)
 }
 
-export function createAdminSession(response: Response) {
+export function createAdminSession(response: Response, request?: Request) {
 	const payload = `${Date.now() + SESSION_TTL_SECONDS * 1000}`
 	const token = `${payload}.${sign(payload)}`
+	const isHttps = request ? (request.secure || request.headers['x-forwarded-proto'] === 'https') : false
+	const isProduction = process.env.NODE_ENV === 'production' || isHttps
+
+	const cookiePolicy = isProduction
+		? '; SameSite=None; Secure'
+		: '; SameSite=Lax'
+
 	response.setHeader(
 		'Set-Cookie',
-		`${COOKIE_NAME}=${token}; Max-Age=${SESSION_TTL_SECONDS}; Path=/; HttpOnly; SameSite=None; Secure`,
+		`${COOKIE_NAME}=${token}; Max-Age=${SESSION_TTL_SECONDS}; Path=/; HttpOnly${cookiePolicy}`,
 	)
 }
 
-export function clearAdminSession(response: Response) {
+export function clearAdminSession(response: Response, request?: Request) {
+	const isHttps = request ? (request.secure || request.headers['x-forwarded-proto'] === 'https') : false
+	const isProduction = process.env.NODE_ENV === 'production' || isHttps
+
+	const cookiePolicy = isProduction
+		? '; SameSite=None; Secure'
+		: '; SameSite=Lax'
+
 	response.setHeader(
 		'Set-Cookie',
-		`${COOKIE_NAME}=; Max-Age=0; Path=/; HttpOnly; SameSite=None; Secure`,
+		`${COOKIE_NAME}=; Max-Age=0; Path=/; HttpOnly${cookiePolicy}`,
 	)
 }
 

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { getProducts } from '../../services/productService'
+import ProductCard from '../../components/ProductCard/ProductCard'
 import type { Product } from '../../types/product'
 import './Kawaii.css'
 
 function Kawaii() {
   const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -13,6 +15,9 @@ function Kawaii() {
       .then(setProducts)
       .catch((error) => {
         console.error('Could not load Kawaii products:', error)
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }, [])
 
@@ -27,51 +32,24 @@ function Kawaii() {
       </button>
 
       <div className="jewellery-intro">
-        <h1>Kawaii</h1>
+        <span className="eyebrow">CUTE FINDS & SWEET STATIONERY</span>
+        <h1>Kawaii Collection</h1>
+        <p style={{ color: '#716269', fontSize: '0.95rem', margin: '0.4rem 0 0' }}>
+          Adorable plushies, pastel pens, aesthetic desk buddies, and accessories to bring a smile.
+        </p>
       </div>
 
       <div className="jewellery-product-grid">
-        {products.map((product) => (
-          <article
-            className="jewellery-product"
-            key={product.id}
-          >
-            <Link
-              to={`/product/${product.id}`}
-              className="jewellery-product-image"
-            >
-              {product.image ? (
-                <img
-                  src={product.image}
-                  alt={product.name}
-                />
-              ) : (
-                <div>No image available</div>
-              )}
-            </Link>
+        {loading && <p>Loading kawaii treasures...</p>}
 
-            <div className="jewellery-product-info">
-              
+        {!loading && products.length === 0 && (
+          <p>No kawaii products available.</p>
+        )}
 
-              <h2>
-                <Link to={`/product/${product.id}`}>
-                  {product.name}
-                </Link>
-              </h2>
-
-              <p className="jewellery-product-price">
-                ₹{product.price}
-              </p>
-
-              <Link
-                to={`/product/${product.id}`}
-                className="jewellery-view-button"
-              >
-                MAKE IT YOURS
-              </Link>
-            </div>
-          </article>
-        ))}
+        {!loading &&
+          products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
       </div>
     </section>
   )

@@ -65,22 +65,22 @@ export async function getScoopConfig() {
       maxExcludedItems: setting.maxExcludedItems,
     },
 
-    shippingRules: setting.shippingRules.map((rule) => ({
+    shippingRules: setting.shippingRules.map((rule: any) => ({
       scoopCount: rule.scoopCount,
       shipping: rule.shipping,
     })),
 
-    colours: colours.map((colour) => ({
-  id: colour.id,
-  name: colour.name,
-})),
-characters: characters.map((character) => ({
-  id: character.id,
-  name: character.name,
-})),
-items: items.map((item) => ({
-  id: item.id,
-  name: item.name,
-})),
+    colours: colours.map((colour: any) => ({
+      id: colour.id,
+      name: colour.name,
+    })),
+    characters: characters.map((character: any) => ({
+      id: character.id,
+      name: character.name,
+    })),
+    items: items.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+    })),
   }
 }

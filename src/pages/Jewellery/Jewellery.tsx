@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { getProducts } from '../../services/productService'
+import ProductCard from '../../components/ProductCard/ProductCard'
 import type { Product } from '../../types/product'
 import './Jewellery.css'
 
@@ -8,7 +9,6 @@ function Jewellery() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -34,11 +34,15 @@ function Jewellery() {
       </button>
 
       <div className="jewellery-intro">
-        <h1>Jewellery</h1>
+        <span className="eyebrow">PRETTY PIECES FOR EVERY DAY</span>
+        <h1>Jewellery Collection</h1>
+        <p style={{ color: '#716269', fontSize: '0.95rem', margin: '0.4rem 0 0' }}>
+          Delicate necklaces, sparkling earrings, and sweet charms to brighten your little moments.
+        </p>
       </div>
 
       <div className="jewellery-product-grid">
-        {loading && <p>Loading jewellery products...</p>}
+        {loading && <p>Loading lovely pieces...</p>}
 
         {!loading && error && <p>{error}</p>}
 
@@ -49,42 +53,7 @@ function Jewellery() {
         {!loading &&
           !error &&
           products.map((product) => (
-            <article className="jewellery-product" key={product.id}>
-              <Link
-                to={`/product/${product.id}`}
-                className="jewellery-product-image"
-              >
-                {product.image ? (
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                  />
-                ) : (
-                  <span>No image</span>
-                )}
-              </Link>
-
-              <div className="jewellery-product-info">
-                
-
-                <h2>
-                  <Link to={`/product/${product.id}`}>
-                    {product.name}
-                  </Link>
-                </h2>
-
-                <p className="jewellery-product-price">
-                  ₹{product.price}
-                </p>
-
-                <Link
-                  to={`/product/${product.id}`}
-                  className="jewellery-view-button"
-                >
-                  MAKE IT YOURS
-                </Link>
-              </div>
-            </article>
+            <ProductCard key={product.id} product={product} />
           ))}
       </div>
     </section>

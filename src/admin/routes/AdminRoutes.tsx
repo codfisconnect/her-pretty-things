@@ -18,6 +18,7 @@ import { getAdminSession } from "../../services/adminService";
 
 function AdminRoutes() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     getAdminSession()
@@ -43,10 +44,15 @@ function AdminRoutes() {
             </div>
           ) : authenticated ? (
             <div className="admin-shell">
-              <AdminSidebar />
+              <AdminSidebar
+                mobileOpen={mobileNavOpen}
+                onClose={() => setMobileNavOpen(false)}
+              />
 
               <div className="admin-main">
-                <AdminNavbar />
+                <AdminNavbar
+                  onToggleMobile={() => setMobileNavOpen((prev) => !prev)}
+                />
 
                 <Routes>
                   <Route
