@@ -197,7 +197,7 @@ class DevDataStore {
     maxPreferredItems: 3,
     maxExcludedItems: 3,
     active: true,
-    imageUrl: '/images/Scoop-Board.png',
+    imageUrl: 'https://res.cloudinary.com/otb2lsot/image/upload/v1790406122/her-pretty-things/products/anqebnjzsd3wrwfzvfnd.png',
     createdAt: new Date(),
     updatedAt: new Date(),
   }

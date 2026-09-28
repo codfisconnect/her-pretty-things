@@ -6,6 +6,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { getProducts } from "../../services/productService";
+import { getScoopConfig } from "../../services/scoopService";
+import { fetchByobProducts } from "../../services/byobService";
 import CategoryCard, {
   type Category,
 } from "../../components/CategoryCard/CategoryCard";
@@ -114,24 +116,58 @@ function ProductCarousel({
 function Home() {
   const [jewelleryProducts, setJewelleryProducts] = useState<Product[]>([]);
   const [kawaiiProducts, setKawaiiProducts] = useState<Product[]>([]);
+  const [scoopImageUrl, setScoopImageUrl] = useState<string | null>(null);
+  const [byobPreviewImages, setByobPreviewImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadProducts() {
+    async function loadHomepageData() {
       try {
-        const [jewellery, kawaii] = await Promise.all([
+        const [jewellery, kawaii, scoopConfig, byobProds] = await Promise.all([
           getProducts("jewellery"),
           getProducts("kawaii"),
+          getScoopConfig(),
+          fetchByobProducts(),
         ]);
         setJewelleryProducts(jewellery);
         setKawaiiProducts(kawaii);
+
+        if (scoopConfig?.imageUrl) {
+          setScoopImageUrl(scoopConfig.imageUrl);
+        }
+
+        if (Array.isArray(byobProds) && byobProds.length > 0) {
+          const validImages = byobProds
+            .filter((p) => p.name && !p.name.toLowerCase().includes("sample"))
+            .map((p) => p.image || (p.images && p.images[0]))
+            .filter((img): img is string => typeof img === "string" && img.length > 0 && !img.includes("Scoop-Board"));
+
+          if (validImages.length >= 2) {
+            setByobPreviewImages(validImages.slice(0, 2));
+          } else if (validImages.length === 1) {
+            setByobPreviewImages([
+              validImages[0],
+              "https://res.cloudinary.com/otb2lsot/image/upload/v1790153970/her-pretty-things/products/jljdxbnckvjcxi1fhdwy.png",
+            ]);
+          } else {
+            setByobPreviewImages([
+              "https://res.cloudinary.com/otb2lsot/image/upload/v1790154032/her-pretty-things/products/ytmewrjji6wqhvsut5sq.png",
+              "https://res.cloudinary.com/otb2lsot/image/upload/v1790315690/her-pretty-things/products/koytyyclbwruvb0in48s.jpg",
+            ]);
+          }
+        } else {
+          setByobPreviewImages([
+            "https://res.cloudinary.com/otb2lsot/image/upload/v1790154032/her-pretty-things/products/ytmewrjji6wqhvsut5sq.png",
+            "https://res.cloudinary.com/otb2lsot/image/upload/v1790315690/her-pretty-things/products/koytyyclbwruvb0in48s.jpg",
+          ]);
+        }
       } catch (error) {
         console.error("Could not load homepage products:", error);
       } finally {
         setLoading(false);
       }
     }
-    loadProducts();
+    loadHomepageData();
   }, []);
 
   return (
@@ -197,73 +233,85 @@ function Home() {
           </div>
         </section>
 
-        {/* Mystery Scoop Spotlight Banner */}
-        <section className="container" style={{ margin: "2rem auto" }}>
-          <div style={{
-            background: "linear-gradient(135deg, #fdf2f8 0%, #fff1f2 100%)",
-            border: "1.5px solid #fbcfe8",
-            borderRadius: 24,
-            padding: "2rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "1.5rem"
-          }}>
-            <div style={{ maxWidth: 520 }}>
-              <span className="eyebrow" style={{ color: "#db2777" }}>
-                🍨 OUR SIGNATURE EXPERIENCE
-              </span>
-              <h2 style={{ fontSize: "1.8rem", margin: "0.3rem 0 0.5rem", color: "#2b2226" }}>
-                The Mystery Scoop Box
-              </h2>
-              <p style={{ color: "#716269", margin: "0 0 1.2rem", lineHeight: 1.5 }}>
-                Pick your scoop quantity, choose your favorite colour theme and character, and let us handpick a magical batch of jewellery, keychains, and stationery treasures.
-              </p>
-              <Link to="/scoops" className="button button-dark">
-                Configure Your Scoop <ArrowRight size={16} />
-              </Link>
-            </div>
-            <div style={{ width: 160, height: 160, borderRadius: 20, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 24px rgba(219,39,119,0.12)" }}>
-              <img
-                src="/images/Scoop-Board.png"
-                alt="Mystery Scoop Board"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
-          </div>
-        </section>
+        {/* Curated Shopping Experiences: Mystery Scoop + Build Your Own Box */}
+        <section className="container experiences-section" aria-label="Curated Shopping Experiences">
+          <div className="experiences-grid">
+            {/* Mystery Scoop Box Card */}
+            <article className="experience-card experience-card--scoop">
+              <div className="experience-card-content">
+                <span className="experience-eyebrow experience-eyebrow--scoop">
+                  🍨 OUR SIGNATURE EXPERIENCE
+                </span>
+                <h2 className="experience-title">The Mystery Scoop Box</h2>
+                <p className="experience-tagline">
+                  Pick your theme. We&apos;ll curate the magic.
+                </p>
+                <Link to="/scoops" className="experience-cta experience-cta--scoop">
+                  <span>Configure Your Scoop</span>
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+              </div>
 
-        {/* BYOB Callout Banner */}
-        <section className="container" style={{ margin: "2rem auto" }}>
-          <div style={{
-            background: "linear-gradient(135deg, #faf5f8 0%, #f3e8f0 100%)",
-            border: "1.5px solid #ebdbe5",
-            borderRadius: 24,
-            padding: "2rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "1.5rem"
-          }}>
-            <div style={{ maxWidth: 520 }}>
-              <span className="eyebrow" style={{ color: "#9d174d" }}>
-                🎁 CUSTOM GIFTING
-              </span>
-              <h2 style={{ fontSize: "1.8rem", margin: "0.3rem 0 0.5rem", color: "#2b2226" }}>
-                Build Your Own Box (BYOB)
-              </h2>
-              <p style={{ color: "#716269", margin: "0 0 1.2rem", lineHeight: 1.5 }}>
-                Your box. Your picks. Your way. Choose eligible Kawaii and Jewellery pieces, reach the ₹1,000 minimum, and we will package your personalized hamper with extra sweetness.
-              </p>
-              <Link to="/byob" className="button button-dark">
-                Start Building Your Box <ArrowRight size={16} />
-              </Link>
-            </div>
-            <div style={{ width: 160, height: 160, borderRadius: 20, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#fdf2f8", fontSize: "3.5rem" }}>
-              🎁✨
-            </div>
+              <div className="experience-card-media experience-card-media--scoop">
+                {scoopImageUrl ? (
+                  <img
+                    src={scoopImageUrl}
+                    alt="The Mystery Scoop Box"
+                    className="experience-scoop-img"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="experience-img-skeleton" aria-hidden="true" />
+                )}
+              </div>
+            </article>
+
+            {/* Build Your Own Box Card */}
+            <article className="experience-card experience-card--byob">
+              <div className="experience-card-content">
+                <span className="experience-eyebrow experience-eyebrow--byob">
+                  🎁 CUSTOM GIFTING
+                </span>
+                <h2 className="experience-title">Build Your Own Box</h2>
+                <p className="experience-tagline">
+                  Your box. Your picks. Your way.
+                </p>
+                <Link to="/byob" className="experience-cta experience-cta--byob">
+                  <span>Start Building Your Box</span>
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+              </div>
+
+              <div className="experience-card-media experience-card-media--byob">
+                <div className="byob-curation-visual">
+                  <div className="byob-items-cascade">
+                    {byobPreviewImages.map((imgUrl, idx) => (
+                      <div
+                        key={idx}
+                        className={`byob-item-bubble byob-item-bubble--${idx + 1}`}
+                      >
+                        <img
+                          src={imgUrl}
+                          alt={`BYOB Pick ${idx + 1}`}
+                          loading="lazy"
+                        />
+                      </div>
+                    ))}
+                    <div className="byob-gift-target" title="Custom Gift Box">
+                      <span>🎁</span>
+                      <span className="byob-sparkle-badge">✨</span>
+                    </div>
+                  </div>
+                  <div className="byob-flow-pill">
+                    <span>Choose</span>
+                    <span className="byob-flow-dot">•</span>
+                    <span>Curate</span>
+                    <span className="byob-flow-dot">•</span>
+                    <span>Gift</span>
+                  </div>
+                </div>
+              </div>
+            </article>
           </div>
         </section>
 
