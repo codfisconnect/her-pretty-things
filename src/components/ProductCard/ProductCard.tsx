@@ -1,11 +1,8 @@
-import { useState } from "react";
-import { Heart, ShoppingBag } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { addCartItem } from "../../services/cartService";
-import {
-  isInWishlist,
-  toggleWishlist,
-} from "../../services/wishlistService";
+import React, { useState } from "react";
+import { Heart, ShoppingBag, Check } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useWishlist } from "../../context/WishlistContext";
+import { useCart } from "../../context/CartContext";
 import type { Product } from "../../types/product";
 import "./ProductCard.css";
 
@@ -13,34 +10,38 @@ interface ProductCardProps {
   product: Product;
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
-  const [isWishlisted, setIsWishlisted] = useState(
-    isInWishlist(product.id),
-  );
-  const navigate = useNavigate();
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const { addToCart } = useCart();
+  const [adding, setAdding] = useState(false);
 
-  const handleAddToCart = async () => {
+  const isWishlisted = isInWishlist(product.id);
+
+  const hasDiscount = product.mrp !== undefined && product.mrp !== null && product.mrp > product.price;
+  const discountPercent = hasDiscount
+    ? Math.round(((product.mrp! - product.price) / product.mrp!) * 100)
+    : 0;
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     try {
-      const savedSessionId =
-        localStorage.getItem("hpt_session_id") ?? crypto.randomUUID();
-
-      localStorage.setItem("hpt_session_id", savedSessionId);
-
-      const savedCartId = localStorage.getItem("hpt_cart_id");
-
-      const cart = await addCartItem({
-        cartId: savedCartId ?? undefined,
-        sessionId: savedSessionId,
+      setAdding(true);
+      await addToCart({
         productId: product.id,
         quantity: 1,
       });
-
-      localStorage.setItem("hpt_cart_id", cart.id);
-
-      navigate("/cart");
+      setTimeout(() => setAdding(false), 900);
     } catch (error) {
       console.error("Could not add product to cart:", error);
+      setAdding(false);
     }
+  };
+
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product);
   };
 
   return (
@@ -55,7 +56,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
             src={product.image}
             alt={product.name}
             className="product-image"
+            loading="lazy"
           />
+          {hasDiscount && (
+            <span className="product-card-discount-badge">
+              {discountPercent}% OFF
+            </span>
+          )}
         </Link>
       </div>
 
@@ -73,14 +80,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 ? `Remove ${product.name} from wishlist`
                 : `Add ${product.name} to wishlist`
             }
-            onClick={() => {
-              const added = toggleWishlist(product);
-              setIsWishlisted(added);
-            }}
+            onClick={handleWishlistClick}
           >
             <Heart
               size={15}
               fill={isWishlisted ? "currentColor" : "none"}
+              color={isWishlisted ? "#db2777" : "currentColor"}
             />
           </button>
         </div>
@@ -92,18 +97,37 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </h3>
 
         <div className="product-bottom">
-          <span className="product-price">
-            ₹{product.price.toLocaleString("en-IN")}
-          </span>
+          <div className="product-pricing">
+            <span className="product-price">
+              ₹{product.price.toLocaleString("en-IN")}
+            </span>
+            {hasDiscount && (
+              <span className="product-mrp-price">
+                ₹{product.mrp!.toLocaleString("en-IN")}
+              </span>
+            )}
+          </div>
 
           <button
             type="button"
-            className="add-cart-button"
-            aria-label={`Add ${product.name} to cart`}
+            className={`add-cart-button ${adding ? "added" : ""} ${product.stock <= 0 ? "out-of-stock" : ""}`}
+            aria-label={product.stock <= 0 ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
             onClick={handleAddToCart}
+            disabled={adding || product.stock <= 0}
           >
-            <ShoppingBag size={15} />
-            <span>Add</span>
+            {product.stock <= 0 ? (
+              <span>Out</span>
+            ) : adding ? (
+              <>
+                <Check size={13} />
+                <span>Added</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag size={13} />
+                <span>Add</span>
+              </>
+            )}
           </button>
         </div>
       </div>

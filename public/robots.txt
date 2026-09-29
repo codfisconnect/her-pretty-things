@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Allow: /scoops
+Allow: /jewellery
+Allow: /kawaii
+Allow: /byob
+Allow: /play
+Allow: /about
+Allow: /contact
+Allow: /shipping
+Allow: /return
+Allow: /replacement-policy
+Allow: /product/
+
+Disallow: /admin
+Disallow: /checkout
+Disallow: /payment/
+Disallow: /profile
+Disallow: /orders
+Disallow: /login
+Disallow: /register
+Disallow: /api/
+
+Sitemap: https://herprettythings.com/sitemap.xml

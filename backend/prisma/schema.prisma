@@ -1,183 +1,205 @@
 generator client {
-	provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-	provider = "postgresql"
-	url      = env("DATABASE_URL")
-}
-
-enum OrderStatus {
-	PENDING_PAYMENT
-	PROCESSING
-	SHIPPED
-	DELIVERED
-	CANCELLED
-}
-
-enum PaymentStatus {
-	PENDING
-	PAID
-	FAILED
-	REFUNDED
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-	id        String    @id @default(cuid())
-	email     String    @unique
-	name      String?
-	phone     String?
-	createdAt DateTime  @default(now())
-	updatedAt DateTime  @updatedAt
-	carts     Cart[]
-	orders    Order[]
-	addresses Address[]
+  id               String         @id @default(cuid())
+  email            String         @unique
+  name             String?
+  phone            String?
+  passwordHash     String?
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  role             String         @default("CUSTOMER")
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  addresses        Address[]
+  carts            Cart[]
+  orders           Order[]
+  wishlist         WishlistItem[]
+  rewards          GameReward[]
 }
 
 model Product {
-  id          String         @id @default(cuid())
-  name        String
-  slug        String         @unique
-  description String?
-  category    String         @default("jewellery")
-  price       Int
-  stock       Int             @default(0)
-  active      Boolean         @default(true)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  images      ProductImage[]
-  cartItems   CartItem[]
-  orderItems  OrderItem[]
+  id           String         @id @default(cuid())
+  name         String
+  slug         String         @unique
+  description  String?
+  mrp          Int?
+  price        Int
+  sku          String?
+  stock        Int            @default(0)
+  category     String         @default("jewellery")
+  byobEligible Boolean        @default(false)
+  active       Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+  images       ProductImage[]
+  wishlists    WishlistItem[]
 }
 
 model ProductImage {
-	id        String  @id @default(cuid())
-	productId String
-	url       String
-	altText   String?
-	sortOrder Int     @default(0)
-	product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  altText   String?
+  sortOrder Int     @default(0)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Cart {
-	id        String     @id @default(cuid())
-	userId    String?
-	sessionId String?
-	createdAt DateTime   @default(now())
-	updatedAt DateTime   @updatedAt
-	user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
-	items     CartItem[]
-	orders    Order[]
-	@@index([userId])
-	@@index([sessionId])
+  id        String     @id @default(cuid())
+  userId    String?
+  sessionId String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User?      @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  orders    Order[]
+
+  @@index([userId])
+  @@index([sessionId])
 }
 
 model CartItem {
-	id                  String   @id @default(cuid())
-	cartId              String
-	productId           String?
-	quantity            Int      @default(1)
-	unitPrice           Int
-	subtotal            Int
-	shipping            Int      @default(0)
-	total               Int
-	isCustomizedScoop   Boolean  @default(false)
-	numberOfScoops      Int?
-	age 				Int?
-	colourTheme         String?
-	preferredCharacter  String?
-	preferredItems      String[] @default([])
-	excludedItems       String[] @default([])
-	additionalMessage   String?
-	cart                Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-	product             Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
-	createdAt           DateTime @default(now())
-	updatedAt           DateTime @updatedAt
-	@@index([cartId])
+  id                 String   @id @default(cuid())
+  cartId             String
+  productId          String?
+  quantity           Int      @default(1)
+  unitPrice          Int
+  subtotal           Int
+  shipping           Int      @default(0)
+  total              Int
+  isCustomizedScoop  Boolean  @default(false)
+  numberOfScoops     Int?
+  colourTheme        String?
+  preferredCharacter String?
+  preferredItems     String[] @default([])
+  excludedItems      String[] @default([])
+  additionalMessage  String?
+  age                Int?
+  isByob             Boolean  @default(false)
+  byobDetails        Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  cart               Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product            Product? @relation(fields: [productId], references: [id])
+
+  @@index([cartId])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String?
+  sessionId String?
+  productId String
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([productId])
 }
 
 model Address {
-	id           String   @id @default(cuid())
-	userId       String?
-	fullName     String
-	phoneNumber  String
-	email        String
-	addressLine1 String
-	addressLine2 String?
-	city         String
-	state        String
-	pincode      String
-	createdAt    DateTime @default(now())
-	user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-	orders       Order[]
+  id           String   @id @default(cuid())
+  userId       String?
+  fullName     String
+  phoneNumber  String
+  email        String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  pincode      String
+  createdAt    DateTime @default(now())
+  user         User?    @relation(fields: [userId], references: [id])
+  orders       Order[]
 }
 
 model Order {
-	id             String        @id @default(cuid())
-	orderNumber    String?       @unique
-	userId         String?
-	cartId         String?
-	addressId      String
-	subtotal       Int
-	shippingAmount Int
-	totalAmount    Int
-	razorpayOrderId String?
-	razorpayPaymentId String? @unique
-	orderStatus    OrderStatus   @default(PENDING_PAYMENT)
-	paymentStatus  PaymentStatus @default(PENDING)
-	createdAt      DateTime      @default(now())
-	updatedAt      DateTime      @updatedAt
-	user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
-	cart           Cart?         @relation(fields: [cartId], references: [id], onDelete: SetNull)
-	address        Address       @relation(fields: [addressId], references: [id])
-	items          OrderItem[]
-	@@index([userId])
-	@@index([cartId])
+  id                String        @id @default(cuid())
+  orderNumber       String?       @unique
+  userId            String?
+  cartId            String?
+  addressId         String
+  subtotal          Int
+  shippingAmount    Int
+  totalAmount       Int
+  rewardCodeApplied String?
+  rewardDiscount    Int           @default(0)
+  razorpayOrderId   String?
+  razorpayPaymentId String?       @unique
+  orderStatus       OrderStatus   @default(PENDING_PAYMENT)
+  paymentStatus     PaymentStatus @default(PENDING)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  user              User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  cart              Cart?         @relation(fields: [cartId], references: [id], onDelete: SetNull)
+  address           Address       @relation(fields: [addressId], references: [id])
+  items             OrderItem[]
+  rewards           GameReward[]
+
+  @@index([userId])
+  @@index([cartId])
 }
 
 model OrderItem {
-	id                  String   @id @default(cuid())
-	orderId             String
-	productId           String?
-	productName         String
-	quantity            Int
-	unitPrice           Int
-	totalPrice          Int
-	isCustomizedScoop   Boolean  @default(false)
-	numberOfScoops      Int?
-	age 				Int?
-	colourTheme         String?
-	preferredCharacter  String?
-	preferredItems      String[] @default([])
-	excludedItems       String[] @default([])
-	additionalMessage   String?
-	order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-	product             Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
-	@@index([orderId])
+  id                 String   @id @default(cuid())
+  orderId            String
+  productId          String?
+  productName        String
+  quantity           Int
+  mrpAtPurchase      Int?
+  unitPrice          Int
+  totalPrice         Int
+  discountAmount     Int?
+  discountPercent    Int?
+  isCustomizedScoop  Boolean  @default(false)
+  numberOfScoops     Int?
+  colourTheme        String?
+  preferredCharacter String?
+  preferredItems     String[] @default([])
+  excludedItems      String[] @default([])
+  additionalMessage  String?
+  age                Int?
+  isByob             Boolean  @default(false)
+  byobDetails        Json?
+  order              Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product            Product? @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
 }
 
 model ScoopSetting {
-  id                    String   @id @default(cuid())
-  firstScoopPrice       Int
-  additionalScoopPrice  Int
-  maxScoops             Int      @default(10)
-  maxPreferredItems     Int      @default(3)
-  maxExcludedItems      Int      @default(3)
-  active                Boolean  @default(true)
-  imageUrl              String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  shippingRules ScoopShippingRule[]
+  id                   String              @id @default(cuid())
+  firstScoopPrice      Int
+  additionalScoopPrice Int
+  maxScoops            Int                 @default(10)
+  maxPreferredItems    Int                 @default(3)
+  maxExcludedItems     Int                 @default(3)
+  active               Boolean             @default(true)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  imageUrl             String?
+  shippingRules        ScoopShippingRule[]
 }
 
 model ScoopShippingRule {
-  id          String       @id @default(cuid())
-  scoopCount  Int          @unique
-  shipping    Int
-  active      Boolean      @default(true)
-  settingId   String
-  setting     ScoopSetting @relation(fields: [settingId], references: [id], onDelete: Cascade)
+  id         String       @id @default(cuid())
+  scoopCount Int          @unique
+  shipping   Int
+  active     Boolean      @default(true)
+  settingId  String
+  setting    ScoopSetting @relation(fields: [settingId], references: [id], onDelete: Cascade)
 
   @@index([settingId])
 }
@@ -208,3 +230,117 @@ model ScoopItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model SeasonalGreeting {
+  id               String    @id @default(cuid())
+  enabled          Boolean   @default(true)
+  characterName    String
+  characterImage   String
+  greeting         String
+  secondaryText    String?
+  startDate        DateTime?
+  endDate          DateTime?
+  displayFrequency String    @default("once_per_session")
+  animationStyle   String    @default("bounce")
+  displayDuration  Int       @default(8)
+  ctaText          String?
+  ctaLink          String?
+  priority         Int       @default(1)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model GameReward {
+  id                String    @id @default(cuid())
+  code              String    @unique
+  rewardType        String    @default("CUTE_PEN")
+  rewardDescription String    @default("One Cute Pen as a Free Gift")
+  status            String    @default("ACTIVE")
+  sessionId         String?
+  userId            String?
+  orderId           String?
+  difficulty        String?
+  movesCount        Int?
+  createdAt         DateTime  @default(now())
+  redeemedAt        DateTime?
+  expiresAt         DateTime?
+  user              User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  order             Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId])
+  @@index([userId])
+}
+
+model ByobSetting {
+  id              String   @id @default(cuid())
+  enabled         Boolean  @default(true)
+  minimumSubtotal Int      @default(1000)
+  shippingFee     Int      @default(150)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model DamageClaim {
+  id               String   @id @default(cuid())
+  orderNumber      String
+  customerEmail    String
+  customerName     String
+  productName      String
+  unboxingVideoUrl String?
+  photoUrls        String[] @default([])
+  description      String
+  status           String   @default("SUBMITTED")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model BusinessInfo {
+  id               String   @id @default(cuid())
+  companyName      String   @default("Her Pretty Things")
+  tagline          String   @default("Little joys, beautifully wrapped")
+  email            String   @default("shop.herprettythings@gmail.com")
+  phone            String   @default("9790858125")
+  locationLocality String   @default("Royapettah")
+  locationCity     String   @default("Chennai")
+  locationState    String   @default("Tamil Nadu")
+  locationCountry  String   @default("India")
+  instagramHandle  String   @default("@her_prettythings")
+  instagramUrl     String   @default("https://www.instagram.com/her_prettythings/")
+  businessHours    String   @default("Mon - Sat: 10:00 AM - 7:00 PM")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model OrderNotificationEvent {
+  id             String   @id @default(cuid())
+  eventType      String   // NEW_ORDER, PAYMENT_SUCCESS, PAYMENT_FAILED, ORDER_CANCELLED, REFUND_PROCESSED, ORDER_SHIPPED, ORDER_DELIVERED, DAMAGE_CLAIM
+  orderId        String?
+  idempotencyKey String   @unique
+  recipient      String
+  subject        String
+  status         String   @default("SENT") // PENDING, SENT, FAILED, RETRYING
+  attempts       Int      @default(1)
+  errorDetails   String?
+  metadata       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([eventType])
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+

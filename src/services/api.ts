@@ -14,9 +14,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null
 }
 
+export interface ApiRequestOptions extends RequestInit {
+	raw?: boolean
+}
+
 export async function apiRequest<T>(
 	path: string,
-	options?: RequestInit,
+	options?: ApiRequestOptions,
 ): Promise<T> {
 	let response: Response
 
@@ -49,7 +53,7 @@ export async function apiRequest<T>(
 		throw new ApiError(response.status, message)
 	}
 
-	if (isRecord(body) && 'data' in body) {
+	if (!options?.raw && isRecord(body) && 'data' in body) {
 		return body.data as T
 	}
 

@@ -1,45 +1,25 @@
 import {
   ArrowLeft,
   ArrowRight,
-  ChevronRight,
   Sparkles,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { getProducts } from "../../services/productService";
-import BrandExperience from "../../components/BrandExperience/BrandExperience";
+import { getScoopConfig } from "../../services/scoopService";
 import CategoryCard, {
   type Category,
 } from "../../components/CategoryCard/CategoryCard";
 import Hero from "../../components/Hero/Hero";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import SocialGallery from "../../components/SocialGallery/SocialGallery";
+import PrettyPlay from "../../components/PrettyPlay/PrettyPlay";
 import type { Product } from "../../types/product";
+import {
+  buildHeroSlides,
+  getCategorySlides,
+} from "../../utils/productSlides";
 import "./Home.css";
-
-const categories: Category[] = [
-  {
-    name: "Scoops",
-    slug: "scoops",
-    description: "Little surprises waiting to be discovered.",
-    accent: "category-pink",
-    icon: "🍨",
-  },
-  {
-    name: "Jewellery",
-    slug: "jewellery",
-    description: "Pretty pieces for every little moment.",
-    accent: "category-lilac",
-    icon: "✧",
-  },
-  {
-    name: "Kawaii",
-    slug: "kawaii",
-    description: "Cute finds you'll want to keep forever.",
-    accent: "category-yellow",
-    icon: "🐰",
-  },
-];
 
 interface ProductCarouselProps {
   title: string;
@@ -55,12 +35,8 @@ function ProductCarousel({
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const scrollCarousel = (direction: "left" | "right") => {
-    if (!carouselRef.current) {
-      return;
-    }
-
+    if (!carouselRef.current) return;
     const amount = carouselRef.current.clientWidth * 0.8;
-
     carouselRef.current.scrollBy({
       left: direction === "right" ? amount : -amount,
       behavior: "smooth",
@@ -112,52 +88,137 @@ function ProductCarousel({
 function Home() {
   const [jewelleryProducts, setJewelleryProducts] = useState<Product[]>([]);
   const [kawaiiProducts, setKawaiiProducts] = useState<Product[]>([]);
+  const [scoopImageUrl, setScoopImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadProducts() {
+    async function loadHomepageData() {
       try {
-        const [jewellery, kawaii] = await Promise.all([
+        const [jewellery, kawaii, scoopConfig] = await Promise.all([
           getProducts("jewellery"),
           getProducts("kawaii"),
+          getScoopConfig(),
         ]);
-
         setJewelleryProducts(jewellery);
         setKawaiiProducts(kawaii);
+        if (scoopConfig?.imageUrl) {
+          setScoopImageUrl(scoopConfig.imageUrl);
+        }
       } catch (error) {
         console.error("Could not load homepage products:", error);
       } finally {
         setLoading(false);
       }
     }
-
-    loadProducts();
+    loadHomepageData();
   }, []);
+
+  // Build dynamic hero slideshow mix (Mystery Scoop -> Jewellery -> Kawaii -> repeat)
+  const heroSlides = useMemo(() => {
+    return buildHeroSlides(scoopImageUrl, jewelleryProducts, kawaiiProducts);
+  }, [scoopImageUrl, jewelleryProducts, kawaiiProducts]);
+
+  // Build dynamic 4 categories
+  const categories: Category[] = useMemo(() => {
+    const scoopFallback = "/images/category/scoops-collection.png";
+    const jewelleryFallback = "/images/category/jewellery-collection.png";
+    const kawaiiFallback = "/images/category/kawaii-collection.png";
+    const byobImage = "/images/category/byob-collection.png";
+
+    const scoopSlides = getCategorySlides(
+      [],
+      "Mystery Scoops",
+      scoopImageUrl || scoopFallback
+    ).map((s) => s.url);
+
+    const jewellerySlides = getCategorySlides(
+      jewelleryProducts,
+      "Jewellery",
+      jewelleryFallback
+    ).map((s) => s.url);
+
+    const kawaiiSlides = getCategorySlides(
+      kawaiiProducts,
+      "Kawaii",
+      kawaiiFallback
+    ).map((s) => s.url);
+
+    return [
+      {
+        id: "scoops",
+        number: "01",
+        name: "MYSTERY SCOOP",
+        subtitle: "Pick your surprise",
+        slug: "scoops",
+        description: "Pick your surprise",
+        ctaText: "Explore",
+        image: scoopSlides[0] || scoopFallback,
+        images: scoopSlides,
+        rotationInterval: 5000,
+      },
+      {
+        id: "jewellery",
+        number: "02",
+        name: "JEWELLERY",
+        subtitle: "Find your little sparkle",
+        slug: "jewellery",
+        description: "Find your little sparkle",
+        ctaText: "Explore",
+        image: jewellerySlides[0] || jewelleryFallback,
+        images: jewellerySlides,
+        rotationInterval: 4800,
+      },
+      {
+        id: "kawaii",
+        number: "03",
+        name: "KAWAII",
+        subtitle: "Something cute awaits",
+        slug: "kawaii",
+        description: "Something cute awaits",
+        ctaText: "Explore",
+        image: kawaiiSlides[0] || kawaiiFallback,
+        images: kawaiiSlides,
+        rotationInterval: 5200,
+      },
+      {
+        id: "byob",
+        number: "04",
+        name: "BUILD YOUR OWN BOX",
+        subtitle: "Create yours",
+        slug: "byob",
+        description: "Create yours",
+        ctaText: "Explore",
+        image: byobImage,
+        images: [byobImage],
+      },
+    ];
+  }, [scoopImageUrl, jewelleryProducts, kawaiiProducts]);
 
   return (
     <>
-      <Hero />
+      <Hero slides={heroSlides} />
 
       <main>
-        <section className="section container category-section">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Made to make you smile</p>
-              <h2>Shop Your Pretty Picks</h2>
+        {/* Unified Premium Editorial Category Showcase */}
+        <section className="section category-showcase-section" aria-label="Shop The Collection">
+          <div className="category-showcase-container">
+            <div className="category-showcase-header">
+              <p className="category-showcase-eyebrow">SHOP THE COLLECTION</p>
+              <h2 className="category-showcase-heading">Find Your Pretty Thing</h2>
+              <p className="category-showcase-supporting">
+                Something sweet, something sparkly, something completely you.
+              </p>
             </div>
 
-            <Link className="text-link desktop-link" to="/scoops">
-              View all <ArrowRight size={16} />
-            </Link>
-          </div>
-
-          <div className="category-grid">
-            {categories.map((category) => (
-              <CategoryCard key={category.name} category={category} />
-            ))}
+            <div className="category-showcase-grid">
+              {categories.map((category) => (
+                <CategoryCard key={category.id} category={category} />
+              ))}
+            </div>
           </div>
         </section>
 
+        {/* Handpicked Products Carousel */}
         <section className="section featured-section">
           <div className="container">
             <div className="section-heading">
@@ -195,37 +256,13 @@ function Home() {
           </div>
         </section>
 
-        <BrandExperience />
 
-        <section className="story-section container">
-          <div className="story-art">
-            <div className="story-sticker">
-              made
-              <br />
-              with <span>♡</span>
-            </div>
-            <div className="story-flower">✿</div>
-            <div className="story-bow">⌁</div>
-          </div>
-
-          <div className="story-copy">
-            <p className="eyebrow">A little about us</p>
-
-            <h2>A Little About Her Pretty Things</h2>
-
-            <p>
-              Her Pretty Things is a tiny corner of the internet filled with
-              cute surprises, pretty jewellery, and Kawaii finds. Every piece
-              is chosen to add a little sparkle to your day and make gifting
-              feel extra lovely.
-            </p>
-
-            <Link className="button button-outline" to="/about">
-              Know Our Story <ChevronRight size={17} />
-            </Link>
-          </div>
+        {/* Pretty Play Section */}
+        <section className="container" style={{ margin: "2.5rem auto" }}>
+          <PrettyPlay />
         </section>
 
+        {/* Social / Instagram Gallery */}
         <SocialGallery />
       </main>
     </>

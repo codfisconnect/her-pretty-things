@@ -1,6 +1,15 @@
 import type { Request, Response } from 'express'
 import { HttpError } from '../middleware/errorHandler.js'
-import { addCartItem, getCart, readAddCartItemInput, readUpdateCartItemInput, removeCartItem, updateCartItem } from '../services/cartService.js'
+import {
+  addCartItem,
+  getCart,
+  getOrCreateCart,
+  clearCart,
+  readAddCartItemInput,
+  readUpdateCartItemInput,
+  removeCartItem,
+  updateCartItem,
+} from '../services/cartService.js'
 
 function readParam(request: Request, name: string): string {
   const value = request.params[name]
@@ -18,6 +27,12 @@ export async function readCart(request: Request, response: Response) {
   response.json({ success: true, data: cart })
 }
 
+export async function handleGetOrCreate(request: Request, response: Response) {
+  const { cartId, sessionId, userId } = request.body || {}
+  const cart = await getOrCreateCart(cartId, sessionId, userId)
+  response.json({ success: true, data: cart })
+}
+
 export async function editCartItem(request: Request, response: Response) {
   const cart = await updateCartItem(readParam(request, 'itemId'), await readUpdateCartItemInput(request.body))
   response.json({ success: true, data: cart })
@@ -25,5 +40,10 @@ export async function editCartItem(request: Request, response: Response) {
 
 export async function deleteCartItem(request: Request, response: Response) {
   const cart = await removeCartItem(readParam(request, 'itemId'))
+  response.json({ success: true, data: cart })
+}
+
+export async function handleClearCart(request: Request, response: Response) {
+  const cart = await clearCart(readParam(request, 'cartId'))
   response.json({ success: true, data: cart })
 }

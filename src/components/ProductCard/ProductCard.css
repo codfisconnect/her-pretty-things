@@ -65,10 +65,36 @@
   margin-top: 6px;
 }
 
-.product-price {
-  font-size: 11px;
-  line-height: 1.2;
-  font-weight: 600;
+.product-image-wrapper {
+  position: relative;
+}
+
+.product-card-discount-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #db2777;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 6px;
+  letter-spacing: 0.4px;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(219, 39, 119, 0.25);
+}
+
+.product-pricing {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.product-mrp-price {
+  font-size: 9.5px;
+  color: #a8949b;
+  text-decoration: line-through;
+  font-weight: 400;
 }
 
 .add-cart-button {
@@ -76,6 +102,12 @@
   gap: 4px;
   padding: 5px 8px;
   font-size: 9px;
+  transition: all 0.2s ease;
+}
+
+.add-cart-button.added {
+  background: #059669 !important;
+  color: #ffffff !important;
 }
 
 @media (max-width: 650px) {

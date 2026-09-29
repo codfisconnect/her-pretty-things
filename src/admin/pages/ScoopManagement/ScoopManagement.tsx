@@ -99,7 +99,7 @@ function ScoopManagement() {
         maxScoops: Number(maxScoops),
         maxPreferredItems: Number(maxPreferredItems),
         maxExcludedItems: Number(maxExcludedItems),
-        imageUrl: result.imageUrl,
+        imageUrl: (result as any).url || result.imageUrl,
       })
 
       const updatedConfig = await getAdminScoopConfig()
@@ -278,10 +278,10 @@ function ScoopManagement() {
       setError('')
       setMessage('')
 
-      await createAdminScoopOption({
-        type: addingOptionType,
-        name: newOptionName.trim(),
-      })
+      await createAdminScoopOption(
+        addingOptionType,
+        newOptionName.trim(),
+      )
 
       const refreshedConfig = await getAdminScoopConfig()
       setConfig(refreshedConfig)
@@ -643,14 +643,31 @@ function ScoopManagement() {
         </div>
       </section>
 
-      <section className="admin-scoop-section">
+      {renderOptions(
+        'Colours',
+        'colour',
+        config.colours,
+      )}
+
+      {renderOptions(
+        'Characters',
+        'character',
+        config.characters,
+      )}
+
+      {renderOptions(
+        'Scoop Items',
+        'item',
+        config.items,
+      )}
+
+      <section className="admin-scoop-section" style={{ marginTop: '2rem' }}>
         <div className="admin-scoop-section-header">
           <div>
             <h2>Shipping Rules</h2>
 
             <p>
-              Shipping amount based on total number
-              of Scoops.
+              Shipping amount based on total number of Scoops.
             </p>
           </div>
         </div>
@@ -691,24 +708,6 @@ function ScoopManagement() {
           ))}
         </div>
       </section>
-
-      {renderOptions(
-        'Colours',
-        'colour',
-        config.colours,
-      )}
-
-      {renderOptions(
-        'Characters',
-        'character',
-        config.characters,
-      )}
-
-      {renderOptions(
-        'Scoop Items',
-        'item',
-        config.items,
-      )}
     </div>
   )
 }

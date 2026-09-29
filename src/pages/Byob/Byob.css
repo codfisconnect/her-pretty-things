@@ -1,0 +1,715 @@
+/* BYOB Page Styles */
+.byob-page {
+  width: 100%;
+  max-width: 1420px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem;
+  box-sizing: border-box;
+}
+
+.byob-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.byob-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #db2777;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.byob-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #2b2226;
+  font-family: var(--font-heading, inherit);
+  margin: 0.2rem 0 0.5rem;
+}
+
+.byob-subheading {
+  font-size: 1.05rem;
+  color: #716269;
+  margin: 0 0 1.2rem;
+}
+
+.byob-rule-pills {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.rule-pill {
+  background: #fdf2f8;
+  color: #be185d;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid #fbcfe8;
+}
+
+/* Layout */
+.byob-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 350px;
+  gap: 2.25rem;
+  align-items: start;
+}
+
+/* Tabs */
+.byob-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #f0e4ea;
+  padding-bottom: 0.5rem;
+}
+
+.byob-tab {
+  background: none;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #716269;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.byob-tab:hover {
+  background: #fdf2f8;
+  color: #db2777;
+}
+
+.byob-tab.active {
+  background: #2b2226;
+  color: #ffffff;
+}
+
+/* Product Grid */
+.byob-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+  gap: 1.25rem;
+}
+
+.byob-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #f0e6eb;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: all 0.25s ease;
+}
+
+.byob-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(45, 30, 36, 0.08);
+}
+
+.byob-card-image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: #fdf2f6;
+  overflow: hidden;
+}
+
+.byob-card-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.byob-card:hover .byob-card-image-wrap img {
+  transform: scale(1.05);
+}
+
+.byob-discount-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #db2777;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 6px;
+}
+
+.byob-count-tag {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(43, 34, 38, 0.85);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  backdrop-filter: blur(4px);
+}
+
+.byob-card-body {
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.byob-card-cat {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #b4868d;
+  font-weight: 600;
+}
+
+.byob-card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #2b2226;
+  margin: 0.2rem 0 0.5rem;
+  line-height: 1.35;
+  min-height: 2.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.byob-card-pricing {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.byob-selling-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2b2226;
+}
+
+.byob-mrp-price {
+  font-size: 0.82rem;
+  color: #a8949b;
+  text-decoration: line-through;
+}
+
+.byob-add-btn {
+  width: 100%;
+  background: #faf5f8;
+  border: 1px solid #eedce5;
+  color: #2b2226;
+  padding: 0.55rem;
+  border-radius: 9px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.byob-add-btn:hover {
+  background: #fce7f3;
+  border-color: #fbcfe8;
+  color: #be185d;
+}
+
+.byob-add-btn.is-in-box {
+  background: #fdf2f8;
+  border-color: #f472b6;
+  color: #db2777;
+}
+
+/* Box Summary Sidebar */
+.byob-box-sidebar {
+  position: sticky;
+  top: 90px;
+}
+
+.box-bounce {
+  animation: boxPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes boxPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+.byob-box-card {
+  background: #ffffff;
+  border: 1px solid #eedee6;
+  border-radius: 18px;
+  padding: 1.4rem;
+  box-shadow: 0 10px 30px rgba(45, 30, 36, 0.06);
+}
+
+.box-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.box-icon {
+  font-size: 1.8rem;
+}
+
+.box-title-row h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2b2226;
+  margin: 0;
+}
+
+.box-title-row small {
+  color: #8c7b83;
+  font-size: 0.8rem;
+}
+
+/* Progress bar */
+.byob-progress-container {
+  margin: 1.2rem 0;
+  background: #faf6f8;
+  padding: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid #f2e4ec;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #524248;
+  margin-bottom: 0.45rem;
+}
+
+.progress-track {
+  height: 8px;
+  background: #ebdce4;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ec4899, #db2777);
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.progress-fill.complete {
+  background: #10b981;
+}
+
+.progress-status-msg {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-top: 0.45rem;
+  text-align: center;
+}
+
+.status-pending {
+  color: #db2777;
+}
+
+.status-success {
+  color: #047857;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Box items list */
+.byob-box-items-list {
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding-right: 0.3rem;
+}
+
+.box-empty-hint {
+  text-align: center;
+  padding: 1.5rem 0.5rem;
+  color: #8c7b83;
+}
+
+.box-empty-hint p {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #2b2226;
+  margin: 0 0 0.3rem;
+}
+
+.box-empty-hint small {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  display: block;
+}
+
+.byob-box-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: #fdfafb;
+  padding: 0.5rem;
+  border-radius: 10px;
+  border: 1px solid #f6edf1;
+}
+
+.byob-box-item-row img {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.box-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.box-item-info h4 {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #2b2226;
+}
+
+.box-item-price {
+  font-size: 0.78rem;
+  color: #8c7b83;
+}
+
+.box-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.box-item-controls button {
+  background: #ffffff;
+  border: 1px solid #e5d7df;
+  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.box-item-controls span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  min-width: 14px;
+  text-align: center;
+}
+
+.box-item-trash {
+  color: #b5a4ac;
+  border: none !important;
+  background: none !important;
+}
+
+.box-item-trash:hover {
+  color: #e11d48;
+}
+
+/* Totals */
+.byob-box-totals {
+  border-top: 1px solid #f0e6eb;
+  padding-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #716269;
+}
+
+.total-highlight {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2b2226;
+  border-top: 1px dashed #e2d3dc;
+  padding-top: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+/* Checkout Button */
+.byob-checkout-btn {
+  width: 100%;
+  margin-top: 1.2rem;
+  padding: 0.88rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.byob-checkout-btn.locked {
+  background: #e7dde2;
+  color: #8c7b83;
+  cursor: not-allowed;
+}
+
+.byob-checkout-btn.unlocked {
+  background: #db2777;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(219, 39, 119, 0.3);
+}
+
+.byob-checkout-btn.unlocked:hover {
+  background: #be185d;
+  transform: translateY(-1px);
+}
+
+/* Mobile Bottom Bar & Drawer */
+.byob-mobile-bar {
+  display: none;
+}
+
+.byob-mobile-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  animation: fadeIn 0.2s ease;
+}
+
+.byob-mobile-drawer {
+  background: #ffffff;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  border-radius: 20px 20px 0 0;
+  padding: 1.25rem 1.25rem 2rem;
+  overflow-y: auto;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.byob-mobile-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.drawer-drag-pill {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  background: #e2d1d9;
+  border-radius: 999px;
+}
+
+.byob-mobile-drawer-close {
+  background: #fdf2f8;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #716269;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .byob-layout {
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: 1.75rem;
+  }
+
+  .byob-grid {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .byob-page {
+    padding-bottom: 5.5rem;
+  }
+
+  .byob-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .byob-box-sidebar {
+    display: none;
+  }
+
+  .byob-grid {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 1rem;
+  }
+
+  .byob-mobile-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border-top: 1px solid #f0e4ea;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+    padding: 0.75rem 1.25rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    z-index: 900;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .byob-mobile-bar-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .byob-mobile-bar-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #db2777;
+    text-transform: uppercase;
+  }
+
+  .byob-mobile-bar-meta {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2b2226;
+  }
+
+  .byob-mobile-bar-btn {
+    background: #db2777;
+    color: #ffffff;
+    border: none;
+    border-radius: 9999px;
+    padding: 0.55rem 1.2rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.3);
+  }
+}
+
+@media (max-width: 640px) {
+  .byob-page {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .byob-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .byob-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .byob-card-body {
+    padding: 0.75rem;
+  }
+
+  .byob-card-title {
+    font-size: 0.85rem;
+    min-height: 2.3rem;
+  }
+
+  .byob-selling-price {
+    font-size: 0.95rem;
+  }
+
+  .byob-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 0.6rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .byob-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .byob-tab {
+    flex-shrink: 0;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .byob-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}

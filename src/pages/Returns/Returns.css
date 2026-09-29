@@ -1,0 +1,133 @@
+/* Replacement Policy Page Styles */
+.replacement-page {
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+  max-width: 860px;
+}
+
+.replacement-header {
+  text-align: center;
+  margin-bottom: 2.2rem;
+}
+
+.replacement-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2b2226;
+  font-family: var(--font-heading, inherit);
+  margin: 0.3rem 0 0.5rem;
+}
+
+.replacement-header p {
+  color: #716269;
+  font-size: 0.95rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.policy-highlight-banner {
+  background: #fdf2f8;
+  border: 1.5px solid #fbcfe8;
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.highlight-icon {
+  font-size: 1.8rem;
+  color: #db2777;
+  flex-shrink: 0;
+}
+
+.policy-highlight-banner h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #9d174d;
+  margin: 0 0 0.4rem;
+}
+
+.policy-highlight-banner p {
+  font-size: 0.9rem;
+  color: #701a75;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.replacement-guidelines-card {
+  background: #ffffff;
+  border: 1px solid #f2e2eb;
+  border-radius: 20px;
+  padding: 2rem;
+}
+
+.replacement-guidelines-card h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2b2226;
+  margin: 0 0 1.6rem;
+}
+
+.rule-item {
+  display: flex;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+  align-items: flex-start;
+}
+
+.rule-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fdf2f8;
+  color: #db2777;
+  font-size: 0.92rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid #fbcfe8;
+}
+
+.rule-item h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2b2226;
+  margin: 0 0 0.25rem;
+}
+
+.rule-item p {
+  font-size: 0.86rem;
+  color: #716269;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.report-action-box {
+  background: #faf6f8;
+  border: 1px solid #eedee6;
+  border-radius: 16px;
+  padding: 1.4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.report-action-box h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2b2226;
+  margin: 0 0 0.2rem;
+}
+
+.report-action-box p {
+  font-size: 0.84rem;
+  color: #716269;
+  margin: 0;
+}
