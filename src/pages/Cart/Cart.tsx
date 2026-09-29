@@ -1,176 +1,188 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  getCart,
-  removeCartItem,
-  updateCartItem,
-  type CartResponse,
-} from "../../services/cartService";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowRight, Trash2, Gift, Sparkles } from "lucide-react";
+import { useCart } from "../../context/CartContext";
 
 function Cart() {
-  const [cart, setCart] = useState<CartResponse | null>(null);
-  const [message, setMessage] = useState("");
-  const hasScoop = cart?.items.some((item) => item.isCustomizedScoop) ?? false;
+  const { cart, updateQuantity, removeFromCart, itemCount, subtotal, shipping, total, loading } = useCart();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const cartId = localStorage.getItem("hpt_cart_id");
+  if (loading && !cart) {
+    return (
+      <main className="checkout-page container">
+        <div style={{ textAlign: "center", padding: "4rem 0" }}>
+          <p>Loading your pretty cart...</p>
+        </div>
+      </main>
+    );
+  }
 
-    if (!cartId) return;
-
-    getCart(cartId)
-      .then(setCart)
-      .catch((error: unknown) => {
-        setMessage(
-          error instanceof Error ? error.message : "Could not load your cart.",
-        );
-      });
-  }, []);
-
-  const handleQuantityChange = async (itemId: string, newQuantity: number) => {
-    try {
-      const updatedCart = await updateCartItem(itemId, newQuantity);
-      setCart(updatedCart);
-    } catch (error: unknown) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "Could not update the quantity.",
-      );
-    }
-  };
-
-  const handleRemove = async (itemId: string) => {
-    try {
-      const updatedCart = await removeCartItem(itemId);
-
-      if (updatedCart.items.length === 0) {
-        localStorage.removeItem("hpt_cart_id");
-        window.location.href = "/scoops";
-        return;
-      }
-
-      setCart(updatedCart);
-    } catch (error: unknown) {
-      setMessage(
-        error instanceof Error ? error.message : "Could not remove the item.",
-      );
-    }
-  };
-
-  if (!cart) {
+  if (!cart || cart.items.length === 0) {
     return (
       <section className="placeholder-page container">
         <p className="eyebrow">Your pretty things</p>
-
         <h1>Your cart is waiting</h1>
-
-        <p>
-          {message || "Once you find something lovely, it will appear here."}
-        </p>
-
-        <Link className="button button-dark" to="/scoops">
-          Build a scoop
-        </Link>
+        <p>Once you find something lovely, it will appear here.</p>
+        <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", marginTop: "1.5rem" }}>
+          <Link className="button button-dark" to="/scoops">
+            Build a Scoop
+          </Link>
+          <Link className="button button-outline" to="/byob">
+            Build Your Own Box
+          </Link>
+        </div>
       </section>
     );
   }
 
   return (
     <section className="checkout-page container">
-      <p className="eyebrow">Your pretty things</p>
-
-      <h1>Your cart</h1>
-
-      {message && <p>{message}</p>}
+      <p className="eyebrow">Little joys, gathered with love</p>
+      <h1>Your Cart ({itemCount} {itemCount === 1 ? 'item' : 'items'})</h1>
 
       <div className="checkout-layout">
+        {/* Items List */}
         <div className="cart-items">
-          {cart.items.map((item) => (
-            <article className="cart-line" key={item.id}>
-              <div>
-                <h2>
-                  {item.isCustomizedScoop
-                    ? `${item.numberOfScoops}-scoop surprise`
-                    : item.product?.name}
-                </h2>
+          {cart.items.map((item) => {
+            const isScoop = item.isCustomizedScoop;
+            const isByob = item.isByob;
+            const byobDetails = item.byobDetails as any;
 
-                <p>
-                  {item.isCustomizedScoop
-                    ? `Customized scoop · Quantity: ${item.quantity}`
-                    : `Quantity: ${item.quantity}`}
-                </p>
+            return (
+              <article className="cart-line" key={item.id}>
+                <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
+                  <div style={{
+                    width: 76,
+                    height: 76,
+                    borderRadius: 12,
+                    background: "#fdf2f6",
+                    overflow: "hidden",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0
+                  }}>
+                    {isScoop ? (
+                      <span style={{ fontSize: "2rem" }}>🍨</span>
+                    ) : isByob ? (
+                      <span style={{ fontSize: "2rem" }}>🎁</span>
+                    ) : (
+                      <img
+                        src={item.product?.image || "/placeholder.png"}
+                        alt={item.product?.name || "Product"}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    )}
+                  </div>
 
-                <div className="cart-quantity-control">
-                  <button
-                    type="button"
-                    disabled={item.quantity === 1}
-                    onClick={() =>
-                      handleQuantityChange(
-                        item.id,
-                        Math.max(1, item.quantity - 1),
-                      )
-                    }
-                  >
-                    −
-                  </button>
+                  <div style={{ flex: 1 }}>
+                    <h2 style={{ fontSize: "1.05rem", margin: "0 0 0.3rem" }}>
+                      {isScoop
+                        ? `${item.numberOfScoops}-Scoop Surprise`
+                        : isByob
+                        ? "Custom Gift Box (BYOB)"
+                        : item.product?.name}
+                    </h2>
 
-                  <span>{item.quantity}</span>
+                    <p style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", color: "#8c7b83" }}>
+                      {isScoop
+                        ? `Customized Scoop · ${item.colourTheme ? `Theme: ${item.colourTheme}` : 'Mystery choice'}`
+                        : isByob && byobDetails?.items
+                        ? `${byobDetails.items.length} custom handpicked items`
+                        : `Category: ${item.product?.name || "Jewellery"}`}
+                    </p>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleQuantityChange(item.id, item.quantity + 1)
-                    }
-                  >
-                    +
-                  </button>
+                    {isByob && byobDetails?.items && (
+                      <div style={{ marginBottom: "0.6rem", fontSize: "0.82rem", color: "#db2777" }}>
+                        <Gift size={13} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} />
+                        {byobDetails.items.map((b: any) => `${b.name || b.productName} (×${b.quantity})`).join(", ")}
+                      </div>
+                    )}
 
-                  <button
-                    type="button"
-                    className="cart-remove-button"
-                    onClick={() => handleRemove(item.id)}
-                  >
-                    Delete
-                  </button>
+                    <div className="cart-quantity-control">
+                      <button
+                        type="button"
+                        disabled={item.quantity <= 1}
+                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        aria-label="Decrease quantity"
+                      >
+                        −
+                      </button>
+
+                      <span>{item.quantity}</span>
+
+                      <button
+                        type="button"
+                        disabled={item.product?.stock !== undefined && item.quantity >= item.product.stock}
+                        onClick={() => {
+                          if (item.product?.stock !== undefined && item.quantity >= item.product.stock) {
+                            return
+                          }
+                          updateQuantity(item.id, item.quantity + 1)
+                        }}
+                        aria-label="Increase quantity"
+                        title={item.product?.stock !== undefined && item.quantity >= item.product.stock ? 'Maximum stock reached' : undefined}
+                      >
+                        +
+                      </button>
+
+                      <button
+                        type="button"
+                        className="cart-remove-button"
+                        onClick={() => removeFromCart(item.id)}
+                        aria-label="Remove item"
+                      >
+                        <Trash2 size={13} style={{ verticalAlign: "middle", marginRight: 3 }} />
+                        Remove
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <div className="cart-line-price">
-                <p>
-                  ₹{item.unitPrice.toLocaleString("en-IN")} × {item.quantity}
-                </p>
-
-                <strong>₹{item.total.toLocaleString("en-IN")}</strong>
-              </div>
-            </article>
-          ))}
+                <div className="cart-line-price">
+                  <p>
+                    ₹{item.unitPrice.toLocaleString("en-IN")} × {item.quantity}
+                  </p>
+                  <strong>₹{item.total.toLocaleString("en-IN")}</strong>
+                </div>
+              </article>
+            );
+          })}
         </div>
 
+        {/* Summary Sidebar */}
         <aside className="checkout-summary">
-          <p>
-            Subtotal <strong>₹{cart.subtotal.toLocaleString("en-IN")}</strong>
-          </p>
-
-          <p>
-            Shipping <strong>₹{cart.shipping.toLocaleString("en-IN")}</strong>
-          </p>
-
-          <p className="shipping-info">
-            {hasScoop
-              ? "Scoop shipping charges are calculated according to the selected Scoop quantity."
-              : cart.subtotal >= 500
-                ? "🎉 Free shipping unlocked! Jewellery & Kawaii orders above ₹500 qualify for free shipping."
-                : `Add ₹${(500 - cart.subtotal).toLocaleString("en-IN")} more to get FREE shipping on Jewellery & Kawaii orders.`}
-          </p>
-
-          <div>
-            <span>Total</span>
-
-            <strong>₹{cart.total.toLocaleString("en-IN")}</strong>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#be185d", fontSize: "0.85rem", marginBottom: "0.8rem" }}>
+            <Sparkles size={15} />
+            <span>Prepaid Orders Only ✦ Pan India</span>
           </div>
 
-          <Link className="button button-dark" to="/shipping">
-            Proceed to Shipping
+          <p>
+            Subtotal <strong>₹{subtotal.toLocaleString("en-IN")}</strong>
+          </p>
+
+          <p>
+            Shipping <strong>{shipping === 0 ? "FREE" : `₹${shipping.toLocaleString("en-IN")}`}</strong>
+          </p>
+
+          <div style={{ borderTop: "1px dashed #e2d1d9", paddingTop: "0.75rem", marginTop: "0.5rem" }}>
+            <span>Order Total</span>
+            <strong>₹{total.toLocaleString("en-IN")}</strong>
+          </div>
+
+          <button
+            type="button"
+            className="button button-dark"
+            style={{ width: "100%", marginTop: "1rem" }}
+            onClick={() => navigate("/checkout")}
+          >
+            Proceed to Checkout <ArrowRight size={16} />
+          </button>
+
+          <Link
+            to="/jewellery"
+            style={{ display: "block", textAlign: "center", marginTop: "0.8rem", fontSize: "0.85rem", color: "#716269" }}
+          >
+            ← Continue Shopping
           </Link>
         </aside>
       </div>

@@ -1,134 +1,91 @@
-import { useEffect, useState } from "react";
-import { Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
-import { NavLink, Link } from "react-router-dom";
-import { getCart } from "../../services/cartService";
-import { getProducts } from "../../services/productService";
-import Logo from "../../../public/images/Logo/HPTlog.png";
+import React, { useEffect, useState, useRef } from 'react'
+import { Heart, Menu, Search, ShoppingBag, X, User } from 'lucide-react'
+import { NavLink, Link } from 'react-router-dom'
+import { useCart } from '../../context/CartContext'
+import { useWishlist } from '../../context/WishlistContext'
+import { useAuth } from '../../context/AuthContext'
+import { products } from '../../data/products'
+import Logo from '../../../public/images/Logo/HPTlog.png'
 
 const navigation = [
-  { label: "Home", to: "/" },
-  { label: "Scoops", to: "/scoops" },
-  { label: "Jewellery", to: "/jewellery" },
-  { label: "Kawaii", to: "/kawaii" },
-  { label: "About Us", to: "/about" },
-];
+  { label: 'Home', to: '/' },
+  { label: 'Scoops', to: '/scoops' },
+  { label: 'Jewellery', to: '/jewellery' },
+  { label: 'Kawaii', to: '/kawaii' },
+  { label: 'Build Your Own Box', to: '/byob' },
+  { label: 'Pretty Play', to: '/play' },
+  { label: 'About', to: '/about' },
+  { label: 'Contact', to: '/contact' },
+]
 
-function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+export const Navbar: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const { itemCount, openDrawer } = useCart()
+  const { wishlistCount } = useWishlist()
+  const { isAuthenticated } = useAuth()
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const [searchResults, setSearchResults] = useState<
-    Awaited<ReturnType<typeof getProducts>>
-  >([]);
-  const [isSearching, setIsSearching] = useState(false);
-
-  // Load cart count
   useEffect(() => {
-    const loadCartCount = async () => {
-      const cartId = localStorage.getItem("hpt_cart_id");
-
-      if (!cartId) {
-        setCartCount(0);
-        return;
-      }
-
-      try {
-        const cart = await getCart(cartId);
-
-        const totalQuantity = cart.items.reduce(
-          (total, item) => total + item.quantity,
-          0,
-        );
-
-        setCartCount(totalQuantity);
-      } catch {
-        setCartCount(0);
-      }
-    };
-
-    loadCartCount();
-  }, []);
-
-  // Search products from backend
-  useEffect(() => {
-    const query = searchQuery.trim();
-
-    if (!isSearchOpen || !query) {
-      setSearchResults([]);
-      setIsSearching(false);
-      return;
+    if (isSearchOpen && searchInputRef.current) {
+      searchInputRef.current.focus()
     }
+  }, [isSearchOpen])
 
-    let isCurrentSearch = true;
+  // Debounced/filtered search results
+  const searchResults = searchQuery.trim()
+    ? products.filter((product) =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : []
 
-    const searchProducts = async () => {
-      setIsSearching(true);
-
-      try {
-        const data = await getProducts(undefined, query);
-
-        if (isCurrentSearch) {
-          setSearchResults(data);
-        }
-      } catch (error) {
-        if (isCurrentSearch) {
-          console.error("Failed to search products:", error);
-          setSearchResults([]);
-        }
-      } finally {
-        if (isCurrentSearch) {
-          setIsSearching(false);
-        }
-      }
-    };
-
-    searchProducts();
-
-    return () => {
-      isCurrentSearch = false;
-    };
-  }, [isSearchOpen, searchQuery]);
+  const handleCartClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    openDrawer()
+  }
 
   return (
     <header className="site-header">
       {/* Announcement Bar */}
       <div className="announcement-wrapper">
         <div className="announcement-bar">
-          IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY{" "}
+          IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY{' '}
           <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little
           joys, beautifully wrapped ✦&nbsp;
         </div>
-
         <div className="announcement-bar" aria-hidden="true">
-          IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY{" "}
+          IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY{' '}
           <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little
           joys, beautifully wrapped ✦&nbsp;
         </div>
-
         <div className="announcement-bar" aria-hidden="true">
-          IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY{" "}
+          IN PAN INDIA DELIVERY 🚚 <span>✦</span> PREPAID ORDERS ONLY{' '}
           <span>✦</span> FAST DISPATCH FOR QUICK DELIVERY <span>✦</span> Little
           joys, beautifully wrapped ✦&nbsp;
         </div>
       </div>
 
-      {/* Navigation */}
+      {/* Main Navigation Wrap */}
       <div className="nav-wrap container">
-        {/* Logo */}
-        <Link className="brand" to="/" onClick={() => setIsMenuOpen(false)}>
+        {/* Brand Logo */}
+        <Link
+          className="brand"
+          to="/"
+          onClick={() => setIsMenuOpen(false)}
+          aria-label="Her Pretty Things Homepage"
+        >
           <span className="brand-mark">
-            <img src={Logo} alt="" />
+            <img src={Logo} alt="Her Pretty Things Logo" />
           </span>
-
           <span>Her Pretty Things</span>
         </Link>
 
-        {/* Navigation Links */}
+        {/* Desktop Navigation Links */}
         <nav
-          className={`main-nav ${isMenuOpen ? "is-open" : ""}`}
+          className={`main-nav ${isMenuOpen ? 'is-open' : ''}`}
           aria-label="Main navigation"
         >
           {navigation.map((item) => (
@@ -136,28 +93,21 @@ function Navbar() {
               key={item.to}
               to={item.to}
               onClick={() => setIsMenuOpen(false)}
-              className={({ isActive }) => (isActive ? "active" : "")}
+              className={({ isActive }) => (isActive ? 'active' : '')}
             >
               {item.label}
             </NavLink>
           ))}
         </nav>
 
-        {/* Navigation Actions */}
+        {/* Action Icons */}
         <div className="nav-actions">
-          {/* Search Button */}
+          {/* Search Toggle */}
           <button
             className="icon-button"
             type="button"
-            aria-label="Search"
-            onClick={() => {
-              setIsSearchOpen(!isSearchOpen);
-
-              if (isSearchOpen) {
-                setSearchQuery("");
-                setSearchResults([]);
-              }
-            }}
+            aria-label={isSearchOpen ? 'Close search' : 'Open search'}
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
           >
             {isSearchOpen ? (
               <X size={19} strokeWidth={1.8} />
@@ -166,83 +116,126 @@ function Navbar() {
             )}
           </button>
 
-          {/* Wishlist */}
-          <Link className="icon-button" to="/wishlist" aria-label="Wishlist">
+          {/* Wishlist Link with Dynamic Instant Count */}
+          <Link
+            className="icon-button wishlist-button-nav"
+            to="/wishlist"
+            aria-label={`Wishlist (${wishlistCount} items)`}
+          >
             <Heart size={19} strokeWidth={1.8} />
+            {wishlistCount > 0 && (
+              <span className="nav-badge wishlist-badge" aria-label={`${wishlistCount} items in wishlist`}>
+                {wishlistCount}
+              </span>
+            )}
           </Link>
 
-          {/* Cart */}
-          <Link
+          {/* Cart Button with Dynamic Instant Count & Drawer Toggle */}
+          <button
             className="icon-button cart-button"
-            to="/cart"
-            aria-label="Shopping cart"
+            type="button"
+            aria-label={`Shopping cart (${itemCount} items)`}
+            onClick={handleCartClick}
           >
             <ShoppingBag size={19} strokeWidth={1.8} />
+            {itemCount > 0 && (
+              <span className="nav-badge cart-count" aria-label={`${itemCount} items in cart`}>
+                {itemCount}
+              </span>
+            )}
+          </button>
 
-            <span className="cart-count">{cartCount}</span>
+          {/* Account Icon */}
+          <Link
+            className="icon-button"
+            to={isAuthenticated ? '/profile' : '/login'}
+            aria-label={isAuthenticated ? 'My Profile' : 'Sign In'}
+          >
+            <User size={19} strokeWidth={1.8} />
           </Link>
 
-          {/* Mobile Menu */}
+          {/* Mobile Menu Toggle */}
           <button
             className="icon-button menu-toggle"
             type="button"
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? <X size={21} /> : <Menu size={21} />}
+            {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </div>
 
-      {/* Search Panel */}
+      {/* Global Search Overlay Panel */}
       {isSearchOpen && (
-        <div className="search-panel container">
-          <input
-            type="text"
-            placeholder="Search pretty things..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            autoFocus
-          />
+        <div className="search-panel container" role="search">
+          <div className="search-input-wrapper">
+            <Search size={18} className="search-bar-icon" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search jewellery, scoops, kawaii gifts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ fontSize: '16px' }} /* Safari Zoom Prevention */
+              autoComplete="off"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                className="search-clear-btn"
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search input"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
 
-          {/* Search Results */}
+          {/* Instant Search Results */}
           {searchQuery.trim() && (
             <div className="search-results">
-              {isSearching ? (
-                <p className="search-no-results">Searching...</p>
-              ) : (
-                <>
-                  {searchResults.map((product) => (
+              {searchResults.length > 0 ? (
+                searchResults.slice(0, 8).map((product) => {
+                  const hasDiscount = product.mrp && product.mrp > product.price
+                  return (
                     <Link
                       key={product.id}
                       to={`/product/${product.id}`}
                       className="search-result-item"
                       onClick={() => {
-                        setIsSearchOpen(false);
-                        setSearchQuery("");
-                        setSearchResults([]);
+                        setIsSearchOpen(false)
+                        setSearchQuery('')
                       }}
                     >
                       <img src={product.image} alt={product.name} />
-
                       <div>
                         <strong>{product.name}</strong>
-                        <span>₹{product.price}</span>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <span style={{ color: '#2b2226', fontWeight: 600 }}>
+                            ₹{product.price.toLocaleString('en-IN')}
+                          </span>
+                          {hasDiscount && (
+                            <span style={{ fontSize: '0.8rem', color: '#9c8a92', textDecoration: 'line-through' }}>
+                              ₹{product.mrp!.toLocaleString('en-IN')}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </Link>
-                  ))}
-
-                  {searchResults.length === 0 && (
-                    <p className="search-no-results">No products found.</p>
-                  )}
-                </>
+                  )
+                })
+              ) : (
+                <p className="search-no-results">
+                  No pretty treasures found matching "{searchQuery}".
+                </p>
               )}
             </div>
           )}
         </div>
       )}
     </header>
-  );
+  )
 }
 
-export default Navbar;
+export default Navbar

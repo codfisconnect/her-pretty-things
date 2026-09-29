@@ -1,0 +1,302 @@
+/* Pretty Play Game Styles */
+.pretty-play-card {
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #fae5ee;
+  box-shadow: 0 10px 32px rgba(219, 39, 119, 0.07);
+  padding: 2rem;
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.play-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #2b2226;
+  font-family: var(--font-heading, inherit);
+  margin: 0.4rem 0 0.5rem;
+}
+
+.play-header p {
+  color: #716269;
+  font-size: 0.95rem;
+  margin: 0 0 1.2rem;
+}
+
+.play-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #be185d;
+  background: #fdf2f8;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid #fbcfe8;
+}
+
+/* Controls */
+.play-controls-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+}
+
+.mode-toggle {
+  display: inline-flex;
+  background: #faf4f7;
+  padding: 0.3rem;
+  border-radius: 9999px;
+  border: 1px solid #eedde6;
+}
+
+.mode-toggle button {
+  background: none;
+  border: none;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #716269;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s;
+}
+
+.mode-toggle button.active {
+  background: #2b2226;
+  color: #ffffff;
+}
+
+.difficulty-pills {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.diff-btn {
+  background: #ffffff;
+  border: 1px solid #eedde6;
+  padding: 0.25rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #716269;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.diff-btn.active {
+  background: #fdf2f8;
+  border-color: #f472b6;
+  color: #db2777;
+}
+
+.play-turn-indicator {
+  font-size: 0.9rem;
+  color: #524248;
+  margin-bottom: 1.2rem;
+  min-height: 24px;
+}
+
+.game-status.win {
+  color: #047857;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.game-status.draw {
+  color: #b45309;
+  font-weight: 600;
+}
+
+/* Tic Tac 3x3 Grid */
+.tic-tac-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-width: 320px;
+  margin: 0 auto 1.5rem;
+}
+
+.grid-cell {
+  aspect-ratio: 1;
+  background: #faf4f7;
+  border: 2px solid #f3e2eb;
+  border-radius: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.grid-cell:hover:not(:disabled) {
+  background: #fce7f3;
+  border-color: #fbcfe8;
+  transform: scale(1.02);
+}
+
+.grid-cell.win-cell {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  animation: pulseWin 0.6s infinite alternate;
+}
+
+@keyframes pulseWin {
+  from { transform: scale(1); }
+  to { transform: scale(1.04); }
+}
+
+.cell-symbol.bow {
+  filter: drop-shadow(0 2px 4px rgba(219, 39, 119, 0.2));
+}
+
+.cell-symbol.star {
+  filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.2));
+}
+
+/* Reward Card */
+.reward-unlocked-card {
+  background: linear-gradient(135deg, #fff5f8 0%, #fdf2f8 100%);
+  border: 1.5px solid #fbcfe8;
+  border-radius: 18px;
+  padding: 1.25rem;
+  margin: 1.2rem 0;
+  text-align: left;
+  display: flex;
+  gap: 1rem;
+  animation: popIn 0.4s ease-out;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.reward-icon-wrap {
+  background: #ffffff;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(219, 39, 119, 0.15);
+  flex-shrink: 0;
+}
+
+.reward-content h3 {
+  font-size: 1.05rem;
+  color: #2b2226;
+  margin: 0 0 0.25rem;
+  font-weight: 700;
+}
+
+.reward-content p {
+  font-size: 0.82rem;
+  color: #716269;
+  margin: 0 0 0.75rem;
+}
+
+.reward-code-box {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.reward-code-box code {
+  background: #ffffff;
+  border: 1px dashed #db2777;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #db2777;
+  letter-spacing: 1px;
+}
+
+.copy-code-btn {
+  background: #2b2226;
+  color: #ffffff;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: background 0.2s;
+}
+
+.copy-code-btn:hover {
+  background: #43363c;
+}
+
+.reward-content small {
+  font-size: 0.75rem;
+  color: #9c8a92;
+}
+
+.reward-info-msg {
+  background: #faf4f7;
+  border-radius: 10px;
+  padding: 0.6rem;
+  font-size: 0.85rem;
+  color: #716269;
+  margin: 1rem 0;
+}
+
+/* Footer Actions */
+.play-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.play-reset-btn {
+  background: #faf4f7;
+  border: 1px solid #eedee6;
+  padding: 0.55rem 1.1rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2b2226;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s;
+}
+
+.play-reset-btn:hover {
+  background: #fdf2f8;
+  border-color: #fbcfe8;
+  color: #db2777;
+}
+
+.play-shop-link {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #db2777;
+  text-decoration: underline;
+}
+
+.play-shop-link:hover {
+  color: #be185d;
+}

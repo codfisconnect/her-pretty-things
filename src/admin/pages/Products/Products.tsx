@@ -26,12 +26,25 @@ function Products() {
   const [scoopConfig, setScoopConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+
+  const toggleCategoryExpand = (key: string) => {
+    setExpandedCategories((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   useEffect(() => {
     Promise.all([getProducts(), getAdminScoopConfig()])
       .then(([productData, scoopData]) => {
         setProducts(productData);
-        setScoopConfig(scoopData);
+        if (scoopData && scoopData.setting) {
+          setScoopConfig({
+            firstScoopPrice: scoopData.setting.firstScoopPrice,
+            additionalScoopPrice: scoopData.setting.additionalScoopPrice,
+            imageUrl: scoopData.setting.imageUrl || "/images/Scoop-Board.png",
+          });
+        } else {
+          setScoopConfig(scoopData);
+        }
       })
       .catch((error) => {
         console.error("Could not load products:", error);
@@ -88,16 +101,23 @@ function Products() {
 
       <div className="product-category-sections">
         {categories.map((category) => {
-          const categoryProducts =
-            category.key === "scoops"
-              ? []
-              : products.filter(
+          const isScoopCat = category.key === "scoops";
+          const categoryProducts = isScoopCat
+            ? products.filter(
+                (p) =>
+                  p.category.toLowerCase() === "scoop" ||
+                  p.category.toLowerCase() === "scoops"
+              )
+            : products.filter(
                 (product) =>
                   product.category.toLowerCase() === category.key
               );
 
-          const visibleProducts =
-            categoryProducts.slice(0, 5);
+          const isExpanded = Boolean(expandedCategories[category.key]);
+          const visibleProducts = isExpanded ? categoryProducts : categoryProducts.slice(0, 5);
+          const totalCount = isScoopCat
+            ? (scoopConfig ? 1 : 0) + categoryProducts.length
+            : categoryProducts.length;
 
           return (
             <section
@@ -109,14 +129,7 @@ function Products() {
                   <h2>{category.title}</h2>
 
                   <span>
-                    {category.key === "scoops"
-                      ? scoopConfig
-                        ? "1 product"
-                        : "0 products"
-                      : `${categoryProducts.length} ${categoryProducts.length === 1
-                        ? "product"
-                        : "products"
-                      }`}
+                    {`${totalCount} ${totalCount === 1 ? "product" : "products"}`}
                   </span>
                 </div>
 
@@ -124,14 +137,21 @@ function Products() {
                   <button
                     type="button"
                     className="category-view-all"
+                    onClick={() => toggleCategoryExpand(category.key)}
                   >
-                    View all
-                    <ChevronRight size={16} />
+                    {isExpanded ? "Show fewer" : "View all"}
+                    <ChevronRight
+                      size={16}
+                      style={{
+                        transform: isExpanded ? "rotate(-90deg)" : "rotate(90deg)",
+                        transition: "transform 0.2s ease",
+                      }}
+                    />
                   </button>
                 )}
               </div>
 
-              {category.key === "scoops" ? (
+              {isScoopCat ? (
                 <div className="admin-product-grid">
                   {scoopConfig && (
                     <Link
@@ -139,11 +159,15 @@ function Products() {
                       className="admin-product-tile"
                     >
                       <div className="admin-product-tile-image">
-                        <span>Mystery Scoop</span>
+                        <img
+                          src={scoopConfig.imageUrl || "/images/Scoop-Board.png"}
+                          alt="Mystery Scoop"
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
                       </div>
 
                       <div className="admin-product-tile-info">
-                        <h3>Mystery Scoop</h3>
+                        <h3>Mystery Scoop (Signature)</h3>
 
                         <div className="admin-product-tile-meta">
                           <strong>
@@ -157,6 +181,34 @@ function Products() {
                       </div>
                     </Link>
                   )}
+
+                  {visibleProducts.map((product) => (
+                    <Link
+                      key={product.id}
+                      to={`/admin/products/${product.id}`}
+                      className="admin-product-tile"
+                    >
+                      <div className="admin-product-tile-image">
+                        {product.image ? (
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                          />
+                        ) : (
+                          <span>No image</span>
+                        )}
+                      </div>
+
+                      <div className="admin-product-tile-info">
+                        <h3>{product.name}</h3>
+
+                        <div className="admin-product-tile-meta">
+                          <strong>₹{product.price}</strong>
+                          <span>Stock: {product.stock}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               ) : visibleProducts.length > 0 ? (
                 <div className="admin-product-grid">

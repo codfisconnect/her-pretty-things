@@ -41,28 +41,28 @@ export async function getAdminScoopConfig() {
       imageUrl: setting.imageUrl,
     },
 
-    shippingRules: setting.shippingRules.map((rule) => ({
+    shippingRules: setting.shippingRules.map((rule: any) => ({
       id: rule.id,
       scoopCount: rule.scoopCount,
       shipping: rule.shipping,
       active: rule.active,
     })),
 
-    colours: colours.map((colour) => ({
+    colours: colours.map((colour: any) => ({
       id: colour.id,
       name: colour.name,
       active: colour.active,
       sortOrder: colour.sortOrder,
     })),
 
-    characters: characters.map((character) => ({
+    characters: characters.map((character: any) => ({
       id: character.id,
       name: character.name,
       active: character.active,
       sortOrder: character.sortOrder,
     })),
 
-    items: items.map((item) => ({
+    items: items.map((item: any) => ({
       id: item.id,
       name: item.name,
       active: item.active,

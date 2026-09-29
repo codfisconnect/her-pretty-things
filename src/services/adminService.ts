@@ -1,7 +1,11 @@
 import { apiRequest } from "./api";
 
 export type AdminOrderStatus =
-  "PENDING_PAYMENT" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+  | "PENDING_PAYMENT"
+  | "PROCESSING"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED";
 
 export interface AdminOrderItem {
   id: string;
@@ -9,23 +13,30 @@ export interface AdminOrderItem {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
-  isCustomizedScoop: boolean;
-  numberOfScoops: number | null;
-  age: number | null;
-  colourTheme: string | null;
-  preferredCharacter: string | null;
-  preferredItems: string[];
-  excludedItems: string[];
-  additionalMessage: string | null;
+  mrpAtPurchase?: number | null;
+  discountAmount?: number | null;
+  discountPercent?: number | null;
+  isCustomizedScoop?: boolean;
+  numberOfScoops?: number | null;
+  age?: number | null;
+  colourTheme?: string | null;
+  preferredCharacter?: string | null;
+  preferredItems?: string[];
+  excludedItems?: string[];
+  additionalMessage?: string | null;
+  isByob?: boolean;
+  byobDetails?: any;
 }
 
 export interface AdminOrder {
   id: string;
-  orderNumber: string | null;
+  orderNumber?: string | null;
   createdAt: string;
   subtotal: number;
   shippingAmount: number;
   totalAmount: number;
+  rewardCodeApplied?: string | null;
+  rewardDiscount?: number;
   orderStatus: AdminOrderStatus;
   paymentStatus: string;
   razorpayPaymentId: string | null;
@@ -55,9 +66,59 @@ export interface AdminDashboard {
     processing: number;
     shipped: number;
     delivered: number;
+    cancelled?: number;
     revenue: number;
+    totalProducts?: number;
+    lowStock?: number;
+    outOfStock?: number;
+    byobOrders?: number;
+    prettyPlayRewards?: number;
   };
   recentOrders: AdminOrder[];
+}
+
+export interface CreateAdminProductInput {
+  name: string;
+  category: "scoops" | "jewellery" | "kawaii" | string;
+  price: number;
+  mrp?: number;
+  sku?: string;
+  description?: string;
+  stock?: number;
+  byobEligible?: boolean;
+}
+
+export interface UpdateAdminProductInput {
+  name?: string;
+  category?: "scoops" | "jewellery" | "kawaii" | string;
+  price?: number;
+  mrp?: number;
+  sku?: string;
+  description?: string;
+  stock?: number;
+  byobEligible?: boolean;
+  active?: boolean;
+  images?: string[];
+}
+
+export interface AdminProduct {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  price: number;
+  mrp?: number;
+  sku?: string;
+  description: string;
+  stock: number;
+  byobEligible?: boolean;
+  active?: boolean;
+  images: {
+    id: string;
+    url: string;
+    altText: string | null;
+    sortOrder: number;
+  }[];
 }
 
 export function adminLogin(email: string, password: string) {
@@ -81,8 +142,18 @@ export function getAdminDashboard() {
   return apiRequest<AdminDashboard>("/admin/dashboard");
 }
 
-export function getAdminOrders() {
-  return apiRequest<AdminOrder[]>("/admin/orders");
+export function getAdminOrders(params?: {
+  status?: string;
+  paymentStatus?: string;
+  search?: string;
+}) {
+  const query = new URLSearchParams();
+  if (params?.status && params.status !== "ALL") query.set("status", params.status);
+  if (params?.paymentStatus && params.paymentStatus !== "ALL")
+    query.set("paymentStatus", params.paymentStatus);
+  if (params?.search?.trim()) query.set("search", params.search.trim());
+  const queryString = query.toString();
+  return apiRequest<AdminOrder[]>(`/admin/orders${queryString ? `?${queryString}` : ""}`);
 }
 
 export function getAdminOrder(orderId: string) {
@@ -102,121 +173,86 @@ export function updateAdminOrderStatus(
   );
 }
 
-export interface CreateProductInput {
-  name: string;
-  category: "scoops" | "jewellery" | "kawaii";
-  price: number;
-  description: string;
-  stock: number;
-  image?: string;
-}
-
-export interface AdminProduct {
-  id: string;
-  name: string;
-  slug: string;
-  category: string;
-  price: number;
-  description: string;
-  stock: number;
-  images: {
-    id: string;
-    url: string;
-    altText: string | null;
-    sortOrder: number;
-  }[];
-}
-
 export function createAdminProduct(
-  input: CreateProductInput,
+  input: CreateAdminProductInput,
   imageFiles?: File[],
 ) {
-  if (imageFiles && imageFiles.length > 0) {
-    const formData = new FormData();
-
-    formData.append("name", input.name);
-    formData.append("category", input.category);
-    formData.append("price", String(input.price));
+  const formData = new FormData();
+  formData.append("name", input.name);
+  formData.append("category", input.category);
+  formData.append("price", String(input.price));
+  if (input.mrp !== undefined) formData.append("mrp", String(input.mrp));
+  if (input.sku !== undefined) formData.append("sku", input.sku);
+  if (input.byobEligible !== undefined)
+    formData.append("byobEligible", String(input.byobEligible));
+  if (input.description !== undefined)
     formData.append("description", input.description);
-    formData.append("stock", String(input.stock));
+  if (input.stock !== undefined) formData.append("stock", String(input.stock));
 
-    imageFiles.forEach((imageFile) => {
-      formData.append("image", imageFile);
-    });
-
-    return apiRequest<AdminProduct>("/admin/products", {
-      method: "POST",
-      body: formData,
+  if (imageFiles) {
+    imageFiles.forEach((file) => {
+      formData.append("image", file);
     });
   }
 
   return apiRequest<AdminProduct>("/admin/products", {
     method: "POST",
-    body: JSON.stringify(input),
+    body: formData,
   });
-}
-
-export async function uploadAdminProductImages(
-  imageFiles: File[],
-): Promise<string[]> {
-  const uploadedUrls: string[] = [];
-
-  for (const imageFile of imageFiles) {
-    const formData = new FormData();
-    formData.append("image", imageFile);
-
-    const result = await apiRequest<{
-      url: string;
-      publicId: string;
-      width: number;
-      height: number;
-      format: string;
-    }>("/admin/products/upload-image", {
-      method: "POST",
-      body: formData,
-    });
-
-    uploadedUrls.push(result.url);
-  }
-
-  return uploadedUrls;
 }
 
 export async function getAdminProduct(productId: string) {
   return apiRequest<AdminProduct>(
     `/admin/products/${encodeURIComponent(productId)}`,
-  )
+  );
 }
 
-export async function updateAdminProduct(
+export function updateAdminProduct(
   productId: string,
-  input: {
-    name?: string;
-    category?: "scoops" | "jewellery" | "kawaii";
-    price?: number;
-    description?: string;
-    stock?: number;
-    images?: string[];
-    active?: boolean;
-  },
+  input: UpdateAdminProductInput,
+  imageFiles?: File[],
 ) {
+  const formData = new FormData();
+  if (input.name !== undefined) formData.append("name", input.name);
+  if (input.category !== undefined) formData.append("category", input.category);
+  if (input.price !== undefined) formData.append("price", String(input.price));
+  if (input.mrp !== undefined) formData.append("mrp", String(input.mrp));
+  if (input.sku !== undefined) formData.append("sku", input.sku);
+  if (input.byobEligible !== undefined)
+    formData.append("byobEligible", String(input.byobEligible));
+  if (input.description !== undefined)
+    formData.append("description", input.description);
+  if (input.stock !== undefined) formData.append("stock", String(input.stock));
+  if (input.active !== undefined) formData.append("active", String(input.active));
+
+  if (input.images) {
+    input.images.forEach((url) => {
+      formData.append("images", url);
+    });
+  }
+
+  if (imageFiles) {
+    imageFiles.forEach((file) => {
+      formData.append("image", file);
+    });
+  }
+
   return apiRequest<AdminProduct>(
     `/admin/products/${encodeURIComponent(productId)}`,
     {
       method: "PUT",
-      body: JSON.stringify(input),
+      body: formData,
     },
   );
 }
 
-export async function deleteAdminProduct(productId: string) {
-  return apiRequest<AdminProduct>(
-    `/admin/products/${encodeURIComponent(productId)}`,
-    {
-      method: "DELETE",
-    },
-  );
+export function deactivateAdminProduct(productId: string) {
+  return apiRequest(`/admin/products/${encodeURIComponent(productId)}`, {
+    method: "DELETE",
+  });
 }
+
+export const deleteAdminProduct = deactivateAdminProduct;
 
 export async function deleteAdminProductImage(
   productId: string,
@@ -230,10 +266,30 @@ export async function deleteAdminProductImage(
   );
 }
 
-/* =========================
-   SCOOP MANAGEMENT
-========================= */
+export async function uploadAdminProductImages(
+  files: File[],
+): Promise<string[]> {
+  const urls: string[] = [];
+  for (const file of files) {
+    const formData = new FormData();
+    formData.append("image", file);
+    try {
+      const res = await apiRequest<any>("/admin/products/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+      const url = res?.url || res?.data?.url;
+      if (url) {
+        urls.push(url);
+      }
+    } catch (e) {
+      console.error("Image upload failed:", e);
+    }
+  }
+  return urls;
+}
 
+/* Scoop Admin */
 export interface AdminScoopSetting {
   id: string;
   firstScoopPrice: number;
@@ -271,27 +327,12 @@ export function getAdminScoopConfig() {
   return apiRequest<AdminScoopConfig>("/admin/scoop/config");
 }
 
-export function updateAdminScoopSetting(input: {
-  firstScoopPrice: number;
-  additionalScoopPrice: number;
-  maxScoops: number;
-  maxPreferredItems: number;
-  maxExcludedItems: number;
-  imageUrl?: string;
-}) {
-  return apiRequest("/admin/scoop/config", {
+export function updateAdminScoopSetting(
+  input: Partial<AdminScoopSetting>,
+) {
+  return apiRequest<AdminScoopConfig>("/admin/scoop/config", {
     method: "PUT",
     body: JSON.stringify(input),
-  });
-}
-
-export function uploadAdminScoopImage(file: File) {
-  const formData = new FormData();
-  formData.append("image", file);
-
-  return apiRequest<{ imageUrl: string }>("/admin/scoop/image", {
-    method: "POST",
-    body: formData,
   });
 }
 
@@ -304,19 +345,23 @@ export function updateAdminScoopOption(
     sortOrder?: number;
   },
 ) {
-  return apiRequest(`/admin/scoop/options/${type}/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(input),
-  });
+  return apiRequest<AdminScoopOption>(
+    `/admin/scoop/options/${encodeURIComponent(type)}/${encodeURIComponent(id)}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(input),
+    },
+  );
 }
-export function createAdminScoopOption(input: {
-  type: "colour" | "character" | "item";
-  name: string;
-  sortOrder?: number;
-}) {
+
+export function createAdminScoopOption(
+  type: "colour" | "character" | "item",
+  name: string,
+  sortOrder?: number,
+) {
   return apiRequest<AdminScoopOption>("/admin/scoop/options", {
     method: "POST",
-    body: JSON.stringify(input),
+    body: JSON.stringify({ type, name, sortOrder }),
   });
 }
 
@@ -324,7 +369,98 @@ export function deleteAdminScoopOption(
   type: "colour" | "character" | "item",
   id: string,
 ) {
-  return apiRequest(`/admin/scoop/options/${type}/${id}`, {
+  return apiRequest<void>(
+    `/admin/scoop/options/${encodeURIComponent(type)}/${encodeURIComponent(id)}`,
+    {
+      method: "DELETE",
+    },
+  );
+}
+
+export async function uploadAdminScoopImage(
+  file: File,
+): Promise<{ url: string; imageUrl: string }> {
+  const formData = new FormData();
+  formData.append("image", file);
+  const res = await apiRequest<any>("/admin/scoop/image", {
+    method: "POST",
+    body: formData,
+  });
+  const url = res?.imageUrl || res?.url || "";
+  return { url, imageUrl: url };
+}
+
+/* Seasonal Character Greetings Admin */
+export function getAdminGreetings() {
+  return apiRequest<any[]>("/admin/seasonal-greetings");
+}
+
+export function createAdminGreeting(formData: FormData) {
+  return apiRequest("/admin/seasonal-greetings", {
+    method: "POST",
+    body: formData,
+  });
+}
+
+export function updateAdminGreeting(id: string, formData: FormData) {
+  return apiRequest(`/admin/seasonal-greetings/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    body: formData,
+  });
+}
+
+export function deleteAdminGreeting(id: string) {
+  return apiRequest(`/admin/seasonal-greetings/${encodeURIComponent(id)}`, {
     method: "DELETE",
+  });
+}
+
+/* BYOB Admin */
+export function getAdminByobSettings() {
+  return apiRequest<{
+    id: string;
+    enabled: boolean;
+    minimumSubtotal: number;
+    shippingFee: number;
+  }>("/admin/byob/settings");
+}
+
+export function updateAdminByobSettings(data: {
+  enabled?: boolean;
+  minimumSubtotal?: number;
+  shippingFee?: number;
+}) {
+  return apiRequest("/admin/byob/settings", {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+/* Rewards Admin */
+export function getAdminRewards() {
+  return apiRequest<any[]>("/admin/rewards");
+}
+
+/* Damage Claims Admin */
+export function getAdminClaims() {
+  return apiRequest<any[]>("/admin/claims");
+}
+
+export function updateAdminClaimStatus(id: string, status: string) {
+  return apiRequest(`/admin/claims/${encodeURIComponent(id)}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
+  });
+}
+
+/* Business Info Admin */
+export function getAdminBusinessInfo() {
+  return apiRequest<any>("/admin/business");
+}
+
+export function updateAdminBusinessInfo(data: any) {
+  return apiRequest("/admin/business", {
+    method: "PUT",
+    body: JSON.stringify(data),
   });
 }

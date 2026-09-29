@@ -198,3 +198,292 @@
         flex-basis: 90px;
     }
 }
+
+/* =========================================
+   UNIFIED PREMIUM CATEGORY SHOWCASE
+   ========================================= */
+
+.category-showcase-section {
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+}
+
+.category-showcase-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 28px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Header */
+.category-showcase-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 3rem auto;
+}
+
+.category-showcase-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #db2777;
+  margin: 0 0 12px 0;
+  background: rgba(251, 207, 232, 0.45);
+  padding: 5px 16px;
+  border-radius: 9999px;
+  border: 1px solid rgba(244, 114, 182, 0.3);
+}
+
+.category-showcase-heading {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  font-weight: 600;
+  color: #2b2226;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.category-showcase-supporting {
+  font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+  color: #716269;
+  line-height: 1.55;
+  margin: 0 auto;
+  max-width: 580px;
+}
+
+/* 4-Card Single Row on Desktop (max 1400px, 16-20px gap) */
+.category-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Editorial Category Card (4:5 vertical aspect ratio, visual-first) */
+.category-editorial-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  aspect-ratio: 4 / 5;
+  border-radius: 22px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #ffffff;
+  background: #fdf2f8;
+  box-shadow: 0 10px 30px -10px rgba(180, 80, 120, 0.14), 0 4px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  transition: transform 0.4s cubic-bezier(0.2, 0, 0.2, 1),
+              box-shadow 0.4s cubic-bezier(0.2, 0, 0.2, 1),
+              border-color 0.4s ease;
+  isolation: isolate;
+  cursor: pointer;
+}
+
+.category-editorial-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 42px -10px rgba(180, 80, 120, 0.26), 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: rgba(251, 207, 232, 0.9);
+}
+
+/* Background Media & Dynamic Rotation */
+.category-editorial-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.category-editorial-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.6s cubic-bezier(0.2, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.category-editorial-img.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 1;
+}
+
+.category-editorial-card:hover .category-editorial-img.active {
+  transform: scale(1.04);
+}
+
+/* Gradient Overlay - readable text over any product image */
+.category-editorial-gradient {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(20, 10, 16, 0) 35%, rgba(20, 10, 16, 0.42) 65%, rgba(20, 10, 16, 0.88) 100%);
+  transition: background 0.4s ease;
+}
+
+.category-editorial-card:hover .category-editorial-gradient {
+  background: linear-gradient(180deg, rgba(20, 10, 16, 0.04) 30%, rgba(20, 10, 16, 0.48) 62%, rgba(20, 10, 16, 0.92) 100%);
+}
+
+/* Bottom Information Layer */
+.category-editorial-content {
+  position: relative;
+  z-index: 3;
+  padding: 24px 22px 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transform: translateZ(0);
+}
+
+.category-editorial-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.category-editorial-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.25;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.category-editorial-tagline {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+  line-height: 1.4;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+
+/* Explore → Action */
+.category-editorial-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #fce7f3;
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 2px;
+  transition: color 0.25s ease;
+}
+
+.category-editorial-cta-text {
+  position: relative;
+}
+
+.category-editorial-card:hover .category-editorial-cta {
+  color: #ffffff;
+}
+
+.category-editorial-arrow {
+  transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1);
+  color: #f472b6;
+}
+
+.category-editorial-card:hover .category-editorial-arrow {
+  transform: translateX(4px);
+  color: #ffffff;
+}
+
+/* =========================================
+   RESPONSIVENESS (CATEGORY SHOWCASE)
+   ========================================= */
+
+/* Tablets / Medium Screens (max-width: 1080px) */
+@media (max-width: 1080px) {
+  .category-showcase-container {
+    padding: 0 20px;
+  }
+
+  .category-showcase-header {
+    margin-bottom: 2.2rem;
+  }
+
+  .category-showcase-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .category-editorial-card {
+    aspect-ratio: 4 / 5;
+  }
+
+  .category-editorial-content {
+    padding: 22px 20px 22px 20px;
+  }
+}
+
+/* Mobile Screens (max-width: 640px) */
+@media (max-width: 640px) {
+  .category-showcase-section {
+    padding-top: 1rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .category-showcase-container {
+    padding: 0 16px;
+  }
+
+  .category-showcase-header {
+    margin-bottom: 1.75rem;
+  }
+
+  .category-showcase-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .category-editorial-card {
+    aspect-ratio: 4 / 5;
+    border-radius: 18px;
+  }
+
+  .category-editorial-content {
+    padding: 20px 18px 20px 18px;
+  }
+
+  .category-editorial-title {
+    font-size: 1.25rem;
+  }
+
+  .category-editorial-tagline {
+    font-size: 0.88rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-editorial-img,
+  .category-editorial-card,
+  .category-editorial-arrow {
+    transition: none !important;
+  }
+}
+
+

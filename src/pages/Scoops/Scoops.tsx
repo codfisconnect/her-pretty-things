@@ -1,7 +1,7 @@
 import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { addCartItem } from "../../services/cartService";
+import { useCart } from "../../context/CartContext";
 import { apiRequest } from "../../services/api";
 import ScoopCustomizer from "./ScoopCustomizer";
 import ScoopPriceSummary from "./ScoopPriceSummary";
@@ -12,38 +12,34 @@ function Scoops() {
   const [scoopImageUrl, setScoopImageUrl] = useState(
     "/images/Scoop-Board.png",
   );
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   useEffect(() => {
-  apiRequest<{
-    imageUrl: string | null;
-  }>("/scoop/config")
-    .then((config) => {
-      if (config.imageUrl) {
-        setScoopImageUrl(config.imageUrl);
-      }
-    })
-    .catch((error) => {
-      console.error("Could not load Scoop image:", error);
-    });
-}, []);
-
-  const navigate = useNavigate();
+    apiRequest<{
+      imageUrl: string | null;
+    }>("/scoop/config")
+      .then((config) => {
+        if (config.imageUrl) {
+          setScoopImageUrl(config.imageUrl);
+        }
+      })
+      .catch((error) => {
+        console.error("Could not load Scoop image:", error);
+      });
+  }, []);
 
   const handleConfigurationReady = async (
     configuration: ScoopConfiguration,
   ) => {
-    const savedSessionId =
-      localStorage.getItem("hpt_session_id") ?? crypto.randomUUID();
-    localStorage.setItem("hpt_session_id", savedSessionId);
-    const savedCartId = localStorage.getItem("hpt_cart_id");
-
-    const cart = await addCartItem({
-      cartId: savedCartId ?? undefined,
-      sessionId: savedSessionId,
-      scoopConfiguration: configuration,
-    });
-    localStorage.setItem("hpt_cart_id", cart.id);
-    navigate("/cart");
+    try {
+      await addToCart({
+        scoopConfiguration: configuration,
+      });
+      navigate("/cart");
+    } catch (err) {
+      console.error("Could not add scoop to cart:", err);
+    }
   };
 
   return (

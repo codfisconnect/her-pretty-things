@@ -1,0 +1,191 @@
+/* Seasonal Character Greeting Styles */
+.seasonal-character-banner {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 990;
+  max-width: 360px;
+  width: calc(100vw - 32px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.seasonal-greeting-card {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+/* Character Avatar */
+.character-avatar-wrap {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fce7f3 0%, #fdf2f8 100%);
+  padding: 4px;
+  box-shadow: 0 8px 24px rgba(219, 39, 119, 0.2);
+  border: 2px solid #ffffff;
+}
+
+.character-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.character-sparkle {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #db2777;
+  color: #ffffff;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(219, 39, 119, 0.4);
+}
+
+/* Speech Bubble */
+.character-speech-bubble {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #f9d8e7;
+  border-radius: 16px;
+  padding: 12px 14px;
+  box-shadow: 0 10px 30px rgba(45, 30, 36, 0.12);
+  flex: 1;
+}
+
+/* Small speech triangle pointing to avatar */
+.character-speech-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: 18px;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid #ffffff;
+  z-index: 1;
+}
+
+.character-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: #a8949b;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.character-close-btn:hover {
+  color: #2b2226;
+  background: #f7eff3;
+}
+
+.bubble-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: #db2777;
+  margin-bottom: 2px;
+}
+
+.bubble-header strong {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.bubble-greeting {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2b2226;
+  margin: 0 0 4px;
+  line-height: 1.35;
+}
+
+.bubble-secondary {
+  font-size: 0.78rem;
+  color: #716269;
+  margin: 0 0 6px;
+  line-height: 1.35;
+}
+
+.bubble-cta-link {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #db2777;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.bubble-cta-link:hover {
+  color: #be185d;
+}
+
+/* Entrance Animations */
+.seasonal-character-banner.bounce {
+  animation: characterEnterBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes characterEnterBounce {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.85);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .seasonal-character-banner.bounce {
+    animation: simpleFadeIn 0.3s ease-in both;
+  }
+
+  @keyframes simpleFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 650px) {
+  .seasonal-character-banner {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-width: 100%;
+  }
+
+  .character-avatar-wrap {
+    width: 60px;
+    height: 60px;
+  }
+
+  .bubble-greeting {
+    font-size: 0.84rem;
+  }
+}
