@@ -14,6 +14,7 @@ import seasonalGreetingRoutes from './routes/seasonalGreetingRoutes.js'
 import gameRoutes from './routes/gameRoutes.js'
 import byobRoutes from './routes/byobRoutes.js'
 import businessRoutes from './routes/businessRoutes.js'
+import instagramRoutes from './routes/instagramRoutes.js'
 
 const app = express()
 const port = Number(process.env.PORT ?? 4000)
@@ -66,6 +67,7 @@ app.use('/api/seasonal-greeting', seasonalGreetingRoutes)
 app.use('/api/game', gameRoutes)
 app.use('/api/byob', byobRoutes)
 app.use('/api/business', businessRoutes)
+app.use('/api/instagram', instagramRoutes)
 
 app.use(errorHandler)
 

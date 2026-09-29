@@ -3,11 +3,10 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { getProducts } from "../../services/productService";
 import { getScoopConfig } from "../../services/scoopService";
-import { fetchByobProducts } from "../../services/byobService";
 import CategoryCard, {
   type Category,
 } from "../../components/CategoryCard/CategoryCard";
@@ -16,38 +15,11 @@ import ProductCard from "../../components/ProductCard/ProductCard";
 import SocialGallery from "../../components/SocialGallery/SocialGallery";
 import PrettyPlay from "../../components/PrettyPlay/PrettyPlay";
 import type { Product } from "../../types/product";
+import {
+  buildHeroSlides,
+  getCategorySlides,
+} from "../../utils/productSlides";
 import "./Home.css";
-
-const categories: Category[] = [
-  {
-    name: "Scoops",
-    slug: "scoops",
-    description: "Little surprises waiting to be discovered.",
-    accent: "category-pink",
-    icon: "🍨",
-  },
-  {
-    name: "Jewellery",
-    slug: "jewellery",
-    description: "Pretty pieces for every little moment.",
-    accent: "category-lilac",
-    icon: "✧",
-  },
-  {
-    name: "Kawaii",
-    slug: "kawaii",
-    description: "Cute finds you'll want to keep forever.",
-    accent: "category-yellow",
-    icon: "🐰",
-  },
-  {
-    name: "Build Your Own Box",
-    slug: "byob",
-    description: "Your box. Your picks. Your custom gift set.",
-    accent: "category-pink",
-    icon: "🎁",
-  },
-];
 
 interface ProductCarouselProps {
   title: string;
@@ -117,49 +89,20 @@ function Home() {
   const [jewelleryProducts, setJewelleryProducts] = useState<Product[]>([]);
   const [kawaiiProducts, setKawaiiProducts] = useState<Product[]>([]);
   const [scoopImageUrl, setScoopImageUrl] = useState<string | null>(null);
-  const [byobPreviewImages, setByobPreviewImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadHomepageData() {
       try {
-        const [jewellery, kawaii, scoopConfig, byobProds] = await Promise.all([
+        const [jewellery, kawaii, scoopConfig] = await Promise.all([
           getProducts("jewellery"),
           getProducts("kawaii"),
           getScoopConfig(),
-          fetchByobProducts(),
         ]);
         setJewelleryProducts(jewellery);
         setKawaiiProducts(kawaii);
-
         if (scoopConfig?.imageUrl) {
           setScoopImageUrl(scoopConfig.imageUrl);
-        }
-
-        if (Array.isArray(byobProds) && byobProds.length > 0) {
-          const validImages = byobProds
-            .filter((p) => p.name && !p.name.toLowerCase().includes("sample"))
-            .map((p) => p.image || (p.images && p.images[0]))
-            .filter((img): img is string => typeof img === "string" && img.length > 0 && !img.includes("Scoop-Board"));
-
-          if (validImages.length >= 2) {
-            setByobPreviewImages(validImages.slice(0, 2));
-          } else if (validImages.length === 1) {
-            setByobPreviewImages([
-              validImages[0],
-              "https://res.cloudinary.com/otb2lsot/image/upload/v1790153970/her-pretty-things/products/jljdxbnckvjcxi1fhdwy.png",
-            ]);
-          } else {
-            setByobPreviewImages([
-              "https://res.cloudinary.com/otb2lsot/image/upload/v1790154032/her-pretty-things/products/ytmewrjji6wqhvsut5sq.png",
-              "https://res.cloudinary.com/otb2lsot/image/upload/v1790315690/her-pretty-things/products/koytyyclbwruvb0in48s.jpg",
-            ]);
-          }
-        } else {
-          setByobPreviewImages([
-            "https://res.cloudinary.com/otb2lsot/image/upload/v1790154032/her-pretty-things/products/ytmewrjji6wqhvsut5sq.png",
-            "https://res.cloudinary.com/otb2lsot/image/upload/v1790315690/her-pretty-things/products/koytyyclbwruvb0in48s.jpg",
-          ]);
         }
       } catch (error) {
         console.error("Could not load homepage products:", error);
@@ -170,28 +113,108 @@ function Home() {
     loadHomepageData();
   }, []);
 
+  // Build dynamic hero slideshow mix (Mystery Scoop -> Jewellery -> Kawaii -> repeat)
+  const heroSlides = useMemo(() => {
+    return buildHeroSlides(scoopImageUrl, jewelleryProducts, kawaiiProducts);
+  }, [scoopImageUrl, jewelleryProducts, kawaiiProducts]);
+
+  // Build dynamic 4 categories
+  const categories: Category[] = useMemo(() => {
+    const scoopFallback = "/images/category/scoops-collection.png";
+    const jewelleryFallback = "/images/category/jewellery-collection.png";
+    const kawaiiFallback = "/images/category/kawaii-collection.png";
+    const byobImage = "/images/category/byob-collection.png";
+
+    const scoopSlides = getCategorySlides(
+      [],
+      "Mystery Scoops",
+      scoopImageUrl || scoopFallback
+    ).map((s) => s.url);
+
+    const jewellerySlides = getCategorySlides(
+      jewelleryProducts,
+      "Jewellery",
+      jewelleryFallback
+    ).map((s) => s.url);
+
+    const kawaiiSlides = getCategorySlides(
+      kawaiiProducts,
+      "Kawaii",
+      kawaiiFallback
+    ).map((s) => s.url);
+
+    return [
+      {
+        id: "scoops",
+        number: "01",
+        name: "MYSTERY SCOOP",
+        subtitle: "Pick your surprise",
+        slug: "scoops",
+        description: "Pick your surprise",
+        ctaText: "Explore",
+        image: scoopSlides[0] || scoopFallback,
+        images: scoopSlides,
+        rotationInterval: 5000,
+      },
+      {
+        id: "jewellery",
+        number: "02",
+        name: "JEWELLERY",
+        subtitle: "Find your little sparkle",
+        slug: "jewellery",
+        description: "Find your little sparkle",
+        ctaText: "Explore",
+        image: jewellerySlides[0] || jewelleryFallback,
+        images: jewellerySlides,
+        rotationInterval: 4800,
+      },
+      {
+        id: "kawaii",
+        number: "03",
+        name: "KAWAII",
+        subtitle: "Something cute awaits",
+        slug: "kawaii",
+        description: "Something cute awaits",
+        ctaText: "Explore",
+        image: kawaiiSlides[0] || kawaiiFallback,
+        images: kawaiiSlides,
+        rotationInterval: 5200,
+      },
+      {
+        id: "byob",
+        number: "04",
+        name: "BUILD YOUR OWN BOX",
+        subtitle: "Create yours",
+        slug: "byob",
+        description: "Create yours",
+        ctaText: "Explore",
+        image: byobImage,
+        images: [byobImage],
+      },
+    ];
+  }, [scoopImageUrl, jewelleryProducts, kawaiiProducts]);
+
   return (
     <>
-      <Hero />
+      <Hero slides={heroSlides} />
 
       <main>
-        {/* 4 Primary Categories */}
-        <section className="section container category-section">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Made to make you smile</p>
-              <h2>Shop Your Pretty Picks</h2>
+        {/* Unified Premium Editorial Category Showcase */}
+        <section className="section category-showcase-section" aria-label="Shop The Collection">
+          <div className="category-showcase-container">
+            <div className="category-showcase-header">
+              <p className="category-showcase-eyebrow">SHOP THE COLLECTION</p>
+              <h2 className="category-showcase-heading">Find Your Pretty Thing</h2>
+              <p className="category-showcase-supporting">
+                Something sweet, something sparkly, something completely you.
+              </p>
             </div>
 
-            <Link className="text-link desktop-link" to="/jewellery">
-              View all <ArrowRight size={16} />
-            </Link>
-          </div>
-
-          <div className="category-grid">
-            {categories.map((category) => (
-              <CategoryCard key={category.name} category={category} />
-            ))}
+            <div className="category-showcase-grid">
+              {categories.map((category) => (
+                <CategoryCard key={category.id} category={category} />
+              ))}
+            </div>
           </div>
         </section>
 
@@ -233,87 +256,6 @@ function Home() {
           </div>
         </section>
 
-        {/* Curated Shopping Experiences: Mystery Scoop + Build Your Own Box */}
-        <section className="container experiences-section" aria-label="Curated Shopping Experiences">
-          <div className="experiences-grid">
-            {/* Mystery Scoop Box Card */}
-            <article className="experience-card experience-card--scoop">
-              <div className="experience-card-content">
-                <span className="experience-eyebrow experience-eyebrow--scoop">
-                  🍨 OUR SIGNATURE EXPERIENCE
-                </span>
-                <h2 className="experience-title">The Mystery Scoop Box</h2>
-                <p className="experience-tagline">
-                  Pick your theme. We&apos;ll curate the magic.
-                </p>
-                <Link to="/scoops" className="experience-cta experience-cta--scoop">
-                  <span>Configure Your Scoop</span>
-                  <ArrowRight size={16} aria-hidden="true" />
-                </Link>
-              </div>
-
-              <div className="experience-card-media experience-card-media--scoop">
-                {scoopImageUrl ? (
-                  <img
-                    src={scoopImageUrl}
-                    alt="The Mystery Scoop Box"
-                    className="experience-scoop-img"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="experience-img-skeleton" aria-hidden="true" />
-                )}
-              </div>
-            </article>
-
-            {/* Build Your Own Box Card */}
-            <article className="experience-card experience-card--byob">
-              <div className="experience-card-content">
-                <span className="experience-eyebrow experience-eyebrow--byob">
-                  🎁 CUSTOM GIFTING
-                </span>
-                <h2 className="experience-title">Build Your Own Box</h2>
-                <p className="experience-tagline">
-                  Your box. Your picks. Your way.
-                </p>
-                <Link to="/byob" className="experience-cta experience-cta--byob">
-                  <span>Start Building Your Box</span>
-                  <ArrowRight size={16} aria-hidden="true" />
-                </Link>
-              </div>
-
-              <div className="experience-card-media experience-card-media--byob">
-                <div className="byob-curation-visual">
-                  <div className="byob-items-cascade">
-                    {byobPreviewImages.map((imgUrl, idx) => (
-                      <div
-                        key={idx}
-                        className={`byob-item-bubble byob-item-bubble--${idx + 1}`}
-                      >
-                        <img
-                          src={imgUrl}
-                          alt={`BYOB Pick ${idx + 1}`}
-                          loading="lazy"
-                        />
-                      </div>
-                    ))}
-                    <div className="byob-gift-target" title="Custom Gift Box">
-                      <span>🎁</span>
-                      <span className="byob-sparkle-badge">✨</span>
-                    </div>
-                  </div>
-                  <div className="byob-flow-pill">
-                    <span>Choose</span>
-                    <span className="byob-flow-dot">•</span>
-                    <span>Curate</span>
-                    <span className="byob-flow-dot">•</span>
-                    <span>Gift</span>
-                  </div>
-                </div>
-              </div>
-            </article>
-          </div>
-        </section>
 
         {/* Pretty Play Section */}
         <section className="container" style={{ margin: "2.5rem auto" }}>
