@@ -1,1 +1,0 @@
-// Cart item component placeholder.

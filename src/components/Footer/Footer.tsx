@@ -1,139 +1,167 @@
-import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Mail, Phone, MapPin, Camera } from 'lucide-react'
-import Logo from '../../../public/images/Logo/HPTlog.png'
-import { fetchBusinessInfoApi, type BusinessInfo } from '../../services/businessService'
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Check } from 'lucide-react';
+import './Footer.css';
 
 export const Footer: React.FC = () => {
-  const [info, setInfo] = useState<BusinessInfo>({
-    companyName: 'Her Pretty Things',
-    tagline: 'Small delights, aesthetic jewellery & curated gifts.',
-    email: 'shop.herprettythings@gmail.com',
-    phone: '9790858125',
-    locationLocality: 'Royapettah',
-    locationCity: 'Chennai',
-    locationState: 'Tamil Nadu',
-    locationCountry: 'India',
-    instagramHandle: '@her_prettythings',
-    instagramUrl: 'https://www.instagram.com/her_prettythings/',
-    businessHours: 'Mon - Sat: 10:00 AM - 7:00 PM',
-  })
+  const [subscribed, setSubscribed] = useState(false);
+  const [email, setEmail] = useState('');
 
-  useEffect(() => {
-    fetchBusinessInfoApi()
-      .then((data) => {
-        if (data) {
-          setInfo((prev) => ({
-            ...prev,
-            ...data,
-            instagramUrl: 'https://www.instagram.com/her_prettythings/',
-            instagramHandle: '@her_prettythings',
-          }))
-        }
-      })
-      .catch(() => {})
-  }, [])
-
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${info.locationLocality}, ${info.locationCity}, ${info.locationState}, India`
-  )}`
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.trim()) {
+      setSubscribed(true);
+      setEmail('');
+    }
+  };
 
   return (
     <footer className="site-footer" role="contentinfo">
-      <div className="footer-main container">
+      <div className="footer-top-inner">
         {/* Brand Column */}
-        <div className="footer-brand">
-          <Link className="brand" to="/" aria-label="Her Pretty Things Home">
-            <span className="brand-mark">
-              <img src={Logo} alt="Her Pretty Things Logo" />
-            </span>
-            <span>Her Pretty Things</span>
+        <div className="footer-brand-col">
+          <Link to="/" className="footer-brand-logo">
+            YUSRAA
           </Link>
-          <p className="footer-tagline">
-            Small delights, aesthetic jewellery & curated gifts.
+          <p className="footer-brand-desc">
+            YUSRAA is a luxury modest wear atelier dedicated exclusively to haute hijabs.
+            From breathable Malaysian chiffons and royal Kashmiri pashminas to grade 6A
+            mulberry silks, our pieces celebrate graceful modesty with unparalleled comfort.
           </p>
-          <a
-            className="instagram-link"
-            href="https://www.instagram.com/her_prettythings/"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Follow Her Pretty Things on Instagram"
-          >
-            <Camera size={13} />
-            <span>@her_prettythings</span>
-          </a>
-        </div>
-
-        {/* Shop + Help Navigation Columns */}
-        <div className="footer-nav-group">
-          {/* Shop Column */}
-          <div className="footer-column">
-            <h3>Shop</h3>
-            <Link to="/scoops">Scoops</Link>
-            <Link to="/jewellery">Jewellery</Link>
-            <Link to="/kawaii">Kawaii</Link>
-            <Link to="/byob">Build Your Own Box</Link>
-            <Link to="/play">Pretty Play</Link>
-          </div>
-
-          {/* Help Column */}
-          <div className="footer-column">
-            <h3>Help</h3>
-            <Link to="/shipping">Shipping & Delivery</Link>
-            <Link to="/return">Replacement Policy</Link>
-            <Link to="/contact">Contact Us</Link>
-            <Link to="/about">About Us</Link>
+          <div style={{ display: 'flex', gap: '0.5rem', color: '#c5a059', fontSize: '0.85rem' }}>
+            <span>Non-Slip Weaves</span> • <span>Featherlight Drape</span> • <span>Ethically Sourced</span>
           </div>
         </div>
 
-        {/* Contact & Location Column */}
-        <div className="footer-column footer-contact-col">
-          <h3>Get In Touch</h3>
-          <a
-            href={mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-address-link"
-            title="Open Royapettah location on Google Maps"
-          >
-            <MapPin size={13} className="footer-contact-icon" />
-            <span className="footer-address-text">
-              <span>{info.locationLocality}, {info.locationCity}</span>
-              <span className="footer-address-sub">{info.locationState}, {info.locationCountry}</span>
-            </span>
-          </a>
-          <a href={`mailto:${info.email}`} className="email-link" title="Send email">
-            <Mail size={13} className="footer-contact-icon" />
-            <span>{info.email}</span>
-          </a>
-          <a href={`tel:${info.phone.replace(/\s+/g, '')}`} className="email-link" title="Call us">
-            <Phone size={13} className="footer-contact-icon" />
-            <span>{info.phone}</span>
-          </a>
+        {/* Hijab Collections */}
+        <div>
+          <h3 className="footer-col-title">Hijab Collections</h3>
+          <ul className="footer-nav-list">
+            <li>
+              <Link to="/shop?category=chiffon-hijab" className="footer-nav-link">
+                Malaysian Chiffon Hijabs
+              </Link>
+            </li>
+            <li>
+              <Link to="/shop?category=pashmina-hijab" className="footer-nav-link">
+                Cashmere Pashmina Hijabs
+              </Link>
+            </li>
+            <li>
+              <Link to="/shop?category=silk-hijab" className="footer-nav-link">
+                Mulberry Silk Hijabs
+              </Link>
+            </li>
+            <li>
+              <Link to="/shop?category=jersey-hijab" className="footer-nav-link">
+                Egyptian Jersey Hijabs
+              </Link>
+            </li>
+            <li>
+              <Link to="/shop?category=modal-hijab" className="footer-nav-link">
+                Lenzing Modal Hijabs
+              </Link>
+            </li>
+            <li>
+              <Link to="/premium-hijab-collection" className="footer-nav-link">
+                Premium Hijab Collection
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Customer Care & Legal */}
+        <div>
+          <h3 className="footer-col-title">Customer Care</h3>
+          <ul className="footer-nav-list">
+            <li>
+              <Link to="/about-us" className="footer-nav-link">
+                About YUSRAA
+              </Link>
+            </li>
+            <li>
+              <Link to="/faq" className="footer-nav-link">
+                Hijab Care &amp; FAQ
+              </Link>
+            </li>
+            <li>
+              <Link to="/contact" className="footer-nav-link">
+                Contact Atelier
+              </Link>
+            </li>
+            <li>
+              <Link to="/shipping-policy" className="footer-nav-link">
+                Shipping Policy
+              </Link>
+            </li>
+            <li>
+              <Link to="/refund-policy" className="footer-nav-link">
+                Refund &amp; Return Policy
+              </Link>
+            </li>
+            <li>
+              <Link to="/terms-and-conditions" className="footer-nav-link">
+                Terms of Service
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Newsletter & Atelier Circle */}
+        <div>
+          <h3 className="footer-col-title">The Atelier Circle</h3>
+          <p className="footer-newsletter-text">
+            Subscribe to receive private invitations to limited fabric drops, modest styling
+            guides, and privileged festive previews.
+          </p>
+
+          {subscribed ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#c5a059', fontSize: '0.85rem' }}>
+              <Check size={16} />
+              <span>Thank you for joining the YUSRAA Circle.</span>
+            </div>
+          ) : (
+            <form onSubmit={handleSubscribe} className="footer-newsletter-form">
+              <input
+                type="email"
+                required
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="footer-newsletter-input"
+                aria-label="Email for YUSRAA newsletter"
+              />
+              <button type="submit" className="footer-newsletter-btn">
+                Join
+              </button>
+            </form>
+          )}
         </div>
       </div>
 
-      {/* Bottom Area: Copyright & Developer Credit */}
-      <div className="footer-bottom-wrap">
-        <div className="footer-bottom container">
-          <span>© {new Date().getFullYear()} Her Pretty Things. Made with love.</span>
-          <span>Prepaid Orders Only · Pan India Delivery</span>
-        </div>
-        <div className="footer-credit container">
-          <span>Website crafted by </span>
-          <a
-            href="https://www.codfis.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="codfis-link"
-          >
-            Codfis Technologies
-          </a>
+      {/* Bottom Bar */}
+      <div className="footer-bottom-bar">
+        <div className="footer-bottom-inner">
+          <p style={{ margin: 0 }}>
+            &copy; 2026 YUSRAA Luxury Hijabs. All rights reserved.
+          </p>
+
+          <div className="footer-legal-links">
+            <Link to="/privacy-policy" className="footer-legal-link">
+              Privacy Policy
+            </Link>
+            <Link to="/terms-and-conditions" className="footer-legal-link">
+              Terms &amp; Conditions
+            </Link>
+            <Link to="/shipping-policy" className="footer-legal-link">
+              Shipping Information
+            </Link>
+            <Link to="/refund-policy" className="footer-legal-link">
+              Refund Policy
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
-  )
-}
-
-export default Footer
-
+  );
+};

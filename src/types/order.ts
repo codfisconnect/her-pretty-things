@@ -1,1 +1,0 @@
-// Order type definitions placeholder.

@@ -1,0 +1,106 @@
+.currency-selector-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.currency-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(248, 245, 240, 0.85);
+  border: 1px solid rgba(197, 160, 89, 0.3);
+  padding: 0.35rem 0.7rem;
+  border-radius: 9999px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.currency-trigger-btn:hover {
+  background: #fdfaf6;
+  border-color: #c5a059;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(197, 160, 89, 0.15);
+}
+
+.currency-symbol-tag {
+  color: #9b783e;
+  font-weight: 700;
+}
+
+.currency-chevron {
+  transition: transform 0.2s ease;
+}
+
+.currency-chevron.open {
+  transform: rotate(180deg);
+}
+
+.currency-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid rgba(197, 160, 89, 0.25);
+  border-radius: 12px;
+  padding: 0.4rem;
+  min-width: 140px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  animation: fadeInDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.currency-option-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #333333;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.currency-option-item:hover {
+  background: #fbf8f2;
+  color: #9b783e;
+}
+
+.currency-option-item.active {
+  background: #f4ede0;
+  color: #7d5e2d;
+  font-weight: 700;
+}
+
+.currency-code-text {
+  font-weight: 600;
+}
+
+.currency-sym-text {
+  color: #888888;
+}
+
+.currency-option-item.active .currency-sym-text {
+  color: #7d5e2d;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

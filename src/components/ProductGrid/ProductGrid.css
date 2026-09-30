@@ -1,0 +1,46 @@
+.product-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.75rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .product-grid-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .product-grid-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .product-grid-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.product-grid-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 1rem;
+  background: #fdfaf6;
+  border-radius: 16px;
+  border: 1px dashed rgba(197, 160, 89, 0.4);
+}
+
+.empty-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.75rem;
+  color: #1a1614;
+  margin-bottom: 0.5rem;
+}
+
+.empty-subtext {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #666;
+  font-size: 0.95rem;
+}

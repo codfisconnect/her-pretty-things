@@ -1,193 +1,167 @@
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Trash2, Gift, Sparkles } from "lucide-react";
-import { useCart } from "../../context/CartContext";
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ShoppingBag, ArrowRight, Plus, Minus, Trash2, ShieldCheck } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
+import { useCurrency } from '../../context/CurrencyContext';
+import './Cart.css';
 
-function Cart() {
-  const { cart, updateQuantity, removeFromCart, itemCount, subtotal, shipping, total, loading } = useCart();
+export const Cart: React.FC = () => {
+  const {
+    items,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    subtotal,
+    shipping,
+    total,
+    totalItems,
+  } = useCart();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
 
-  if (loading && !cart) {
+  if (items.length === 0) {
     return (
-      <main className="checkout-page container">
-        <div style={{ textAlign: "center", padding: "4rem 0" }}>
-          <p>Loading your pretty cart...</p>
-        </div>
-      </main>
-    );
-  }
-
-  if (!cart || cart.items.length === 0) {
-    return (
-      <section className="placeholder-page container">
-        <p className="eyebrow">Your pretty things</p>
-        <h1>Your cart is waiting</h1>
-        <p>Once you find something lovely, it will appear here.</p>
-        <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", marginTop: "1.5rem" }}>
-          <Link className="button button-dark" to="/scoops">
-            Build a Scoop
-          </Link>
-          <Link className="button button-outline" to="/byob">
-            Build Your Own Box
-          </Link>
-        </div>
-      </section>
+      <div className="cart-page" style={{ textAlign: 'center', padding: '5rem 1rem' }}>
+        <ShoppingBag size={56} color="#c5a059" style={{ margin: '0 auto 1.5rem', display: 'block' }} />
+        <h1 className="cart-title">Your Hijab Bag is Empty</h1>
+        <p style={{ color: '#666', maxWidth: 460, margin: '0 auto 2rem', lineHeight: 1.6 }}>
+          You have not added any hijabs yet. Explore our handcrafted Malaysian chiffons,
+          royal Kashmiri pashminas, and pure mulberry silks.
+        </p>
+        <Link to="/shop" className="hero-primary-btn">
+          Explore The Hijab Store
+        </Link>
+      </div>
     );
   }
 
   return (
-    <section className="checkout-page container">
-      <p className="eyebrow">Little joys, gathered with love</p>
-      <h1>Your Cart ({itemCount} {itemCount === 1 ? 'item' : 'items'})</h1>
+    <div className="cart-page">
+      <h1 className="cart-title">Your Hijab Bag ({totalItems})</h1>
 
-      <div className="checkout-layout">
+      <div className="cart-grid-layout">
         {/* Items List */}
-        <div className="cart-items">
-          {cart.items.map((item) => {
-            const isScoop = item.isCustomizedScoop;
-            const isByob = item.isByob;
-            const byobDetails = item.byobDetails as any;
+        <div className="cart-table-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#666' }}>Selected Items</span>
+            <button
+              type="button"
+              onClick={clearCart}
+              style={{ background: 'none', border: 'none', color: '#c94a4a', fontSize: '0.82rem', cursor: 'pointer' }}
+            >
+              Clear Entire Bag
+            </button>
+          </div>
+
+          {items.map((item, idx) => {
+            const colour = item.selectedColour || item.product.colour;
+            const p = item.product;
+            const img = p.images?.[0] || p.image || '/src/assets/images/yusraa-hero-model.jpg';
 
             return (
-              <article className="cart-line" key={item.id}>
-                <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
-                  <div style={{
-                    width: 76,
-                    height: 76,
-                    borderRadius: 12,
-                    background: "#fdf2f6",
-                    overflow: "hidden",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0
-                  }}>
-                    {isScoop ? (
-                      <span style={{ fontSize: "2rem" }}>🍨</span>
-                    ) : isByob ? (
-                      <span style={{ fontSize: "2rem" }}>🎁</span>
-                    ) : (
-                      <img
-                        src={item.product?.image || "/placeholder.png"}
-                        alt={item.product?.name || "Product"}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
-                    )}
-                  </div>
+              <div key={`${p.id}-${colour}-${idx}`} className="cart-item-row-card">
+                <div className="cart-item-thumb-box">
+                  <img src={img} alt={`Yusraa ${p.name}`} className="cart-item-img" />
+                </div>
 
-                  <div style={{ flex: 1 }}>
-                    <h2 style={{ fontSize: "1.05rem", margin: "0 0 0.3rem" }}>
-                      {isScoop
-                        ? `${item.numberOfScoops}-Scoop Surprise`
-                        : isByob
-                        ? "Custom Gift Box (BYOB)"
-                        : item.product?.name}
-                    </h2>
+                <div className="cart-item-details">
+                  <Link to={`/shop/${p.categorySlug}/${p.slug}`} className="cart-item-title-link">
+                    {p.name}
+                  </Link>
+                  <span className="cart-item-meta-text">Fabric: {p.fabric} • Shade: {colour}</span>
 
-                    <p style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", color: "#8c7b83" }}>
-                      {isScoop
-                        ? `Customized Scoop · ${item.colourTheme ? `Theme: ${item.colourTheme}` : 'Mystery choice'}`
-                        : isByob && byobDetails?.items
-                        ? `${byobDetails.items.length} custom handpicked items`
-                        : `Category: ${item.product?.name || "Jewellery"}`}
-                    </p>
-
-                    {isByob && byobDetails?.items && (
-                      <div style={{ marginBottom: "0.6rem", fontSize: "0.82rem", color: "#db2777" }}>
-                        <Gift size={13} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} />
-                        {byobDetails.items.map((b: any) => `${b.name || b.productName} (×${b.quantity})`).join(", ")}
-                      </div>
-                    )}
-
-                    <div className="cart-quantity-control">
+                  <div className="cart-item-controls-row">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <button
                         type="button"
-                        disabled={item.quantity <= 1}
-                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        className="quickcart-qty-btn"
+                        onClick={() => updateQuantity(p.id, colour, item.quantity - 1)}
                         aria-label="Decrease quantity"
                       >
-                        −
+                        <Minus size={12} />
                       </button>
-
-                      <span>{item.quantity}</span>
-
+                      <span style={{ fontWeight: 600, fontSize: '0.9rem', minWidth: 20, textAlign: 'center' }}>
+                        {item.quantity}
+                      </span>
                       <button
                         type="button"
-                        disabled={item.product?.stock !== undefined && item.quantity >= item.product.stock}
-                        onClick={() => {
-                          if (item.product?.stock !== undefined && item.quantity >= item.product.stock) {
-                            return
-                          }
-                          updateQuantity(item.id, item.quantity + 1)
-                        }}
+                        className="quickcart-qty-btn"
+                        onClick={() => updateQuantity(p.id, colour, item.quantity + 1)}
                         aria-label="Increase quantity"
-                        title={item.product?.stock !== undefined && item.quantity >= item.product.stock ? 'Maximum stock reached' : undefined}
                       >
-                        +
+                        <Plus size={12} />
                       </button>
+                    </div>
 
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                      <span className="cart-item-unit-price">{formatPrice(p.price * item.quantity)}</span>
                       <button
                         type="button"
-                        className="cart-remove-button"
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(p.id, colour)}
+                        style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer' }}
                         aria-label="Remove item"
                       >
-                        <Trash2 size={13} style={{ verticalAlign: "middle", marginRight: 3 }} />
-                        Remove
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
                 </div>
-
-                <div className="cart-line-price">
-                  <p>
-                    ₹{item.unitPrice.toLocaleString("en-IN")} × {item.quantity}
-                  </p>
-                  <strong>₹{item.total.toLocaleString("en-IN")}</strong>
-                </div>
-              </article>
+              </div>
             );
           })}
         </div>
 
-        {/* Summary Sidebar */}
-        <aside className="checkout-summary">
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#be185d", fontSize: "0.85rem", marginBottom: "0.8rem" }}>
-            <Sparkles size={15} />
-            <span>Prepaid Orders Only ✦ Pan India</span>
+        {/* Summary */}
+        <div className="cart-summary-card">
+          <h2 className="summary-heading">Order Summary</h2>
+
+          <div className="summary-row">
+            <span>Subtotal</span>
+            <span>{formatPrice(subtotal)}</span>
           </div>
 
-          <p>
-            Subtotal <strong>₹{subtotal.toLocaleString("en-IN")}</strong>
-          </p>
+          <div className="summary-row">
+            <span>Estimated Shipping</span>
+            <span>{shipping === 0 ? 'FREE' : formatPrice(shipping)}</span>
+          </div>
 
-          <p>
-            Shipping <strong>{shipping === 0 ? "FREE" : `₹${shipping.toLocaleString("en-IN")}`}</strong>
-          </p>
+          {shipping === 0 && (
+            <div style={{ fontSize: '0.78rem', color: '#2e7d32', marginBottom: '0.85rem' }}>
+              ✓ You have unlocked free express delivery!
+            </div>
+          )}
 
-          <div style={{ borderTop: "1px dashed #e2d1d9", paddingTop: "0.75rem", marginTop: "0.5rem" }}>
-            <span>Order Total</span>
-            <strong>₹{total.toLocaleString("en-IN")}</strong>
+          <div className="summary-row total-bold">
+            <span>Estimated Total</span>
+            <span>{formatPrice(total)}</span>
           </div>
 
           <button
             type="button"
-            className="button button-dark"
-            style={{ width: "100%", marginTop: "1rem" }}
-            onClick={() => navigate("/checkout")}
+            id="proceed-checkout-btn"
+            className="cart-checkout-btn-full"
+            onClick={() => navigate('/checkout')}
           >
-            Proceed to Checkout <ArrowRight size={16} />
+            <span>Proceed to Checkout</span>
+            <ArrowRight size={17} />
           </button>
 
-          <Link
-            to="/jewellery"
-            style={{ display: "block", textAlign: "center", marginTop: "0.8rem", fontSize: "0.85rem", color: "#716269" }}
+          <div
+            style={{
+              marginTop: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.6rem',
+              fontSize: '0.8rem',
+              color: '#777',
+              justifyContent: 'center'
+            }}
           >
-            ← Continue Shopping
-          </Link>
-        </aside>
+            <ShieldCheck size={16} color="#9b783e" />
+            <span>Guaranteed Safe &amp; Encrypted Checkout</span>
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
   );
-}
-
-export default Cart;
+};

@@ -1,0 +1,61 @@
+.shipping-policy-container {
+  padding: 4rem 1.5rem 6rem;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.shipping-header {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid rgba(197, 160, 89, 0.25);
+  padding-bottom: 1.5rem;
+}
+
+.shipping-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.4rem, 4.5vw, 3.2rem);
+  font-weight: 700;
+  color: #1a1614;
+  margin: 0 0 0.5rem 0;
+}
+
+.shipping-meta {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.85rem;
+  color: #8c827a;
+}
+
+.shipping-content {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #4a443d;
+}
+
+.shipping-content h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a1614;
+  margin: 2.5rem 0 1rem 0;
+}
+
+.shipping-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.shipping-table th,
+.shipping-table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(197, 160, 89, 0.25);
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.shipping-table th {
+  background: #fdfaf6;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.1rem;
+  color: #1a1614;
+}
