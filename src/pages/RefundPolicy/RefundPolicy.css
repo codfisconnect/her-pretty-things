@@ -1,0 +1,53 @@
+.refund-policy-container {
+  padding: 4rem 1.5rem 6rem;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.refund-header {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid rgba(197, 160, 89, 0.25);
+  padding-bottom: 1.5rem;
+}
+
+.refund-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.4rem, 4.5vw, 3.2rem);
+  font-weight: 700;
+  color: #1a1614;
+  margin: 0 0 0.5rem 0;
+}
+
+.refund-meta {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.85rem;
+  color: #8c827a;
+}
+
+.refund-content {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #4a443d;
+}
+
+.refund-content h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a1614;
+  margin: 2.5rem 0 1rem 0;
+}
+
+.refund-content p {
+  margin-bottom: 1.25rem;
+}
+
+.refund-content ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.refund-content li {
+  margin-bottom: 0.5rem;
+}

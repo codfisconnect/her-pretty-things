@@ -1,105 +1,86 @@
-import { apiRequest } from './api'
-import type { ScoopConfiguration } from '../pages/Scoops/scoopTypes'
+import type { CartItem, CartState } from '../types/Cart';
+import type { Product } from '../types/Product';
 
-export interface CartProductDetails {
-  id: string
-  name: string
-  slug?: string
-  price: number
-  mrp?: number
-  discountAmount?: number
-  discountPercent?: number
-  stock?: number
-  image?: string
-}
+const CART_STORAGE_KEY = 'yusraa_hijab_cart_v2';
 
-export interface CartItemResponse {
-  id: string
-  cartId?: string
-  productId?: string | null
-  quantity: number
-  unitPrice: number
-  subtotal: number
-  shipping: number
-  total: number
-  isCustomizedScoop: boolean
-  numberOfScoops: number | null
-  colourTheme: string | null
-  preferredCharacter: string | null
-  preferredItems: string[]
-  excludedItems: string[]
-  additionalMessage: string | null
-  age?: number | null
-  isByob?: boolean
-  byobDetails?: {
-    items: Array<{
-      productId: string
-      name: string
-      price: number
-      mrp?: number
-      quantity: number
-      lineTotal: number
-      image?: string
-      category?: string
-    }>
-    boxSubtotal: number
-    minimumSubtotal: number
-    shippingFee: number
-  } | null
-  product: CartProductDetails | null
-}
+export const cartService = {
+  getStoredCart(): CartItem[] {
+    try {
+      const data = localStorage.getItem(CART_STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  },
 
-export interface CartResponse {
-  id: string
-  userId?: string | null
-  sessionId?: string | null
-  items: CartItemResponse[]
-  itemCount: number
-  subtotal: number
-  shipping: number
-  total: number
-}
+  saveCart(items: CartItem[]): void {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    } catch (e) {
+      console.error('Failed to save cart to localStorage', e);
+    }
+  },
 
-export interface AddCartItemRequest {
-  cartId?: string
-  sessionId?: string
-  userId?: string
-  productId?: string
-  quantity?: number
-  scoopConfiguration?: ScoopConfiguration
-  isByob?: boolean
-  byobDetails?: any
-  byobBox?: {
-    items: Array<{ productId: string; quantity: number }>
+  calculateState(items: CartItem[]): CartState {
+    const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+    return {
+      items,
+      itemCount,
+      subtotal
+    };
+  },
+
+  addItem(items: CartItem[], product: Product, quantity = 1, selectedColour?: string): CartItem[] {
+    const colour = selectedColour || product.colour;
+    const existingIndex = items.findIndex(
+      item => item.product.id === product.id && item.selectedColour === colour
+    );
+
+    if (existingIndex > -1) {
+      const updated = [...items];
+      updated[existingIndex] = {
+        ...updated[existingIndex],
+        quantity: updated[existingIndex].quantity + quantity
+      };
+      this.saveCart(updated);
+      return updated;
+    }
+
+    const newItem: CartItem = {
+      id: `${product.id}-${colour}-${Date.now()}`,
+      product,
+      quantity,
+      selectedColour: colour
+    };
+
+    const updated = [...items, newItem];
+    this.saveCart(updated);
+    return updated;
+  },
+
+  updateQuantity(items: CartItem[], itemId: string, quantity: number): CartItem[] {
+    if (quantity <= 0) {
+      return this.removeItem(items, itemId);
+    }
+    const updated = items.map(item =>
+      item.id === itemId ? { ...item, quantity } : item
+    );
+    this.saveCart(updated);
+    return updated;
+  },
+
+  removeItem(items: CartItem[], itemId: string): CartItem[] {
+    const updated = items.filter(item => item.id !== itemId);
+    this.saveCart(updated);
+    return updated;
+  },
+
+  clearCart(): void {
+    try {
+      localStorage.removeItem(CART_STORAGE_KEY);
+    } catch (e) {
+      console.error('Failed to clear cart', e);
+    }
   }
-}
-
-export function addCartItem(item: AddCartItemRequest) {
-  return apiRequest<CartResponse>('/cart/items', { method: 'POST', body: JSON.stringify(item) })
-}
-
-export function getCart(cartId: string) {
-  return apiRequest<CartResponse>(`/cart/${encodeURIComponent(cartId)}`)
-}
-
-export function getOrCreateCart(cartId?: string, sessionId?: string, userId?: string) {
-  return apiRequest<CartResponse>('/cart/get-or-create', {
-    method: 'POST',
-    body: JSON.stringify({ cartId, sessionId, userId }),
-  })
-}
-
-export function updateCartItem(itemId: string, quantity: number, scoopConfiguration?: ScoopConfiguration) {
-  return apiRequest<CartResponse>(`/cart/items/${encodeURIComponent(itemId)}`, {
-    method: 'PUT',
-    body: JSON.stringify({ quantity, scoopConfiguration }),
-  })
-}
-
-export function removeCartItem(itemId: string) {
-  return apiRequest<CartResponse>(`/cart/items/${encodeURIComponent(itemId)}`, { method: 'DELETE' })
-}
-
-export function clearCartApi(cartId: string) {
-  return apiRequest<CartResponse>(`/cart/${encodeURIComponent(cartId)}`, { method: 'DELETE' })
-}
+};

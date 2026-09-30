@@ -1,77 +1,75 @@
-import { apiRequest } from './api'
+import type { Order, ShippingAddress } from '../types/Order';
+import type { CartItem } from '../types/Cart';
+import { api } from './api';
 
-export interface ShippingDetails {
-  fullName: string
-  phoneNumber: string
-  email: string
-  addressLine1: string
-  addressLine2?: string
-  city: string
-  state: string
-  pincode: string
-}
+const ORDERS_STORAGE_KEY = 'yusraa_hijab_orders';
 
-export interface OrderItemResponse {
-  id: string
-  productName: string
-  quantity: number
-  unitPrice: number
-  totalPrice: number
-  mrpAtPurchase?: number | null
-  discountAmount?: number | null
-  discountPercent?: number | null
-  isCustomizedScoop?: boolean
-  numberOfScoops?: number | null
-  colourTheme?: string | null
-  preferredCharacter?: string | null
-  preferredItems?: string[]
-  excludedItems?: string[]
-  additionalMessage?: string | null
-  age?: number | null
-  isByob?: boolean
-  byobDetails?: any
-}
+export const orderService = {
+  async createOrder(params: {
+    items: CartItem[];
+    shippingAddress: ShippingAddress;
+    subtotal: number;
+    shippingFee: number;
+    total: number;
+    currency: string;
+    paymentMethod: string;
+  }): Promise<Order> {
+    const orderData: Order = {
+      id: `YUS-${Math.floor(100000 + Math.random() * 900000)}`,
+      items: params.items,
+      shippingAddress: params.shippingAddress,
+      subtotal: params.subtotal,
+      shippingFee: params.shippingFee,
+      total: params.total,
+      currency: params.currency,
+      paymentMethod: params.paymentMethod,
+      paymentStatus: 'paid',
+      orderStatus: 'confirmed',
+      createdAt: new Date().toISOString()
+    };
 
-export interface OrderResponse {
-  id: string
-  orderNumber?: string | null
-  userId?: string | null
-  subtotal: number
-  shippingAmount: number
-  totalAmount: number
-  rewardCodeApplied?: string | null
-  rewardDiscount?: number
-  orderStatus: string
-  paymentStatus: string
-  razorpayOrderId?: string | null
-  razorpayPaymentId?: string | null
-  createdAt: string
-  address: ShippingDetails
-  items?: OrderItemResponse[]
-}
+    try {
+      const response = await api.post<{ success: boolean; data: Order }>('/orders', orderData);
+      if (response && response.success && response.data) {
+        this.saveOrderLocally(response.data);
+        return response.data;
+      }
+    } catch {
+      // Fallback to storing locally
+      this.saveOrderLocally(orderData);
+    }
 
-export function createOrder(
-  cartId: string,
-  shipping: ShippingDetails,
-  userId?: string,
-  rewardCode?: string,
-) {
-  return apiRequest<OrderResponse>('/orders', {
-    method: 'POST',
-    body: JSON.stringify({ cartId, shipping, userId, rewardCode }),
-  })
-}
+    return orderData;
+  },
 
-export function getOrder(orderId: string) {
-  return apiRequest<OrderResponse>(`/orders/${encodeURIComponent(orderId)}`)
-}
+  saveOrderLocally(order: Order): void {
+    try {
+      const existing = this.getStoredOrders();
+      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify([order, ...existing]));
+    } catch (e) {
+      console.error('Failed to save order locally', e);
+    }
+  },
 
-export function listUserOrders(userId: string) {
-  return apiRequest<OrderResponse[]>(`/orders/user/${encodeURIComponent(userId)}`)
-}
+  getStoredOrders(): Order[] {
+    try {
+      const raw = localStorage.getItem(ORDERS_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  },
 
-export function cancelOrder(orderId: string) {
-  return apiRequest<OrderResponse>(`/orders/${encodeURIComponent(orderId)}/cancel`, {
-    method: 'POST',
-  })
-}
+  async getOrderById(orderId: string): Promise<Order | undefined> {
+    try {
+      const res = await api.get<{ success: boolean; data: Order }>(`/orders/${orderId}`);
+      if (res && res.success && res.data) {
+        return res.data;
+      }
+    } catch {
+      // Check local storage
+    }
+    const local = this.getStoredOrders();
+    return local.find(o => o.id === orderId);
+  }
+};

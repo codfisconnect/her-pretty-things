@@ -1,61 +1,101 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
+// API client for YUSRAA Hijab Store
+const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export class ApiError extends Error {
-	status: number
+  status: number;
+  data?: unknown;
 
-	constructor(status: number, message: string) {
-		super(message)
-		this.name = 'ApiError'
-		this.status = status
-	}
+  constructor(status: number, message: string, data?: unknown) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
+  }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === 'object' && value !== null
-}
+export const api = {
+  async get<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
+    try {
+      const res = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options?.headers || {})
+        },
+        ...options
+      });
+      if (!res.ok) {
+        throw new ApiError(res.status, `Request failed with status ${res.status}`);
+      }
+      return await res.json();
+    } catch (err: unknown) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(500, (err as Error).message || 'Network error');
+    }
+  },
 
-export interface ApiRequestOptions extends RequestInit {
-	raw?: boolean
-}
+  async post<T>(endpoint: string, body?: unknown, options?: RequestInit): Promise<T> {
+    const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options?.headers || {})
+        },
+        body: body ? JSON.stringify(body) : undefined,
+        ...options
+      });
+      if (!res.ok) {
+        throw new ApiError(res.status, `Request failed with status ${res.status}`);
+      }
+      return await res.json();
+    } catch (err: unknown) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(500, (err as Error).message || 'Network error');
+    }
+  },
 
-export async function apiRequest<T>(
-	path: string,
-	options?: ApiRequestOptions,
-): Promise<T> {
-	let response: Response
+  async put<T>(endpoint: string, body?: unknown, options?: RequestInit): Promise<T> {
+    const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
+    try {
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options?.headers || {})
+        },
+        body: body ? JSON.stringify(body) : undefined,
+        ...options
+      });
+      if (!res.ok) {
+        throw new ApiError(res.status, `Request failed with status ${res.status}`);
+      }
+      return await res.json();
+    } catch (err: unknown) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(500, (err as Error).message || 'Network error');
+    }
+  },
 
-	try {
-		const isFormData = options?.body instanceof FormData
-
-		response = await fetch(`${API_BASE_URL}${path}`, {
-			...options,
-			credentials: 'include',
-			headers: {
-				...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-				...options?.headers,
-			},
-		})
-	} catch {
-		throw new ApiError(
-			0,
-			'The backend is unavailable. Start the API with "cd backend; npm run dev" and try again.',
-		)
-	}
-
-	const body: unknown = await response.json().catch(() => null)
-
-	if (!response.ok) {
-		const message =
-			isRecord(body) && typeof body.message === 'string'
-				? body.message
-				: 'The request could not be completed.'
-
-		throw new ApiError(response.status, message)
-	}
-
-	if (!options?.raw && isRecord(body) && 'data' in body) {
-		return body.data as T
-	}
-
-	return body as T
-}
+  async delete<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
+    try {
+      const res = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options?.headers || {})
+        },
+        ...options
+      });
+      if (!res.ok) {
+        throw new ApiError(res.status, `Request failed with status ${res.status}`);
+      }
+      return await res.json();
+    } catch (err: unknown) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(500, (err as Error).message || 'Network error');
+    }
+  }
+};

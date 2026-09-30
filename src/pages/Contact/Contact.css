@@ -1,255 +1,126 @@
-/* Contact Page Styles */
 .contact-page {
-  padding-top: 2rem;
-  padding-bottom: 4rem;
-  max-width: 900px;
+  padding: 3.5rem 1.5rem 6rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .contact-header {
   text-align: center;
-  margin-bottom: 2.2rem;
+  max-width: 720px;
+  margin: 0 auto 3.5rem;
 }
 
-.contact-header h1 {
-  font-size: 2rem;
+.contact-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.4rem, 4.5vw, 3.4rem);
   font-weight: 700;
-  color: #2b2226;
-  font-family: var(--font-heading, inherit);
-  margin: 0.3rem 0 0.5rem;
+  color: #1a1614;
+  margin: 0 0 1rem 0;
 }
 
-.contact-header p {
-  color: #716269;
-  font-size: 0.95rem;
-  max-width: 520px;
-  margin: 0 auto;
-}
-
-/* Contact Cards Grid */
-.contact-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.2rem;
-  margin-bottom: 1.5rem;
-}
-
-.contact-card {
-  background: #ffffff;
-  border: 1px solid #f2e2eb;
-  border-radius: 18px;
-  padding: 1.5rem 1.2rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: all 0.2s ease;
-}
-
-.contact-card:hover {
-  transform: translateY(-2px);
-  border-color: #fbcfe8;
-  box-shadow: 0 6px 20px rgba(45, 30, 36, 0.05);
-}
-
-.contact-card-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #fdf2f8;
-  color: #db2777;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0.8rem;
-}
-
-.contact-card h3 {
+.contact-sub {
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 1rem;
-  font-weight: 700;
-  color: #2b2226;
-  margin: 0 0 0.4rem;
+  line-height: 1.65;
+  color: #665e56;
 }
 
-.contact-card p {
-  font-size: 0.84rem;
-  color: #716269;
-  margin: 0 0 1rem;
-  line-height: 1.4;
-  flex: 1;
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3.5rem;
 }
 
-.contact-action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #db2777;
-  padding: 0.4rem 0.8rem;
-  border-radius: 8px;
-  background: #fdf2f8;
-  transition: all 0.2s;
+@media (min-width: 860px) {
+  .contact-grid {
+    grid-template-columns: 1fr 1.35fr;
+  }
 }
 
-.contact-action-btn:hover {
-  background: #fce7f3;
-  color: #be185d;
-}
-
-.contact-hours-banner {
-  background: #faf6f8;
-  border: 1px solid #f0e4ea;
-  border-radius: 12px;
-  padding: 0.75rem 1rem;
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #524248;
-  margin-bottom: 2.5rem;
-}
-
-/* Damage Claim Section */
-.damage-claim-section {
-  background: #ffffff;
-  border: 1px solid #f0e0ea;
+.contact-info-card {
+  background: #fdfaf6;
+  border: 1px solid rgba(197, 160, 89, 0.25);
   border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 8px 28px rgba(45, 30, 36, 0.04);
+  padding: 2.5rem 2rem;
+  height: fit-content;
 }
 
-.damage-claim-header {
+.contact-card-heading {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a1614;
+  margin: 0 0 1.5rem 0;
+}
+
+.contact-detail-row {
   display: flex;
   align-items: flex-start;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
-.claim-icon-wrap {
-  width: 48px;
-  height: 48px;
-  background: #fdf2f8;
-  border-radius: 12px;
+.contact-icon-bubble {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #f4ede0;
+  color: #9b783e;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.damage-claim-header h2 {
-  font-size: 1.25rem;
+.contact-form-card {
+  background: #ffffff;
+  border: 1px solid rgba(197, 160, 89, 0.25);
+  border-radius: 20px;
+  padding: 2.5rem 2.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.contact-textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.contact-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: #1c1917;
+  color: #ffffff;
+  padding: 0.95rem 2rem;
+  border-radius: 9999px;
+  border: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
   font-weight: 700;
-  color: #2b2226;
-  margin: 0 0 0.3rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  width: fit-content;
 }
 
-.damage-claim-header p {
-  font-size: 0.88rem;
-  color: #716269;
-  margin: 0;
-  line-height: 1.4;
+.contact-submit-btn:hover {
+  background: #9b783e;
 }
 
-.claim-alert {
+.contact-success-msg {
+  background: #eef7ee;
+  border: 1px solid #c2e2c2;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  color: #2e632e;
+  font-size: 0.92rem;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.85rem 1.2rem;
-  border-radius: 12px;
-  font-size: 0.88rem;
-  margin-bottom: 1.5rem;
-}
-
-.claim-alert.success {
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
-  color: #047857;
-}
-
-.claim-alert.error {
-  background: #fff1f2;
-  border: 1px solid #fecdd3;
-  color: #e11d48;
-}
-
-.damage-claim-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-}
-
-.claim-form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.1rem;
-}
-
-.claim-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.claim-field.full {
-  grid-column: span 2;
-}
-
-.claim-field span {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #4b3d43;
-}
-
-.claim-field small {
-  font-size: 0.76rem;
-  color: #8c7b83;
-  margin-top: 0.2rem;
-}
-
-/* 16px to prevent iPhone Safari zoom */
-.claim-field input,
-.claim-field textarea {
-  font-size: 16px !important;
-  padding: 0.75rem 0.9rem;
-  border: 1px solid #e5d7df;
-  border-radius: 12px;
-  background: #faf7f8;
-  color: #2b2226;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-  width: 100%;
-  font-family: inherit;
-}
-
-.claim-field input:focus,
-.claim-field textarea:focus {
-  outline: none;
-  background: #ffffff;
-  border-color: #db2777;
-  box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.12);
-}
-
-.claim-submit-btn {
-  background: #2b2226;
-  color: #ffffff;
-  border: none;
-  padding: 0.85rem 1.6rem;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  align-self: flex-start;
-  transition: all 0.2s;
-}
-
-.claim-submit-btn:hover:not(:disabled) {
-  background: #43363c;
-}
-
-@media (max-width: 600px) {
-  .claim-form-grid {
-    grid-template-columns: 1fr;
-  }
-  .claim-field.full {
-    grid-column: span 1;
-  }
+  gap: 0.5rem;
 }

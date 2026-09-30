@@ -1,133 +1,149 @@
-import React, { useState } from "react";
-import { Heart, ShoppingBag, Check } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useWishlist } from "../../context/WishlistContext";
-import { useCart } from "../../context/CartContext";
-import type { Product } from "../../types/product";
-import "./ProductCard.css";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Star, ShoppingBag, ArrowRight } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
+import { useCurrency } from '../../context/CurrencyContext';
+import type { Product } from '../../types/Product';
+import './ProductCard.css';
 
 interface ProductCardProps {
   product: Product;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { isInWishlist, toggleWishlist } = useWishlist();
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
-  const [adding, setAdding] = useState(false);
+  const { formatPrice } = useCurrency();
+  const navigate = useNavigate();
 
-  const isWishlisted = isInWishlist(product.id);
+  // Selected colour state, defaulting to primary product colour or first option
+  const [selectedColour, setSelectedColour] = useState<string>(
+    product.colour || product.availableColours?.[0]?.name || ''
+  );
 
-  const hasDiscount = product.mrp !== undefined && product.mrp !== null && product.mrp > product.price;
-  const discountPercent = hasDiscount
-    ? Math.round(((product.mrp! - product.price) / product.mrp!) * 100)
-    : 0;
-
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    try {
-      setAdding(true);
-      await addToCart({
-        productId: product.id,
-        quantity: 1,
-      });
-      setTimeout(() => setAdding(false), 900);
-    } catch (error) {
-      console.error("Could not add product to cart:", error);
-      setAdding(false);
+  // Compute the image corresponding to the selected colour
+  const getCurrentImage = (): string => {
+    if (product.availableColours && product.availableColours.length > 0) {
+      const foundColour = product.availableColours.find(c => c.name === selectedColour);
+      if (foundColour?.image) {
+        return foundColour.image;
+      }
+      const colourIdx = product.availableColours.findIndex(c => c.name === selectedColour);
+      if (colourIdx >= 0 && product.images?.[colourIdx]) {
+        return product.images[colourIdx];
+      }
     }
+    return product.images?.[0] || product.image || '/src/assets/images/yusraa-hero-model.jpg';
   };
 
-  const handleWishlistClick = (e: React.MouseEvent) => {
+  const handleColourClick = (e: React.MouseEvent, colourName: string) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleWishlist(product);
+    setSelectedColour(colourName);
   };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product, 1, selectedColour || product.colour);
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product, 1, selectedColour || product.colour);
+    navigate('/checkout');
+  };
+
+  const productUrl = `/shop/${product.categorySlug}/${product.slug}`;
+  const currentImage = getCurrentImage();
+  const activeColourName = selectedColour || product.colour;
 
   return (
-    <article className="product-card">
-      <div className="product-image-wrapper">
-        <Link
-          to={`/product/${product.id}`}
-          className="product-image-link"
-          aria-label={`View ${product.name}`}
-        >
-          <img
-            src={product.image}
-            alt={product.name}
-            className="product-image"
-            loading="lazy"
-          />
-          {hasDiscount && (
-            <span className="product-card-discount-badge">
-              {discountPercent}% OFF
-            </span>
-          )}
-        </Link>
-      </div>
+    <article className="product-card" id={`product-card-${product.id}`}>
+      <Link to={productUrl} className="product-image-container" tabIndex={-1} aria-hidden="true">
+        <img
+          src={currentImage}
+          alt={`Yusraa ${product.name} in ${activeColourName}`}
+          className="product-card-img"
+          loading="lazy"
+        />
+        {product.isBestSeller && (
+          <span className="product-badge-tag bestseller">Best Seller</span>
+        )}
+        {!product.isBestSeller && product.isFeatured && (
+          <span className="product-badge-tag">Premium</span>
+        )}
+      </Link>
 
-      <div className="product-info">
-        <div className="product-category-row">
-          <p className="product-category">{product.category}</p>
+      <div className="product-card-body">
+        <span className="product-card-category">{product.category}</span>
 
-          <button
-            type="button"
-            className={`wishlist-button ${
-              isWishlisted ? "is-wishlisted" : ""
-            }`}
-            aria-label={
-              isWishlisted
-                ? `Remove ${product.name} from wishlist`
-                : `Add ${product.name} to wishlist`
-            }
-            onClick={handleWishlistClick}
-          >
-            <Heart
-              size={15}
-              fill={isWishlisted ? "currentColor" : "none"}
-              color={isWishlisted ? "#db2777" : "currentColor"}
-            />
-          </button>
-        </div>
-
-        <h3 className="product-name">
-          <Link to={`/product/${product.id}`}>
+        <h3 style={{ margin: 0, padding: 0 }}>
+          <Link to={productUrl} className="product-card-title">
             {product.name}
           </Link>
         </h3>
 
-        <div className="product-bottom">
-          <div className="product-pricing">
-            <span className="product-price">
-              ₹{product.price.toLocaleString("en-IN")}
-            </span>
-            {hasDiscount && (
-              <span className="product-mrp-price">
-                ₹{product.mrp!.toLocaleString("en-IN")}
-              </span>
-            )}
+        <div className="product-card-rating">
+          <Star size={13} className="star-icon-filled" aria-hidden="true" />
+          <span>{product.rating.toFixed(1)}</span>
+          <span>({product.reviewsCount})</span>
+        </div>
+
+        {product.availableColours && product.availableColours.length > 0 && (
+          <div
+            className="product-colours-row"
+            role="group"
+            aria-label={`Available colours for ${product.name}, currently selected ${activeColourName}`}
+          >
+            {product.availableColours.slice(0, 4).map((c, i) => {
+              const isSelected = activeColourName === c.name;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  className={`colour-dot-btn ${isSelected ? 'active' : ''}`}
+                  style={{ backgroundColor: c.hex }}
+                  onClick={(e) => handleColourClick(e, c.name)}
+                  title={c.name}
+                  aria-label={`Select ${c.name} colour variant for ${product.name}`}
+                  aria-pressed={isSelected}
+                />
+              );
+            })}
           </div>
+        )}
+
+        <div className="product-card-price-row">
+          <span className="product-card-price">{formatPrice(product.price)}</span>
+          {product.originalPrice && product.originalPrice > product.price && (
+            <span className="product-card-original-price">
+              {formatPrice(product.originalPrice)}
+            </span>
+          )}
+        </div>
+
+        <div className="product-card-actions">
+          <button
+            type="button"
+            className="product-cart-btn"
+            id={`add-to-cart-${product.id}`}
+            onClick={handleAddToCart}
+            aria-label={`Add ${product.name} in ${activeColourName} to cart`}
+          >
+            <ShoppingBag size={14} aria-hidden="true" />
+            <span>Add</span>
+          </button>
 
           <button
             type="button"
-            className={`add-cart-button ${adding ? "added" : ""} ${product.stock <= 0 ? "out-of-stock" : ""}`}
-            aria-label={product.stock <= 0 ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
-            onClick={handleAddToCart}
-            disabled={adding || product.stock <= 0}
+            className="product-buynow-btn"
+            id={`buy-now-${product.id}`}
+            onClick={handleBuyNow}
+            aria-label={`Buy ${product.name} in ${activeColourName} now`}
           >
-            {product.stock <= 0 ? (
-              <span>Out</span>
-            ) : adding ? (
-              <>
-                <Check size={13} />
-                <span>Added</span>
-              </>
-            ) : (
-              <>
-                <ShoppingBag size={13} />
-                <span>Add</span>
-              </>
-            )}
+            <span>Buy Now</span>
+            <ArrowRight size={13} aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -135,4 +151,3 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   );
 };
 
-export default ProductCard;
