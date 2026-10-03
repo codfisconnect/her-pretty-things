@@ -5,6 +5,7 @@ import { useWishlist } from "../../context/WishlistContext";
 import { useCart } from "../../context/CartContext";
 import type { Product } from "../../types/product";
 import "./ProductCard.css";
+import { optimizeCloudinaryImage } from "../../utils/cloudinary";
 
 interface ProductCardProps {
   product: Product;
@@ -53,10 +54,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           aria-label={`View ${product.name}`}
         >
           <img
-            src={product.image}
+            src={optimizeCloudinaryImage(product.image, 500)}
             alt={product.name}
             className="product-image"
             loading="lazy"
+            decoding="async"
           />
           {hasDiscount && (
             <span className="product-card-discount-badge">
@@ -72,9 +74,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           <button
             type="button"
-            className={`wishlist-button ${
-              isWishlisted ? "is-wishlisted" : ""
-            }`}
+            className={`wishlist-button ${isWishlisted ? "is-wishlisted" : ""
+              }`}
             aria-label={
               isWishlisted
                 ? `Remove ${product.name} from wishlist`

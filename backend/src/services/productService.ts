@@ -90,7 +90,10 @@ function serializeProduct(product: any) {
   }
 }
 
-export async function getProducts(category?: string, byobOnly?: boolean) {
+export async function getProducts(
+  category?: string,
+  options?: { byobOnly?: boolean; search?: string }
+) {
   const database = getDatabase()
   const where: any = { active: true }
 
@@ -98,8 +101,15 @@ export async function getProducts(category?: string, byobOnly?: boolean) {
     where.category = category.toLowerCase()
   }
 
-  if (byobOnly) {
+  if (options?.byobOnly) {
     where.byobEligible = true
+  }
+
+  if (options?.search?.trim()) {
+    where.name = {
+      contains: options.search.trim(),
+      mode: 'insensitive',
+    }
   }
 
   const products = await database.product.findMany({
@@ -164,11 +174,11 @@ export async function createProduct(input: CreateProductInput) {
       description,
       images: input.images && input.images.length > 0
         ? {
-            create: input.images.map((url, index) => ({
-              url: url.trim(),
-              sortOrder: index,
-            })),
-          }
+          create: input.images.map((url, index) => ({
+            url: url.trim(),
+            sortOrder: index,
+          })),
+        }
         : undefined,
     },
     include: {

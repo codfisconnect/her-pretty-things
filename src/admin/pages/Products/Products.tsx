@@ -40,7 +40,7 @@ function Products() {
           setScoopConfig({
             firstScoopPrice: scoopData.setting.firstScoopPrice,
             additionalScoopPrice: scoopData.setting.additionalScoopPrice,
-            imageUrl: scoopData.setting.imageUrl || "/images/Scoop-Board.png",
+            imageUrl: scoopData.setting.imageUrl || "/images/Scoop-Board.webp",
           });
         } else {
           setScoopConfig(scoopData);
@@ -160,7 +160,7 @@ function Products() {
                     >
                       <div className="admin-product-tile-image">
                         <img
-                          src={scoopConfig.imageUrl || "/images/Scoop-Board.png"}
+                          src={scoopConfig.imageUrl || "/images/Scoop-Board.webp"}
                           alt="Mystery Scoop"
                           style={{ width: "100%", height: "100%", objectFit: "cover" }}
                         />

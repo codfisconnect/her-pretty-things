@@ -2,12 +2,9 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import type { HeroSlide } from "../../utils/productSlides";
+import { optimizeCloudinaryImage } from "../../utils/cloudinary";
 
-const DEFAULT_HERO_SLIDE: HeroSlide = {
-  url: "/images/hero-banners/scoops-banner-hero.png",
-  alt: "Find something pretty today",
-  category: "scoops",
-};
+
 
 interface HeroProps {
   slides?: HeroSlide[];
@@ -15,7 +12,7 @@ interface HeroProps {
 
 function Hero({ slides }: HeroProps) {
   const activeSlides = useMemo(() => {
-    return slides && slides.length > 0 ? slides : [DEFAULT_HERO_SLIDE];
+    return slides && slides.length > 0 ? slides : [];
   }, [slides]);
 
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -51,16 +48,16 @@ function Hero({ slides }: HeroProps) {
       const nextSlide = activeSlides[nextIndex];
       if (nextSlide?.url) {
         const img = new Image();
-        img.src = nextSlide.url;
+        img.src = optimizeCloudinaryImage(nextSlide.url, 900);
       }
     }
   }, [currentSlide, activeSlides]);
 
-  const current = activeSlides[currentSlide] || activeSlides[0] || DEFAULT_HERO_SLIDE;
+  const current = activeSlides[currentSlide] || activeSlides[0];
 
   // Contextual Primary CTA and dynamic badge derived from active slide category
   const contextualCta = useMemo(() => {
-    switch (current.category) {
+    switch (current?.category) {
       case "scoops":
         return {
           text: "SHOP SCOOPS",
@@ -86,8 +83,11 @@ function Hero({ slides }: HeroProps) {
           badge: "FEATURED",
         };
     }
-  }, [current.category]);
+  }, [current?.category]);
 
+  if (!current) {
+    return null;
+  }
   return (
     <section className="hero-section" aria-label="Featured Collection Hero">
       <div className="hero-container">
@@ -156,21 +156,14 @@ function Hero({ slides }: HeroProps) {
                     aria-hidden={!isActive}
                   >
                     <img
-                      src={slide.url}
-                      alt={slide.alt || "Her Pretty Things featured product"}
+                      src={isActive ? optimizeCloudinaryImage(slide.url, 900) : undefined}
+                      alt={isActive ? (slide.alt || "Her Pretty Things featured product") : ""}
                       className="hero-slide-img"
-                      loading={index === 0 ? "eager" : "lazy"}
+                      loading={isActive ? "eager" : undefined}
+                      decoding="async"
+                      fetchPriority={isActive ? "high" : "auto"}
                       onError={(e) => {
-                        const target = e.currentTarget;
-                        const fallback =
-                          slide.category === "jewellery"
-                            ? "/images/category/jewellery-collection.png"
-                            : slide.category === "kawaii"
-                              ? "/images/category/kawaii-collection.png"
-                              : "/images/category/scoops-collection.png";
-                        if (!target.src.includes(fallback)) {
-                          target.src = fallback;
-                        }
+                        e.currentTarget.style.visibility = "hidden";
                       }}
                     />
                   </div>

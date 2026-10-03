@@ -4,8 +4,9 @@ import { NavLink, Link } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 import { useWishlist } from '../../context/WishlistContext'
 import { useAuth } from '../../context/AuthContext'
-import { products } from '../../data/products'
-import Logo from '../../../public/images/Logo/HPTlog.png'
+import type { Product } from '../../types/product'
+import { getProducts } from '../../services/productService'
+import Logo from '../../../public/images/Logo/HPTlog.webp'
 
 const navigation = [
   { label: 'Home', to: '/' },
@@ -22,6 +23,8 @@ export const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchProducts, setSearchProducts] = useState<Product[]>([])
+  const [isSearchLoading, setIsSearchLoading] = useState(false)
 
   const { itemCount, openDrawer } = useCart()
   const { wishlistCount } = useWishlist()
@@ -34,13 +37,37 @@ export const Navbar: React.FC = () => {
     }
   }, [isSearchOpen])
 
+  useEffect(() => {
+    const query = searchQuery.trim()
+
+    if (!query) {
+      setSearchProducts([])
+      setIsSearchLoading(false)
+      return
+    }
+
+    const timer = window.setTimeout(async () => {
+      try {
+        setIsSearchLoading(true)
+
+        const results = await getProducts(undefined, {
+          search: query,
+        })
+
+        setSearchProducts(results)
+      } catch (error) {
+        console.error('[Search] Failed to load products:', error)
+        setSearchProducts([])
+      } finally {
+        setIsSearchLoading(false)
+      }
+    }, 250)
+
+    return () => window.clearTimeout(timer)
+  }, [searchQuery])
+
   // Debounced/filtered search results
-  const searchResults = searchQuery.trim()
-    ? products.filter((product) =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : []
+
 
   const handleCartClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -195,8 +222,10 @@ export const Navbar: React.FC = () => {
           {/* Instant Search Results */}
           {searchQuery.trim() && (
             <div className="search-results">
-              {searchResults.length > 0 ? (
-                searchResults.slice(0, 8).map((product) => {
+              {isSearchLoading ? (
+                <p className="search-no-results">Searching...</p>
+              ) : searchProducts.length > 0 ? (
+                searchProducts.slice(0, 8).map((product) => {
                   const hasDiscount = product.mrp && product.mrp > product.price
                   return (
                     <Link

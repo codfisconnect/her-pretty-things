@@ -4,8 +4,13 @@ import { getProducts as fetchProducts, getProductById as fetchProductById } from
 export async function getProducts(request: Request, response: Response) {
   const category = typeof request.query.category === 'string' ? request.query.category.trim() : undefined
   const byobOnly = request.query.byobEligible === 'true' || request.query.byob === 'true'
-
-  const products = await fetchProducts(category, byobOnly)
+  const search = typeof request.query.search === 'string'
+    ? request.query.search
+    : undefined
+  const products = await fetchProducts(category, {
+    byobOnly,
+    search,
+  })
 
   response.json({
     success: true,

@@ -10,7 +10,7 @@ import type { ScoopConfiguration } from "./scoopTypes";
 function Scoops() {
   const [selectedScoops, setSelectedScoops] = useState<number | "">("");
   const [scoopImageUrl, setScoopImageUrl] = useState(
-    "/images/Scoop-Board.png",
+    "/images/Scoop-Board.webp",
   );
   const { addToCart } = useCart();
   const navigate = useNavigate();
@@ -62,7 +62,7 @@ function Scoops() {
 
         <div className="scoops-intro-art">
           <img
-            src="/images/banners/scoops-banner.png"
+            src="/images/hero-banners/scoops-banner-hero.webp"
             alt="Pretty Things Scoops"
             className="scoops-banner-image"
           />

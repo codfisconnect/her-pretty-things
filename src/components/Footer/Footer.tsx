@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Mail, Phone, MapPin, Camera } from 'lucide-react'
-import Logo from '../../../public/images/Logo/HPTlog.png'
+import Logo from '../../../public/images/Logo/HPTlog.webp'
 import { fetchBusinessInfoApi, type BusinessInfo } from '../../services/businessService'
 
 export const Footer: React.FC = () => {
@@ -31,7 +31,7 @@ export const Footer: React.FC = () => {
           }))
         }
       })
-      .catch(() => {})
+      .catch(() => { })
   }, [])
 
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
