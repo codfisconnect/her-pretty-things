@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { optimizeCloudinaryImage } from "../../utils/cloudinary";
 
 export interface Category {
   id: string;
@@ -69,16 +70,13 @@ function CategoryCard({ category }: CategoryCardProps) {
           return (
             <img
               key={`${imgSrc}-${idx}`}
-              src={imgSrc}
+              src={optimizeCloudinaryImage(imgSrc, 700)}
               alt={`${category.name} - view ${idx + 1}`}
               className={`category-editorial-img ${isActive ? "active" : ""}`}
               loading={idx === 0 ? "eager" : "lazy"}
+              decoding="async"
               onError={(e) => {
-                // Fallback to default category image if item fails
-                const target = e.currentTarget;
-                if (target.src !== category.image) {
-                  target.src = category.image;
-                }
+                e.currentTarget.style.visibility = "hidden";
               }}
             />
           );
@@ -111,4 +109,4 @@ function CategoryCard({ category }: CategoryCardProps) {
 
 export default CategoryCard;
 
-
+

@@ -6,7 +6,6 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { getProducts } from "../../services/productService";
-import { getScoopConfig } from "../../services/scoopService";
 import CategoryCard, {
   type Category,
 } from "../../components/CategoryCard/CategoryCard";
@@ -15,6 +14,7 @@ import ProductCard from "../../components/ProductCard/ProductCard";
 import SocialGallery from "../../components/SocialGallery/SocialGallery";
 import PrettyPlay from "../../components/PrettyPlay/PrettyPlay";
 import type { Product } from "../../types/product";
+import { getScoopConfig } from "../../services/scoopService";
 import {
   buildHeroSlides,
   getCategorySlides,
@@ -89,58 +89,73 @@ function Home() {
   const [jewelleryProducts, setJewelleryProducts] = useState<Product[]>([]);
   const [kawaiiProducts, setKawaiiProducts] = useState<Product[]>([]);
   const [scoopImageUrl, setScoopImageUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
-    async function loadHomepageData() {
+    async function loadProducts() {
       try {
-        const [jewellery, kawaii, scoopConfig] = await Promise.all([
+        const [jewellery, kawaii] = await Promise.all([
           getProducts("jewellery"),
           getProducts("kawaii"),
-          getScoopConfig(),
         ]);
+
         setJewelleryProducts(jewellery);
         setKawaiiProducts(kawaii);
-        if (scoopConfig?.imageUrl) {
-          setScoopImageUrl(scoopConfig.imageUrl);
-        }
       } catch (error) {
         console.error("Could not load homepage products:", error);
-      } finally {
-        setLoading(false);
       }
     }
-    loadHomepageData();
+
+    loadProducts();
+  }, []);
+
+  useEffect(() => {
+    async function loadScoopConfig() {
+      try {
+        const scoopConfig = await getScoopConfig();
+        setScoopImageUrl(scoopConfig?.imageUrl || "");
+      } catch (error) {
+        console.error("Could not load Scoop configuration:", error);
+        setScoopImageUrl("");
+      }
+    }
+
+    loadScoopConfig();
   }, []);
 
   // Build dynamic hero slideshow mix (Mystery Scoop -> Jewellery -> Kawaii -> repeat)
   const heroSlides = useMemo(() => {
-    return buildHeroSlides(scoopImageUrl, jewelleryProducts, kawaiiProducts);
+    if (scoopImageUrl === null) {
+      return [];
+    }
+
+    return buildHeroSlides(
+      scoopImageUrl,
+      jewelleryProducts,
+      kawaiiProducts
+    );
   }, [scoopImageUrl, jewelleryProducts, kawaiiProducts]);
 
   // Build dynamic 4 categories
   const categories: Category[] = useMemo(() => {
-    const scoopFallback = "/images/category/scoops-collection.png";
-    const jewelleryFallback = "/images/category/jewellery-collection.png";
-    const kawaiiFallback = "/images/category/kawaii-collection.png";
-    const byobImage = "/images/category/byob-collection.png";
+    const byobImage = "/images/category/byob-collection.webp";
 
     const scoopSlides = getCategorySlides(
       [],
       "Mystery Scoops",
-      scoopImageUrl || scoopFallback
+      scoopImageUrl || ""
     ).map((s) => s.url);
 
     const jewellerySlides = getCategorySlides(
       jewelleryProducts,
       "Jewellery",
-      jewelleryFallback
+      ""
     ).map((s) => s.url);
 
     const kawaiiSlides = getCategorySlides(
       kawaiiProducts,
       "Kawaii",
-      kawaiiFallback
+      ""
     ).map((s) => s.url);
 
     return [
@@ -152,7 +167,7 @@ function Home() {
         slug: "scoops",
         description: "Pick your surprise",
         ctaText: "Explore",
-        image: scoopSlides[0] || scoopFallback,
+        image: scoopSlides[0] || "",
         images: scoopSlides,
         rotationInterval: 5000,
       },
@@ -164,7 +179,7 @@ function Home() {
         slug: "jewellery",
         description: "Find your little sparkle",
         ctaText: "Explore",
-        image: jewellerySlides[0] || jewelleryFallback,
+        image: jewellerySlides[0] || "",
         images: jewellerySlides,
         rotationInterval: 4800,
       },
@@ -176,7 +191,7 @@ function Home() {
         slug: "kawaii",
         description: "Something cute awaits",
         ctaText: "Explore",
-        image: kawaiiSlides[0] || kawaiiFallback,
+        image: kawaiiSlides[0] || "",
         images: kawaiiSlides,
         rotationInterval: 5200,
       },
@@ -234,25 +249,19 @@ function Home() {
               </Link>
             </div>
 
-            {loading ? (
-              <div className="home-products-message">
-                Loading pretty picks...
-              </div>
-            ) : (
-              <div className="home-product-rows">
-                <ProductCarousel
-                  title="Jewellery"
-                  products={jewelleryProducts}
-                  viewAllPath="/jewellery"
-                />
+            <div className="home-product-rows">
+              <ProductCarousel
+                title="Jewellery"
+                products={jewelleryProducts}
+                viewAllPath="/jewellery"
+              />
 
-                <ProductCarousel
-                  title="Kawaii"
-                  products={kawaiiProducts}
-                  viewAllPath="/kawaii"
-                />
-              </div>
-            )}
+              <ProductCarousel
+                title="Kawaii"
+                products={kawaiiProducts}
+                viewAllPath="/kawaii"
+              />
+            </div>
           </div>
         </section>
 

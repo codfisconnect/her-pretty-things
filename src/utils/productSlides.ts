@@ -61,13 +61,13 @@ export function getCategorySlides(
   // Filter products: active products with at least one valid image
   const validProducts = Array.isArray(products)
     ? products.filter(
-        (p) =>
-          p &&
-          p.active !== false &&
-          p.name &&
-          !p.name.toLowerCase().includes('sample') &&
-          extractValidProductImages(p).length > 0
-      )
+      (p) =>
+        p &&
+        p.active !== false &&
+        p.name &&
+        !p.name.toLowerCase().includes('sample') &&
+        extractValidProductImages(p).length > 0
+    )
     : []
 
   // First pass: 1 primary image per distinct product
@@ -123,26 +123,24 @@ export function buildHeroSlides(
   jewelleryProducts: Product[],
   kawaiiProducts: Product[]
 ): HeroSlide[] {
-  const scoopFallback = '/images/category/scoops-collection.png'
-  const jewelleryFallback = '/images/category/jewellery-collection.png'
-  const kawaiiFallback = '/images/category/kawaii-collection.png'
+
 
   const scoopSlides = getCategorySlides(
     [],
     'Mystery Scoop',
-    scoopImage || scoopFallback
+    scoopImage || ''
   ).map((s) => ({ ...s, category: 'scoops' as const }))
 
   const jewellerySlides = getCategorySlides(
     jewelleryProducts,
     'Jewellery',
-    jewelleryFallback
+    ''
   ).map((s) => ({ ...s, category: 'jewellery' as const }))
 
   const kawaiiSlides = getCategorySlides(
     kawaiiProducts,
     'Kawaii',
-    kawaiiFallback
+    ''
   ).map((s) => ({ ...s, category: 'kawaii' as const }))
 
   const availableStreams = [
@@ -152,13 +150,7 @@ export function buildHeroSlides(
   ].filter((stream) => stream.slides.length > 0)
 
   if (availableStreams.length === 0) {
-    return [
-      {
-        url: '/images/hero-banners/scoops-banner-hero.png',
-        alt: 'Her Pretty Things Collection',
-        category: 'general',
-      },
-    ]
+    return []
   }
 
   // Interleave round-robin across available streams (2 rounds for exactly 6 slides)

@@ -40,7 +40,7 @@ function ProductDetails() {
     try {
       setAdding(true);
       await addToCart({
-        productId: id,
+        productId: product.id,
         quantity,
       });
       setTimeout(() => setAdding(false), 800);
@@ -54,7 +54,7 @@ function ProductDetails() {
     if (!id || !product) return;
     try {
       await addToCart({
-        productId: id,
+        productId: product.id,
         quantity,
       });
       navigate("/checkout");
@@ -121,9 +121,8 @@ function ProductDetails() {
                   <button
                     key={image}
                     type="button"
-                    className={`product-details-thumbnail ${
-                      selectedImage === index ? "active" : ""
-                    }`}
+                    className={`product-details-thumbnail ${selectedImage === index ? "active" : ""
+                      }`}
                     onClick={() => setSelectedImage(index)}
                   >
                     <img
