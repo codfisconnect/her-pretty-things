@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { X, Sparkles, Heart } from 'lucide-react'
 import { fetchActiveGreeting, type SeasonalGreeting } from '../../services/seasonalGreetingService'
 import './SeasonalCharacterGreeting.css'
 
 export const SeasonalCharacterGreeting: React.FC = () => {
+  const location = useLocation()
   const [greeting, setGreeting] = useState<SeasonalGreeting | null>(null)
   const [visible, setVisible] = useState(false)
   const [closed, setClosed] = useState(false)
@@ -58,7 +59,7 @@ export const SeasonalCharacterGreeting: React.FC = () => {
     }
   }, [])
 
-  if (!greeting || !visible || closed) return null
+  if (location.pathname === '/byob' || !greeting || !visible || closed) return null
 
   const handleClose = () => {
     setVisible(false)
