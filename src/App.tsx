@@ -42,6 +42,8 @@ import CustomerOrderDetails from './pages/OrderDetails/CustomerOrderDetails'
 import AdminRoutes from './admin/routes/AdminRoutes'
 import './App.css'
 
+import NotFound from './pages/NotFound/NotFound'
+
 function ScrollToTop() {
   const location = useLocation()
 
@@ -115,6 +117,7 @@ function App() {
                 <Route path="/return" element={<Returns />} />
                 <Route path="/replacement-policy" element={<Returns />} />
                 <Route path="/faq" element={<FAQ />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </StoreLayout>
           </CartProvider>

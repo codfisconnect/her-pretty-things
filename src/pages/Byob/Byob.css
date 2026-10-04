@@ -5,7 +5,8 @@
   margin: 0 auto;
   padding: 1.5rem 1.5rem 4rem;
   box-sizing: border-box;
-  overflow-x: clip; /* Defensive clip on root container without breaking sticky */
+  overflow-x: clip;
+  /* Defensive clip on root container without breaking sticky */
 }
 
 .byob-header {
@@ -71,7 +72,8 @@
 }
 
 .byob-products-col {
-  min-width: 0; /* Prevents grid column blowout from wide child content */
+  min-width: 0;
+  /* Prevents grid column blowout from wide child content */
   width: 100%;
   box-sizing: border-box;
 }
@@ -321,9 +323,17 @@
 }
 
 @keyframes boxPop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .byob-box-card {
@@ -675,6 +685,7 @@
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -684,6 +695,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -724,7 +736,8 @@
   }
 
   .byob-box-sidebar {
-    display: none; /* Desktop sidebar hidden on tablet/mobile */
+    display: none;
+    /* Desktop sidebar hidden on tablet/mobile */
   }
 
   .byob-grid {
@@ -887,14 +900,25 @@
   }
 
   .byob-tabs {
-    padding-bottom: 0.4rem;
-    margin-bottom: 1.1rem;
-    gap: 0.35rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.4rem;
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.6rem;
   }
 
   .byob-tab {
-    padding: 0.48rem 0.85rem;
-    font-size: 0.82rem;
+    min-width: 0;
+    width: 100%;
+    padding: 0.55rem 0.35rem;
+    font-size: 0.78rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
   }
 }
 

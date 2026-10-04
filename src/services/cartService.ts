@@ -5,6 +5,7 @@ export interface CartProductDetails {
   id: string
   name: string
   slug?: string
+  category?: string
   price: number
   mrp?: number
   discountAmount?: number
