@@ -3,6 +3,9 @@ import { getDatabase } from '../config/database.js'
 import { HttpError } from '../middleware/errorHandler.js'
 import { refundPayment } from './paymentService.js'
 import { notifyNewOrder, notifyOrderCancelled } from './notificationService.js'
+import { validateAndNormalizeShipping } from '../utils/addressValidation.js'
+import { lookupPincode } from './pincodeService.js'
+import { checkAddressConsistency } from '../utils/indiaLocations.js'
 
 export interface ShippingInput {
   fullName: string
@@ -36,22 +39,14 @@ function requiredString(value: unknown, fieldName: string): string {
 export function readCreateOrderInput(value: unknown): CreateOrderInput {
   if (!isRecord(value)) throw new HttpError(400, 'Order payload must be an object.')
   if (!isRecord(value.shipping)) throw new HttpError(400, 'shipping is required.')
-  const shipping = value.shipping
+
+  const normalizedShipping = validateAndNormalizeShipping(value.shipping)
 
   return {
     cartId: requiredString(value.cartId, 'cartId'),
     userId: typeof value.userId === 'string' ? value.userId : undefined,
     rewardCode: typeof value.rewardCode === 'string' ? value.rewardCode.trim().toUpperCase() : undefined,
-    shipping: {
-      fullName: requiredString(shipping.fullName, 'fullName'),
-      phoneNumber: requiredString(shipping.phoneNumber, 'phoneNumber'),
-      email: requiredString(shipping.email, 'email'),
-      addressLine1: requiredString(shipping.addressLine1, 'addressLine1'),
-      addressLine2: typeof shipping.addressLine2 === 'string' ? shipping.addressLine2.trim() : undefined,
-      city: requiredString(shipping.city, 'city'),
-      state: requiredString(shipping.state, 'state'),
-      pincode: requiredString(shipping.pincode, 'pincode'),
-    },
+    shipping: normalizedShipping,
   }
 }
 
@@ -105,6 +100,37 @@ async function generateOrderNumber(
 }
 
 export async function createOrder(input: CreateOrderInput) {
+  // Authoritative server-side pincode and consistency verification
+  const postalData = await lookupPincode(input.shipping.pincode)
+  if (!postalData) {
+    throw new HttpError(
+      400,
+      `Pincode "${input.shipping.pincode}" is invalid or could not be verified by the postal registry.`,
+    )
+  }
+
+  const consistency = checkAddressConsistency(
+    input.shipping.state,
+    input.shipping.city,
+    postalData,
+  )
+
+  if (!consistency.stateMatches) {
+    throw new HttpError(
+      400,
+      consistency.stateErrorMessage ||
+        `This pincode belongs to ${postalData.state}, not ${input.shipping.state}.`,
+    )
+  }
+
+  if (!consistency.cityMatches) {
+    throw new HttpError(
+      400,
+      consistency.cityErrorMessage ||
+        `The selected city "${input.shipping.city}" does not match the postal information for pincode ${input.shipping.pincode}.`,
+    )
+  }
+
   const database = getDatabase()
 
   const cart = await database.cart.findUnique({

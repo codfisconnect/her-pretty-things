@@ -5,6 +5,8 @@
   margin: 0 auto;
   padding: 1.5rem 1.5rem 4rem;
   box-sizing: border-box;
+  overflow-x: clip;
+  /* Defensive clip on root container without breaking sticky */
 }
 
 .byob-header {
@@ -30,12 +32,14 @@
   color: #2b2226;
   font-family: var(--font-heading, inherit);
   margin: 0.2rem 0 0.5rem;
+  overflow-wrap: break-word;
 }
 
 .byob-subheading {
   font-size: 1.05rem;
   color: #716269;
   margin: 0 0 1.2rem;
+  overflow-wrap: break-word;
 }
 
 .byob-rule-pills {
@@ -53,14 +57,25 @@
   padding: 0.35rem 0.85rem;
   border-radius: 9999px;
   border: 1px solid #fbcfe8;
+  white-space: normal;
+  text-align: center;
 }
 
-/* Layout */
+/* Primary Two-Column Layout */
 .byob-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 350px;
-  gap: 2.25rem;
+  gap: 2rem;
   align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.byob-products-col {
+  min-width: 0;
+  /* Prevents grid column blowout from wide child content */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Tabs */
@@ -70,6 +85,13 @@
   margin-bottom: 1.5rem;
   border-bottom: 1px solid #f0e4ea;
   padding-bottom: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.byob-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .byob-tab {
@@ -82,6 +104,8 @@
   border-radius: 9999px;
   cursor: pointer;
   transition: all 0.2s;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .byob-tab:hover {
@@ -94,11 +118,27 @@
   color: #ffffff;
 }
 
+.byob-tab:focus-visible {
+  outline: 2px solid #db2777;
+  outline-offset: 2px;
+}
+
+/* Loading & Empty States */
+.byob-loading,
+.byob-empty-category {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #8c7b83;
+  font-size: 0.95rem;
+}
+
 /* Product Grid */
 .byob-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .byob-card {
@@ -110,6 +150,8 @@
   flex-direction: column;
   height: 100%;
   transition: all 0.25s ease;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .byob-card:hover {
@@ -130,6 +172,7 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  display: block;
 }
 
 .byob-card:hover .byob-card-image-wrap img {
@@ -146,6 +189,7 @@
   font-weight: 700;
   padding: 3px 6px;
   border-radius: 6px;
+  z-index: 2;
 }
 
 .byob-count-tag {
@@ -159,6 +203,8 @@
   padding: 2px 7px;
   border-radius: 9999px;
   backdrop-filter: blur(4px);
+  z-index: 2;
+  white-space: nowrap;
 }
 
 .byob-card-body {
@@ -167,6 +213,8 @@
   flex-direction: column;
   flex: 1;
   justify-content: space-between;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .byob-card-cat {
@@ -175,6 +223,10 @@
   letter-spacing: 0.8px;
   color: #b4868d;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
 }
 
 .byob-card-title {
@@ -188,6 +240,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  overflow-wrap: break-word;
 }
 
 .byob-card-pricing {
@@ -195,18 +248,21 @@
   align-items: baseline;
   gap: 6px;
   margin-bottom: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .byob-selling-price {
   font-size: 1rem;
   font-weight: 700;
   color: #2b2226;
+  white-space: nowrap;
 }
 
 .byob-mrp-price {
   font-size: 0.82rem;
   color: #a8949b;
   text-decoration: line-through;
+  white-space: nowrap;
 }
 
 .byob-add-btn {
@@ -224,9 +280,10 @@
   gap: 0.35rem;
   cursor: pointer;
   transition: all 0.2s;
+  box-sizing: border-box;
 }
 
-.byob-add-btn:hover {
+.byob-add-btn:hover:not(:disabled) {
   background: #fce7f3;
   border-color: #fbcfe8;
   color: #be185d;
@@ -238,10 +295,27 @@
   color: #db2777;
 }
 
-/* Box Summary Sidebar */
+.byob-add-btn.disabled,
+.byob-add-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #f3ecf0;
+  color: #92838a;
+  border-color: #e5d9e0;
+}
+
+/* Box Summary Sidebar (Desktop Sticky) */
 .byob-box-sidebar {
   position: sticky;
   top: 90px;
+  max-height: calc(100vh - 105px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #ebdce4 transparent;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .box-bounce {
@@ -249,17 +323,28 @@
 }
 
 @keyframes boxPop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.03); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .byob-box-card {
   background: #ffffff;
   border: 1px solid #eedee6;
   border-radius: 18px;
-  padding: 1.4rem;
+  padding: 1.35rem;
   box-shadow: 0 10px 30px rgba(45, 30, 36, 0.06);
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .box-title-row {
@@ -270,6 +355,7 @@
 
 .box-icon {
   font-size: 1.8rem;
+  line-height: 1;
 }
 
 .box-title-row h2 {
@@ -282,6 +368,7 @@
 .box-title-row small {
   color: #8c7b83;
   font-size: 0.8rem;
+  display: block;
 }
 
 /* Progress bar */
@@ -291,6 +378,7 @@
   padding: 0.85rem;
   border-radius: 12px;
   border: 1px solid #f2e4ec;
+  box-sizing: border-box;
 }
 
 .progress-labels {
@@ -300,6 +388,7 @@
   font-weight: 600;
   color: #524248;
   margin-bottom: 0.45rem;
+  gap: 0.5rem;
 }
 
 .progress-track {
@@ -325,6 +414,7 @@
   font-weight: 600;
   margin-top: 0.45rem;
   text-align: center;
+  overflow-wrap: break-word;
 }
 
 .status-pending {
@@ -346,7 +436,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
-  padding-right: 0.3rem;
+  padding-right: 0.25rem;
+  scrollbar-width: thin;
 }
 
 .box-empty-hint {
@@ -376,6 +467,8 @@
   padding: 0.5rem;
   border-radius: 10px;
   border: 1px solid #f6edf1;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .byob-box-item-row img {
@@ -384,6 +477,7 @@
   border-radius: 8px;
   object-fit: cover;
   flex-shrink: 0;
+  display: block;
 }
 
 .box-item-info {
@@ -404,41 +498,57 @@
 .box-item-price {
   font-size: 0.78rem;
   color: #8c7b83;
+  display: block;
 }
 
 .box-item-controls {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.25rem;
+  flex-shrink: 0;
 }
 
 .box-item-controls button {
   background: #ffffff;
   border: 1px solid #e5d7df;
   border-radius: 6px;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  color: #4b3d43;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.box-item-controls button:hover:not(:disabled) {
+  border-color: #db2777;
+  color: #db2777;
+  background: #fdf2f8;
+}
+
+.box-item-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .box-item-controls span {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  min-width: 14px;
+  min-width: 18px;
   text-align: center;
 }
 
 .box-item-trash {
-  color: #b5a4ac;
+  color: #b5a4ac !important;
   border: none !important;
   background: none !important;
 }
 
 .box-item-trash:hover {
-  color: #e11d48;
+  color: #e11d48 !important;
 }
 
 /* Totals */
@@ -481,6 +591,7 @@
   gap: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .byob-checkout-btn.locked {
@@ -515,18 +626,20 @@
   justify-content: center;
   align-items: flex-end;
   animation: fadeIn 0.2s ease;
+  box-sizing: border-box;
 }
 
 .byob-mobile-drawer {
   background: #ffffff;
   width: 100%;
-  max-width: 500px;
+  max-width: 540px;
   max-height: 85vh;
   border-radius: 20px 20px 0 0;
-  padding: 1.25rem 1.25rem 2rem;
+  padding: 1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
   box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
   animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
 }
 
 .byob-mobile-drawer-header {
@@ -560,12 +673,19 @@
   color: #716269;
   cursor: pointer;
   margin-left: auto;
+  transition: all 0.15s ease;
+}
+
+.byob-mobile-drawer-close:hover {
+  background: #fce7f3;
+  color: #db2777;
 }
 
 @keyframes slideUp {
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -575,27 +695,39 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
 }
 
-/* Responsive */
+/* ==================================================
+   RESPONSIVE BREAKPOINTS
+   ================================================== */
+
+/* Laptop / Medium Desktop (1024px to 1200px) */
 @media (max-width: 1200px) {
   .byob-layout {
-    grid-template-columns: minmax(0, 1fr) 330px;
-    gap: 1.75rem;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 1.5rem;
   }
 
   .byob-grid {
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
     gap: 1rem;
+  }
+
+  .byob-box-card {
+    padding: 1.15rem;
   }
 }
 
-@media (max-width: 992px) {
+/* Tablet (max-width: 1024px)
+   Clean transition from two-column to single-column with bottom action bar */
+@media (max-width: 1024px) {
   .byob-page {
-    padding-bottom: 5.5rem;
+    /* Generous bottom padding to clear the 76px+ mobile action bar */
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
   }
 
   .byob-layout {
@@ -605,6 +737,7 @@
 
   .byob-box-sidebar {
     display: none;
+    /* Desktop sidebar hidden on tablet/mobile */
   }
 
   .byob-grid {
@@ -612,104 +745,214 @@
     gap: 1rem;
   }
 
+  /* Fixed Mobile / Tablet Bottom Bar */
   .byob-mobile-bar {
     display: flex;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
+    width: 100%;
     background: #ffffff;
     border-top: 1px solid #f0e4ea;
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -4px 18px rgba(45, 30, 36, 0.08);
     padding: 0.75rem 1.25rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
-    z-index: 900;
+    z-index: 950;
     align-items: center;
     justify-content: space-between;
+    gap: 0.75rem;
+    box-sizing: border-box;
   }
 
   .byob-mobile-bar-info {
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    flex: 1;
   }
 
   .byob-mobile-bar-title {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 1px;
     color: #db2777;
     text-transform: uppercase;
+    line-height: 1.2;
   }
 
   .byob-mobile-bar-meta {
     font-size: 0.95rem;
     font-weight: 700;
     color: #2b2226;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .byob-mobile-bar-subtext {
+    font-size: 0.75rem;
+    color: #716269;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .byob-mobile-bar-subtext.unlocked {
+    color: #047857;
+    font-weight: 600;
   }
 
   .byob-mobile-bar-btn {
-    background: #db2777;
+    background: #2b2226;
     color: #ffffff;
     border: none;
     border-radius: 9999px;
-    padding: 0.55rem 1.2rem;
+    padding: 0.65rem 1.35rem;
     font-size: 0.85rem;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.3);
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .byob-mobile-bar-btn.unlocked {
+    background: #db2777;
+    box-shadow: 0 3px 10px rgba(219, 39, 119, 0.35);
+  }
+
+  .byob-mobile-bar-btn.unlocked:hover {
+    background: #be185d;
   }
 }
 
+/* Mobile Devices (max-width: 640px) */
 @media (max-width: 640px) {
   .byob-page {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+    padding-top: 1.2rem;
+  }
+
+  .byob-header {
+    margin-bottom: 1.5rem;
   }
 
   .byob-header h1 {
-    font-size: 1.75rem;
+    font-size: 1.7rem;
   }
 
-  .byob-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-
-  .byob-card-body {
-    padding: 0.75rem;
-  }
-
-  .byob-card-title {
-    font-size: 0.85rem;
-    min-height: 2.3rem;
-  }
-
-  .byob-selling-price {
+  .byob-subheading {
     font-size: 0.95rem;
   }
 
-  .byob-tabs {
-    overflow-x: auto;
-    white-space: nowrap;
-    padding-bottom: 0.6rem;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+  .byob-rule-pills {
+    gap: 0.4rem;
   }
 
-  .byob-tabs::-webkit-scrollbar {
-    display: none;
+  .rule-pill {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.65rem;
+  }
+
+  /* 2-Column Responsive Grid on Mobile */
+  .byob-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .byob-card-body {
+    padding: 0.65rem;
+  }
+
+  .byob-card-cat {
+    font-size: 0.68rem;
+  }
+
+  .byob-card-title {
+    font-size: 0.82rem;
+    min-height: 2.2rem;
+    line-height: 1.3;
+    margin-bottom: 0.35rem;
+  }
+
+  .byob-card-pricing {
+    gap: 4px;
+    margin-bottom: 0.55rem;
+  }
+
+  .byob-selling-price {
+    font-size: 0.9rem;
+  }
+
+  .byob-mrp-price {
+    font-size: 0.75rem;
+  }
+
+  .byob-add-btn {
+    padding: 0.48rem 0.35rem;
+    font-size: 0.78rem;
+    border-radius: 8px;
+    gap: 0.25rem;
+  }
+
+  .byob-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.4rem;
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.6rem;
   }
 
   .byob-tab {
-    flex-shrink: 0;
-    padding: 0.5rem 0.9rem;
-    font-size: 0.85rem;
+    min-width: 0;
+    width: 100%;
+    padding: 0.55rem 0.35rem;
+    font-size: 0.78rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
   }
 }
 
+/* Small Mobile / Narrow Screens (320px to 380px) */
 @media (max-width: 380px) {
+  .byob-page {
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+  }
+
+  .byob-header h1 {
+    font-size: 1.45rem;
+  }
+
+  /* 1-Column grid on narrowest devices ensures buttons and text never clip */
   .byob-grid {
     grid-template-columns: 1fr;
     gap: 0.75rem;
+  }
+
+  .byob-card {
+    max-width: 100%;
+  }
+
+  .byob-mobile-bar {
+    padding: 0.65rem 0.85rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .byob-mobile-bar-meta {
+    font-size: 0.88rem;
+  }
+
+  .byob-mobile-bar-btn {
+    padding: 0.55rem 0.95rem;
+    font-size: 0.8rem;
   }
 }

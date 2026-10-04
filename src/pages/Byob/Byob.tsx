@@ -4,6 +4,7 @@ import { Gift, Sparkles, Plus, Minus, Trash2, ShoppingBag, X } from 'lucide-reac
 import { fetchByobProducts, fetchByobSettings, type ByobSettings } from '../../services/byobService'
 import { useCart } from '../../context/CartContext'
 import type { Product } from '../../types/product'
+import { optimizeCloudinaryImage } from '../../utils/cloudinary'
 import './Byob.css'
 
 interface BoxItem {
@@ -25,6 +26,17 @@ const Byob: React.FC = () => {
   const [boxReact, setBoxReact] = useState(false)
   const [addingToCart, setAddingToCart] = useState(false)
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
+
+  // Lock background scrolling when mobile drawer is open
+  useEffect(() => {
+    if (mobileDrawerOpen) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow
+      }
+    }
+  }, [mobileDrawerOpen])
 
   const { addToCart, closeDrawer } = useCart()
   const navigate = useNavigate()
@@ -226,7 +238,12 @@ const Byob: React.FC = () => {
         ) : (
           boxItems.map(({ product, quantity }) => (
             <div className="byob-box-item-row" key={product.id}>
-              <img src={product.image} alt={product.name} />
+              <img
+                src={optimizeCloudinaryImage(product.image, 120)}
+                alt={product.name}
+                loading="lazy"
+                decoding="async"
+              />
               <div className="box-item-info">
                 <h4>{product.name}</h4>
                 <span className="box-item-price">
@@ -376,7 +393,12 @@ const Byob: React.FC = () => {
                 return (
                   <article className="byob-card" key={product.id}>
                     <div className="byob-card-image-wrap">
-                      <img src={product.image} alt={product.name} loading="lazy" />
+                      <img
+                        src={optimizeCloudinaryImage(product.image, 500)}
+                        alt={product.name}
+                        loading="lazy"
+                        decoding="async"
+                      />
                       {hasDiscount && (
                         <span className="byob-discount-badge">{discountPercent}% OFF</span>
                       )}
@@ -434,25 +456,38 @@ const Byob: React.FC = () => {
       </div>
 
       {/* Mobile Sticky Bottom Summary Bar */}
-      <div className="byob-mobile-bar">
+      <div className="byob-mobile-bar" role="region" aria-label="Mobile box summary">
         <div className="byob-mobile-bar-info">
           <span className="byob-mobile-bar-title">YOUR BOX</span>
           <span className="byob-mobile-bar-meta">
             {totalQuantityInBox} {totalQuantityInBox === 1 ? 'ITEM' : 'ITEMS'} · ₹{boxSubtotal.toLocaleString('en-IN')}
           </span>
+          <span className={`byob-mobile-bar-subtext ${isMinimumReached ? 'unlocked' : ''}`}>
+            {isMinimumReached
+              ? '✨ Ready to checkout'
+              : `Add ₹${remaining.toLocaleString('en-IN')} to unlock`}
+          </span>
         </div>
         <button
           type="button"
-          className="byob-mobile-bar-btn"
+          className={`byob-mobile-bar-btn ${isMinimumReached ? 'unlocked' : ''}`}
           onClick={() => setMobileDrawerOpen(true)}
+          aria-haspopup="dialog"
+          aria-expanded={mobileDrawerOpen}
         >
-          VIEW BOX
+          {isMinimumReached ? 'CHECKOUT BOX' : 'VIEW BOX'}
         </button>
       </div>
 
       {/* Mobile Bottom Sheet Drawer */}
       {mobileDrawerOpen && (
-        <div className="byob-mobile-drawer-overlay" onClick={() => setMobileDrawerOpen(false)}>
+        <div
+          className="byob-mobile-drawer-overlay"
+          onClick={() => setMobileDrawerOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Your custom box details"
+        >
           <div className="byob-mobile-drawer" onClick={(e) => e.stopPropagation()}>
             <div className="byob-mobile-drawer-header">
               <span className="drawer-drag-pill" />

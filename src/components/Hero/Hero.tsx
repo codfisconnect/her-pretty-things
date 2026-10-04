@@ -48,7 +48,8 @@ function Hero({ slides }: HeroProps) {
       const nextSlide = activeSlides[nextIndex];
       if (nextSlide?.url) {
         const img = new Image();
-        img.src = optimizeCloudinaryImage(nextSlide.url, 900);
+        const targetWidth = typeof window !== "undefined" && window.innerWidth <= 650 ? 750 : 900;
+        img.src = optimizeCloudinaryImage(nextSlide.url, targetWidth);
       }
     }
   }, [currentSlide, activeSlides]);
@@ -156,7 +157,13 @@ function Hero({ slides }: HeroProps) {
                     aria-hidden={!isActive}
                   >
                     <img
-                      src={isActive ? optimizeCloudinaryImage(slide.url, 900) : undefined}
+                      src={isActive ? optimizeCloudinaryImage(slide.url, 950) : undefined}
+                      srcSet={
+                        isActive && slide.url.includes("res.cloudinary.com")
+                          ? `${optimizeCloudinaryImage(slide.url, 750)} 750w, ${optimizeCloudinaryImage(slide.url, 950)} 950w`
+                          : undefined
+                      }
+                      sizes="(max-width: 650px) 100vw, (max-width: 1024px) 50vw, 650px"
                       alt={isActive ? (slide.alt || "Her Pretty Things featured product") : ""}
                       className="hero-slide-img"
                       loading={isActive ? "eager" : undefined}

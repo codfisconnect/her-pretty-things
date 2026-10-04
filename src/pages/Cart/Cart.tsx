@@ -79,16 +79,16 @@ function Cart() {
                       {isScoop
                         ? `${item.numberOfScoops}-Scoop Surprise`
                         : isByob
-                        ? "Custom Gift Box (BYOB)"
-                        : item.product?.name}
+                          ? "Custom Gift Box (BYOB)"
+                          : item.product?.name}
                     </h2>
 
                     <p style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", color: "#8c7b83" }}>
                       {isScoop
                         ? `Customized Scoop · ${item.colourTheme ? `Theme: ${item.colourTheme}` : 'Mystery choice'}`
                         : isByob && byobDetails?.items
-                        ? `${byobDetails.items.length} custom handpicked items`
-                        : `Category: ${item.product?.name || "Jewellery"}`}
+                          ? `${byobDetails.items.length} custom handpicked items`
+                          : `Category: ${item.product?.category || "Jewellery"}`}
                     </p>
 
                     {isByob && byobDetails?.items && (
