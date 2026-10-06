@@ -367,7 +367,11 @@
 }
 
 .hero-slide-overlay {
-  display: none;
+  display: none !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
 }
 
 .hero-slide-item {
@@ -1474,22 +1478,13 @@
     object-position: center 48%;
   }
 
-  /* Luminous gentle gradient overlay for readability while preserving image brilliance */
+  /* Luminous gentle gradient overlay removed to preserve crystal-clear image sharpness */
   .hero-slide-overlay {
-    display: block;
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    pointer-events: none;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.82) 0%,
-      rgba(255, 255, 255, 0.45) 20%,
-      rgba(255, 255, 255, 0.04) 42%,
-      rgba(253, 242, 244, 0.38) 64%,
-      rgba(253, 242, 244, 0.88) 84%,
-      rgba(253, 242, 244, 0.98) 100%
-    );
+    display: none !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
   }
 
   /* Dynamic Category Badge in top right */
