@@ -84,9 +84,6 @@ function Hero({
                 />
               </picture>
 
-              {/* Luminous overlay for mobile text readability */}
-              <div className="hero-slide-overlay" aria-hidden="true" />
-
               {/* Curated Editorial Badge */}
               <div className="hero-slide-badge" aria-label="Featured Collection">
                 CURATED GIFTS
