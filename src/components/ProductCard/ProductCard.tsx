@@ -9,9 +9,10 @@ import { optimizeCloudinaryImage } from "../../utils/cloudinary";
 
 interface ProductCardProps {
   product: Product;
+  imageOverride?: string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, imageOverride }) => {
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { addToCart } = useCart();
   const [adding, setAdding] = useState(false);
@@ -22,6 +23,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const discountPercent = hasDiscount
     ? Math.round(((product.mrp! - product.price) / product.mrp!) * 100)
     : 0;
+
+  const displayImage =
+    imageOverride && imageOverride.trim().length > 0
+      ? imageOverride
+      : optimizeCloudinaryImage(product.image, 500);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -53,13 +59,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           className="product-image-link"
           aria-label={`View ${product.name}`}
         >
-          <img
-            src={optimizeCloudinaryImage(product.image, 500)}
-            alt={product.name}
-            className="product-image"
-            loading="lazy"
-            decoding="async"
-          />
+          {displayImage ? (
+            <img
+              src={displayImage}
+              alt={product.name}
+              className="product-image"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div className="product-image-fallback" aria-hidden="true" />
+          )}
           {hasDiscount && (
             <span className="product-card-discount-badge">
               {discountPercent}% OFF

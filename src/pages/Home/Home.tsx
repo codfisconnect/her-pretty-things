@@ -15,6 +15,7 @@ import SocialGallery from "../../components/SocialGallery/SocialGallery";
 import PrettyPlay from "../../components/PrettyPlay/PrettyPlay";
 import type { Product } from "../../types/product";
 import { homepageAssets } from "../../constants/homepageAssets";
+import { getHomepageProductImage } from "../../data/homepageProducts";
 import "./Home.css";
 
 interface ProductCarouselProps {
@@ -68,7 +69,10 @@ function ProductCarousel({
       <div ref={carouselRef} className="home-product-carousel">
         {products.slice(0, 10).map((product) => (
           <div className="home-product-item" key={product.id}>
-            <ProductCard product={product} />
+            <ProductCard
+              product={product}
+              imageOverride={getHomepageProductImage(product)}
+            />
           </div>
         ))}
 
