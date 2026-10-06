@@ -4,7 +4,7 @@ export const homepageAssets = {
   jewellery: "/images/homepage/jewellery-card.webp",
   kawaii: "/images/homepage/kawaii-card.webp",
   byob: "/images/homepage/byob-card.webp",
-  scoop: "/images/homepage/scoop-board.webp",
+  scoop: "/images/homepage/scoop-board-card.webp",
 } as const;
 
 export type HomepageAssets = typeof homepageAssets;
