@@ -1,94 +1,16 @@
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
-import type { HeroSlide } from "../../utils/productSlides";
-import { optimizeCloudinaryImage } from "../../utils/cloudinary";
-
-
+import { homepageAssets } from "../../constants/homepageAssets";
 
 interface HeroProps {
-  slides?: HeroSlide[];
+  desktopSrc?: string;
+  mobileSrc?: string;
 }
 
-function Hero({ slides }: HeroProps) {
-  const activeSlides = useMemo(() => {
-    return slides && slides.length > 0 ? slides : [];
-  }, [slides]);
-
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  // Keep index valid if slides array updates dynamically
-  useEffect(() => {
-    if (currentSlide >= activeSlides.length) {
-      setCurrentSlide(0);
-    }
-  }, [activeSlides.length, currentSlide]);
-
-  // Auto-rotation every 5 seconds with reduced-motion support
-  useEffect(() => {
-    if (activeSlides.length <= 1) return;
-
-    const prefersReducedMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (prefersReducedMotion) return;
-
-    const interval = setInterval(() => {
-      setCurrentSlide((curr) => (curr + 1) % activeSlides.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [activeSlides.length]);
-
-  // Preload next slide image
-  useEffect(() => {
-    if (activeSlides.length > 1) {
-      const nextIndex = (currentSlide + 1) % activeSlides.length;
-      const nextSlide = activeSlides[nextIndex];
-      if (nextSlide?.url) {
-        const img = new Image();
-        const targetWidth = typeof window !== "undefined" && window.innerWidth <= 650 ? 750 : 900;
-        img.src = optimizeCloudinaryImage(nextSlide.url, targetWidth);
-      }
-    }
-  }, [currentSlide, activeSlides]);
-
-  const current = activeSlides[currentSlide] || activeSlides[0];
-
-  // Contextual Primary CTA and dynamic badge derived from active slide category
-  const contextualCta = useMemo(() => {
-    switch (current?.category) {
-      case "scoops":
-        return {
-          text: "SHOP SCOOPS",
-          path: "/scoops",
-          badge: "MYSTERY SCOOP",
-        };
-      case "jewellery":
-        return {
-          text: "SHOP JEWELLERY",
-          path: "/jewellery",
-          badge: "JEWELLERY",
-        };
-      case "kawaii":
-        return {
-          text: "SHOP KAWAII",
-          path: "/kawaii",
-          badge: "KAWAII",
-        };
-      default:
-        return {
-          text: "SHOP THE COLLECTION",
-          path: "/jewellery",
-          badge: "FEATURED",
-        };
-    }
-  }, [current?.category]);
-
-  if (!current) {
-    return null;
-  }
+function Hero({
+  desktopSrc = homepageAssets.heroDesktop,
+  mobileSrc = homepageAssets.heroMobile,
+}: HeroProps) {
   return (
     <section className="hero-section" aria-label="Featured Collection Hero">
       <div className="hero-container">
@@ -116,10 +38,10 @@ function Hero({ slides }: HeroProps) {
               <div className="hero-actions">
                 <Link
                   className="button button-dark hero-btn-primary"
-                  to={contextualCta.path}
-                  aria-label={`${contextualCta.text} - Explore ${contextualCta.badge}`}
+                  to="/jewellery"
+                  aria-label="Shop The Collection - Explore Jewellery"
                 >
-                  <span>{contextualCta.text}</span>
+                  <span>SHOP THE COLLECTION</span>
                   <ArrowRight size={16} aria-hidden="true" />
                 </Link>
 
@@ -140,71 +62,35 @@ function Hero({ slides }: HeroProps) {
             </div>
           </div>
 
-          {/* Slideshow Art */}
+          {/* Static Optimized Hero Visual with responsive <picture> */}
           <div className="hero-art">
-            <div
-              className="hero-slideshow"
-              role="region"
-              aria-roledescription="carousel"
-              aria-label="Dynamic Product Showcase"
-            >
-              {activeSlides.map((slide, index) => {
-                const isActive = index === currentSlide;
-                return (
-                  <div
-                    key={`${slide.url}-${index}`}
-                    className={`hero-slide-item hero-slide-item--${slide.category} ${isActive ? "active" : ""}`}
-                    aria-hidden={!isActive}
-                  >
-                    <img
-                      src={isActive ? optimizeCloudinaryImage(slide.url, 950) : undefined}
-                      srcSet={
-                        isActive && slide.url.includes("res.cloudinary.com")
-                          ? `${optimizeCloudinaryImage(slide.url, 750)} 750w, ${optimizeCloudinaryImage(slide.url, 950)} 950w`
-                          : undefined
-                      }
-                      sizes="(max-width: 650px) 100vw, (max-width: 1024px) 50vw, 650px"
-                      alt={isActive ? (slide.alt || "Her Pretty Things featured product") : ""}
-                      className="hero-slide-img"
-                      loading={isActive ? "eager" : undefined}
-                      decoding="async"
-                      fetchPriority={isActive ? "high" : "auto"}
-                      onError={(e) => {
-                        e.currentTarget.style.visibility = "hidden";
-                      }}
-                    />
-                  </div>
-                );
-              })}
+            <div className="hero-visual-frame">
+              <picture className="hero-picture">
+                <source
+                  media="(max-width: 650px)"
+                  srcSet={mobileSrc}
+                  type="image/webp"
+                />
+                <img
+                  src={desktopSrc}
+                  alt="Her Pretty Things curated gift box collection with sparkling jewellery and kawaii treasures"
+                  className="hero-static-img"
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
+                  onError={(e) => {
+                    e.currentTarget.style.visibility = "hidden";
+                  }}
+                />
+              </picture>
 
               {/* Luminous overlay for mobile text readability */}
               <div className="hero-slide-overlay" aria-hidden="true" />
 
-              {/* Dynamic Category Badge in top right */}
-              <div className="hero-slide-badge" aria-live="polite">
-                {contextualCta.badge}
+              {/* Curated Editorial Badge */}
+              <div className="hero-slide-badge" aria-label="Featured Collection">
+                CURATED GIFTS
               </div>
-
-              {/* Slideshow Indicator Dots */}
-              {activeSlides.length > 1 && (
-                <div
-                  className="hero-slide-dots"
-                  role="tablist"
-                  aria-label="Slideshow pagination"
-                >
-                  {activeSlides.map((_, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      role="tab"
-                      aria-selected={index === currentSlide}
-                      className={`hero-dot ${index === currentSlide ? "active" : ""}`}
-                      onClick={() => setCurrentSlide(index)}
-                      aria-label={`Go to slide ${index + 1}: ${activeSlides[index]?.category || "featured"}`}
-                    />
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </div>
