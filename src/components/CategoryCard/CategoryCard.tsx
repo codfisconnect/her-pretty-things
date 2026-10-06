@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { optimizeCloudinaryImage } from "../../utils/cloudinary";
 
 export interface Category {
@@ -21,10 +21,13 @@ interface CategoryCardProps {
 }
 
 function CategoryCard({ category }: CategoryCardProps) {
-  const imageList =
-    category.images && category.images.length > 0
-      ? category.images
-      : [category.image];
+  const imageList = useMemo(() => {
+    return category.images && category.images.length > 0
+      ? category.images.filter((img) => typeof img === "string" && img.trim().length > 0)
+      : category.image && category.image.trim().length > 0
+      ? [category.image]
+      : [];
+  }, [category.images, category.image]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -46,14 +49,14 @@ function CategoryCard({ category }: CategoryCardProps) {
     return () => clearInterval(interval);
   }, [imageList.length, category.rotationInterval]);
 
-  // Preload next image in sequence
+  // Preload next image in sequence if rotating
   useEffect(() => {
     if (imageList.length > 1) {
       const nextIdx = (currentIndex + 1) % imageList.length;
       const nextUrl = imageList[nextIdx];
       if (nextUrl) {
         const img = new Image();
-        img.src = nextUrl;
+        img.src = optimizeCloudinaryImage(nextUrl, 700);
       }
     }
   }, [currentIndex, imageList]);
@@ -67,13 +70,16 @@ function CategoryCard({ category }: CategoryCardProps) {
       <div className="category-editorial-media">
         {imageList.map((imgSrc, idx) => {
           const isActive = idx === currentIndex;
+          const finalSrc = optimizeCloudinaryImage(imgSrc, 700);
+          if (!finalSrc) return null;
+
           return (
             <img
               key={`${imgSrc}-${idx}`}
-              src={optimizeCloudinaryImage(imgSrc, 700)}
-              alt={`${category.name} - view ${idx + 1}`}
+              src={finalSrc}
+              alt={`${category.name} collection`}
               className={`category-editorial-img ${isActive ? "active" : ""}`}
-              loading={idx === 0 ? "eager" : "lazy"}
+              loading="lazy"
               decoding="async"
               onError={(e) => {
                 e.currentTarget.style.visibility = "hidden";
@@ -108,5 +114,3 @@ function CategoryCard({ category }: CategoryCardProps) {
 }
 
 export default CategoryCard;
-
-

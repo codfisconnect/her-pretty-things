@@ -3,7 +3,7 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { getProducts } from "../../services/productService";
 import CategoryCard, {
@@ -14,11 +14,7 @@ import ProductCard from "../../components/ProductCard/ProductCard";
 import SocialGallery from "../../components/SocialGallery/SocialGallery";
 import PrettyPlay from "../../components/PrettyPlay/PrettyPlay";
 import type { Product } from "../../types/product";
-import { getScoopConfig } from "../../services/scoopService";
-import {
-  buildHeroSlides,
-  getCategorySlides,
-} from "../../utils/productSlides";
+import { homepageAssets } from "../../constants/homepageAssets";
 import "./Home.css";
 
 interface ProductCarouselProps {
@@ -85,13 +81,61 @@ function ProductCarousel({
   );
 }
 
+// Curated static promotional category cards - renders immediately with zero network delay
+const staticCategories: Category[] = [
+  {
+    id: "scoops",
+    number: "01",
+    name: "MYSTERY SCOOP",
+    subtitle: "Pick your surprise",
+    slug: "scoops",
+    description: "Pick your surprise",
+    ctaText: "Explore",
+    image: homepageAssets.scoop,
+    images: [homepageAssets.scoop],
+  },
+  {
+    id: "jewellery",
+    number: "02",
+    name: "JEWELLERY",
+    subtitle: "Find your little sparkle",
+    slug: "jewellery",
+    description: "Find your little sparkle",
+    ctaText: "Explore",
+    image: homepageAssets.jewellery,
+    images: [homepageAssets.jewellery],
+  },
+  {
+    id: "kawaii",
+    number: "03",
+    name: "KAWAII",
+    subtitle: "Something cute awaits",
+    slug: "kawaii",
+    description: "Something cute awaits",
+    ctaText: "Explore",
+    image: homepageAssets.kawaii,
+    images: [homepageAssets.kawaii],
+  },
+  {
+    id: "byob",
+    number: "04",
+    name: "BUILD YOUR OWN BOX",
+    subtitle: "Create yours",
+    slug: "byob",
+    description: "Create yours",
+    ctaText: "Explore",
+    image: homepageAssets.byob,
+    images: [homepageAssets.byob],
+  },
+];
+
 function Home() {
   const [jewelleryProducts, setJewelleryProducts] = useState<Product[]>([]);
   const [kawaiiProducts, setKawaiiProducts] = useState<Product[]>([]);
-  const [scoopImageUrl, setScoopImageUrl] = useState<string | null>(null);
 
-
+  // Independent below-the-fold dynamic product catalog loading (non-blocking for Hero & Categories)
   useEffect(() => {
+    let isMounted = true;
     async function loadProducts() {
       try {
         const [jewellery, kawaii] = await Promise.all([
@@ -99,119 +143,24 @@ function Home() {
           getProducts("kawaii"),
         ]);
 
-        setJewelleryProducts(jewellery);
-        setKawaiiProducts(kawaii);
+        if (isMounted) {
+          setJewelleryProducts(jewellery);
+          setKawaiiProducts(kawaii);
+        }
       } catch (error) {
         console.error("Could not load homepage products:", error);
       }
     }
 
     loadProducts();
+    return () => {
+      isMounted = false;
+    };
   }, []);
-
-  useEffect(() => {
-    async function loadScoopConfig() {
-      try {
-        const scoopConfig = await getScoopConfig();
-        setScoopImageUrl(scoopConfig?.imageUrl || "");
-      } catch (error) {
-        console.error("Could not load Scoop configuration:", error);
-        setScoopImageUrl("");
-      }
-    }
-
-    loadScoopConfig();
-  }, []);
-
-  // Build dynamic hero slideshow mix (Mystery Scoop -> Jewellery -> Kawaii -> repeat)
-  const heroSlides = useMemo(() => {
-    if (scoopImageUrl === null) {
-      return [];
-    }
-
-    return buildHeroSlides(
-      scoopImageUrl,
-      jewelleryProducts,
-      kawaiiProducts
-    );
-  }, [scoopImageUrl, jewelleryProducts, kawaiiProducts]);
-
-  // Build dynamic 4 categories
-  const categories: Category[] = useMemo(() => {
-    const byobImage = "/images/category/byob-collection.webp";
-
-    const scoopSlides = getCategorySlides(
-      [],
-      "Mystery Scoops",
-      scoopImageUrl || ""
-    ).map((s) => s.url);
-
-    const jewellerySlides = getCategorySlides(
-      jewelleryProducts,
-      "Jewellery",
-      ""
-    ).map((s) => s.url);
-
-    const kawaiiSlides = getCategorySlides(
-      kawaiiProducts,
-      "Kawaii",
-      ""
-    ).map((s) => s.url);
-
-    return [
-      {
-        id: "scoops",
-        number: "01",
-        name: "MYSTERY SCOOP",
-        subtitle: "Pick your surprise",
-        slug: "scoops",
-        description: "Pick your surprise",
-        ctaText: "Explore",
-        image: scoopSlides[0] || "",
-        images: scoopSlides,
-        rotationInterval: 5000,
-      },
-      {
-        id: "jewellery",
-        number: "02",
-        name: "JEWELLERY",
-        subtitle: "Find your little sparkle",
-        slug: "jewellery",
-        description: "Find your little sparkle",
-        ctaText: "Explore",
-        image: jewellerySlides[0] || "",
-        images: jewellerySlides,
-        rotationInterval: 4800,
-      },
-      {
-        id: "kawaii",
-        number: "03",
-        name: "KAWAII",
-        subtitle: "Something cute awaits",
-        slug: "kawaii",
-        description: "Something cute awaits",
-        ctaText: "Explore",
-        image: kawaiiSlides[0] || "",
-        images: kawaiiSlides,
-        rotationInterval: 5200,
-      },
-      {
-        id: "byob",
-        number: "04",
-        name: "BUILD YOUR OWN BOX",
-        subtitle: "Create yours",
-        slug: "byob",
-        description: "Create yours",
-        ctaText: "Explore",
-        image: byobImage,
-        images: [byobImage],
-      },
-    ];
-  }, [scoopImageUrl, jewelleryProducts, kawaiiProducts]);
 
   return (
     <>
-      <Hero slides={heroSlides} />
+      <Hero />
 
       <main>
         {/* Unified Premium Editorial Category Showcase */}
@@ -226,7 +175,7 @@ function Home() {
             </div>
 
             <div className="category-showcase-grid">
-              {categories.map((category) => (
+              {staticCategories.map((category) => (
                 <CategoryCard key={category.id} category={category} />
               ))}
             </div>
@@ -264,7 +213,6 @@ function Home() {
             </div>
           </div>
         </section>
-
 
         {/* Pretty Play Section */}
         <section className="container" style={{ margin: "2.5rem auto" }}>
