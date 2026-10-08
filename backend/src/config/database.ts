@@ -6,6 +6,9 @@ import crypto from 'node:crypto'
 let realPrisma: PrismaClient | null = null
 let useDevFallback = false
 
+const isProduction = process.env.NODE_ENV === 'production'
+const allowDevFallback = process.env.ENABLE_DEV_FALLBACK === 'true' || (!isProduction && !process.env.DATABASE_URL)
+
 try {
   if (process.env.DATABASE_URL) {
     realPrisma = new PrismaClient()
@@ -735,19 +738,58 @@ const devDatabase = {
 
 export const prisma = realPrisma
 
+let dbConnected = false
+
 export function getDatabase(): any {
-  if (useDevFallback || !realPrisma) {
+  if (useDevFallback) {
     return devDatabase
+  }
+  if (!realPrisma) {
+    throw new Error('Database is not initialized. Please ensure DATABASE_URL is configured.')
   }
   return realPrisma
 }
 
-// Automatically detect if PostgreSQL is offline and switch to dev database seamlessly
+export async function isDatabaseConnected(): Promise<boolean> {
+  if (useDevFallback) return false
+  if (!realPrisma) return false
+  try {
+    await realPrisma.$queryRaw`SELECT 1`
+    dbConnected = true
+    return true
+  } catch {
+    dbConnected = false
+    return false
+  }
+}
+
+// Automatically detect database connection status
 if (realPrisma) {
-  realPrisma.$connect().catch(() => {
-    console.warn('[Her Pretty Things] PostgreSQL server is currently offline. Operating in high-performance resilient development mode.')
-    useDevFallback = true
-  })
+  realPrisma
+    .$connect()
+    .then(() => {
+      dbConnected = true
+      console.log('[Her Pretty Things] Successfully connected to PostgreSQL database.')
+    })
+    .catch((err) => {
+      dbConnected = false
+      if (allowDevFallback) {
+        console.warn(
+          '[Her Pretty Things] PostgreSQL server is currently offline. Operating in high-performance resilient development mode (devStore enabled).'
+        )
+        useDevFallback = true
+      } else {
+        console.error(
+          '[Her Pretty Things] CRITICAL: PostgreSQL connection failed in production. DevStore fallback is DISABLED to prevent data mismatch.',
+          err?.message || err
+        )
+      }
+    })
 } else {
-  useDevFallback = true
+  if (allowDevFallback) {
+    console.warn('[Her Pretty Things] No DATABASE_URL provided. Running with devStore fallback in development mode.')
+    useDevFallback = true
+  } else {
+    console.error('[Her Pretty Things] CRITICAL: DATABASE_URL is not configured in production environment.')
+  }
 }
