@@ -15,6 +15,7 @@ import gameRoutes from './routes/gameRoutes.js'
 import byobRoutes from './routes/byobRoutes.js'
 import businessRoutes from './routes/businessRoutes.js'
 import instagramRoutes from './routes/instagramRoutes.js'
+import { isDatabaseConnected } from './config/database.js'
 import pincodeRoutes from './routes/pincodeRoutes.js'
 
 const app = express()
@@ -52,8 +53,22 @@ app.use('/api/payments/webhook', express.raw({ type: 'application/json', limit: 
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
-app.get('/api/health', (_request, response) => {
-  response.json({ success: true, message: 'Her Pretty Things API is running smoothly' })
+app.get('/api/health', async (_request, response) => {
+  const dbOk = await isDatabaseConnected()
+  if (!dbOk) {
+    response.status(503).json({
+      success: false,
+      api: 'ok',
+      database: 'unavailable',
+    })
+    return
+  }
+
+  response.json({
+    success: true,
+    api: 'ok',
+    database: 'connected',
+  })
 })
 
 app.use('/api/products', productRoutes)
